@@ -1,0 +1,771 @@
+[
+  {
+    "submission_id": "lc_sub_101",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "704",
+      "title": "Binary Search",
+      "difficulty": "Easy",
+      "topic_tags": ["Binary Search", "Array"],
+      "url": "https://leetcode.com/problems/binary-search/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 32,
+      "memory_mb": 27.5,
+      "timestamp": 1709120400,
+      "code": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        int left = 0, right = nums.size() - 1;\n        while (left < right) { // Bug: fails when left == right on single element\n            int mid = left + (right - left) / 2;\n            if (nums[mid] == target) return mid;\n            else if (nums[mid] < target) left = mid + 1;\n            else right = mid - 1;\n        }\n        return -1;\n    }\n};",
+      "error_message": "Wrong Answer: Input [-1,0,3,5,9,12], target 9 -> Output -1, Expected 4"
+    }
+  },
+  {
+    "submission_id": "lc_sub_102",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "35",
+      "title": "Search Insert Position",
+      "difficulty": "Easy",
+      "topic_tags": ["Binary Search", "Array"],
+      "url": "https://leetcode.com/problems/search-insert-position/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 4,
+      "memory_mb": 9.8,
+      "timestamp": 1709124000,
+      "code": "class Solution {\npublic:\n    int searchInsert(vector<int>& nums, int target) {\n        int left = 0, right = nums.size();\n        while (left < right) {\n            int mid = (left + right) / 2;\n            if (nums[mid] == target) return mid;\n            if (nums[mid] < target) left = mid + 1;\n            else right = mid - 1; // Bug: skips potential insert position at mid\n        }\n        return left;\n    }\n};",
+      "error_message": "Wrong Answer: Input [1,3,5,6], target 2 -> Output 0, Expected 1"
+    }
+  },
+  {
+    "submission_id": "lc_sub_103",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "34",
+      "title": "Find First and Last Position of Element in Sorted Array",
+      "difficulty": "Medium",
+      "topic_tags": ["Binary Search", "Array"],
+      "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 78,
+      "memory_mb": 17.2,
+      "timestamp": 1709127600,
+      "code": "class Solution:\n    def searchRange(self, nums: List[int], target: int) -> List[int]:\n        def findBound(isFirst):\n            l, r = 0, len(nums) - 1\n            ans = -1\n            while l <= r:\n                mid = (l + r) // 2\n                if nums[mid] == target:\n                    ans = mid\n                    if isFirst:\n                        r = mid # Bug: infinite loop / incorrect boundary step\n                    else:\n                        l = mid\n                elif nums[mid] < target:\n                    l = mid + 1\n                else:\n                    r = mid - 1\n            return ans\n        return [findBound(True), findBound(False)]",
+      "error_message": "Time Limit Exceeded / Wrong Answer on boundary test case"
+    }
+  },
+  {
+    "submission_id": "cf_sub_201",
+    "user_id": "user_demo",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1613C",
+      "title": "Poisoned Dagger",
+      "difficulty": "1200",
+      "topic_tags": ["Binary Search", "Greedy"],
+      "url": "https://codeforces.com/problemset/problem/1613/C"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 110,
+      "memory_mb": 3.2,
+      "timestamp": 1709131200,
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nbool check(long long k, const vector<long long>& a, long long h) {\n    long long damage = 0;\n    for (size_t i = 0; i < a.size() - 1; i++) {\n        damage += min(k, a[i+1] - a[i]);\n    }\n    damage += k;\n    return damage >= h;\n}\n\nint main() {\n    int t;\n    if (!(cin >> t)) return 0;\n    while(t--) {\n        int n;\n        long long h;\n        cin >> n >> h;\n        vector<long long> a(n);\n        for (int i = 0; i < n; i++) cin >> a[i];\n        long long low = 1, high = 1e18, ans = high;\n        while (low < high) { // Bug: off-by-one termination\n            long long mid = (low + high) / 2;\n            if (check(mid, a, h)) {\n                ans = mid;\n                high = mid - 1;\n            } else {\n                low = mid + 1;\n            }\n        }\n        cout << ans << \"\\n\";\n    }\n    return 0;\n}",
+      "error_message": "Wrong answer on test 2"
+    }
+  },
+  {
+    "submission_id": "lc_sub_104",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "875",
+      "title": "Koko Eating Bananas",
+      "difficulty": "Medium",
+      "topic_tags": ["Binary Search", "Array"],
+      "url": "https://leetcode.com/problems/koko-eating-bananas/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "AC",
+      "runtime_ms": 145,
+      "memory_mb": 18.1,
+      "timestamp": 1709134800,
+      "code": "class Solution:\n    def minEatingSpeed(self, piles: List[int], h: int) -> int:\n        low, high = 1, max(piles)\n        res = high\n        while low <= high:\n            k = low + (high - low) // 2\n            hours = sum((p + k - 1) // k for p in piles)\n            if hours <= h:\n                res = k\n                high = k - 1\n            else:\n                low = k + 1\n        return res"
+    }
+  },
+  {
+    "submission_id": "lc_sub_105",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "153",
+      "title": "Find Minimum in Rotated Sorted Array",
+      "difficulty": "Medium",
+      "topic_tags": ["Binary Search", "Array"],
+      "url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 0,
+      "memory_mb": 10.1,
+      "timestamp": 1709138400,
+      "code": "class Solution {\npublic:\n    int findMin(vector<int>& nums) {\n        int l = 0, r = nums.size() - 1;\n        while (l < r) {\n            int mid = l + (r - l) / 2;\n            if (nums[mid] > nums[l]) { // Bug: comparing to nums[l] fails when array is already sorted\n                l = mid + 1;\n            } else {\n                r = mid;\n            }\n        }\n        return nums[l];\n    }\n};",
+      "error_message": "Wrong Answer: Input [11,13,15,17] -> Output 13, Expected 11"
+    }
+  },
+  {
+    "submission_id": "lc_sub_106",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "322",
+      "title": "Coin Change",
+      "difficulty": "Medium",
+      "topic_tags": ["Dynamic Programming", "Breadth-First Search"],
+      "url": "https://leetcode.com/problems/coin-change/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "TLE",
+      "runtime_ms": 2000,
+      "memory_mb": 45.3,
+      "timestamp": 1709200000,
+      "code": "class Solution:\n    def coinChange(self, coins: List[int], amount: int) -> int:\n        # Bug: Pure recursion without memoization cache\n        def helper(rem):\n            if rem == 0: return 0\n            if rem < 0: return float('inf')\n            res = float('inf')\n            for c in coins:\n                res = min(res, 1 + helper(rem - c))\n            return res\n        ans = helper(amount)\n        return ans if ans != float('inf') else -1",
+      "error_message": "Time Limit Exceeded"
+    }
+  },
+  {
+    "submission_id": "lc_sub_107",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "300",
+      "title": "Longest Increasing Subsequence",
+      "difficulty": "Medium",
+      "topic_tags": ["Dynamic Programming", "Binary Search"],
+      "url": "https://leetcode.com/problems/longest-increasing-subsequence/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 40,
+      "memory_mb": 11.2,
+      "timestamp": 1709203600,
+      "code": "class Solution {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        if (nums.empty()) return 0;\n        vector<int> dp(nums.size(), 1);\n        int overall = 1;\n        for (size_t i = 1; i < nums.size(); i++) {\n            // Bug: Incorrect state transition assuming greedy previous element\n            if (nums[i] > nums[i-1]) dp[i] = dp[i-1] + 1;\n            else dp[i] = dp[i-1];\n            overall = max(overall, dp[i]);\n        }\n        return overall;\n    }\n};",
+      "error_message": "Wrong Answer: Input [0,1,0,3,2,3] -> Output 3, Expected 4"
+    }
+  },
+  {
+    "submission_id": "lc_sub_108",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1143",
+      "title": "Longest Common Subsequence",
+      "difficulty": "Medium",
+      "topic_tags": ["Dynamic Programming", "String"],
+      "url": "https://leetcode.com/problems/longest-common-subsequence/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 25,
+      "memory_mb": 15.6,
+      "timestamp": 1709207200,
+      "code": "class Solution {\npublic:\n    int longestCommonSubsequence(string text1, string text2) {\n        int m = text1.size(), n = text2.size();\n        vector<vector<int>> dp(m, vector<int>(n, 0));\n        // Bug: Off-by-one 0-index without proper base padding\n        for (int i = 0; i < m; i++) {\n            for (int j = 0; j < n; j++) {\n                if (text1[i] == text2[j]) {\n                    dp[i][j] = (i > 0 && j > 0 ? dp[i-1][j-1] : 0) + 1;\n                } else {\n                    dp[i][j] = max(i > 0 ? dp[i-1][j] : 0, j > 0 ? dp[i][j-1] : 0);\n                }\n            }\n        }\n        return dp[m-1][n-1];\n    }\n};",
+      "error_message": "Wrong Answer on edge cases with matching prefix"
+    }
+  },
+  {
+    "submission_id": "cf_sub_202",
+    "user_id": "user_demo",
+    "platform": "codeforces",
+    "problem": {
+      "id": "180C",
+      "title": "Letter",
+      "difficulty": "1400",
+      "topic_tags": ["Dynamic Programming", "Strings"],
+      "url": "https://codeforces.com/problemset/problem/180/C"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 62,
+      "memory_mb": 4.1,
+      "timestamp": 1709210800,
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    string s;\n    if (!(cin >> s)) return 0;\n    int n = s.size();\n    vector<int> lower_pref(n + 1, 0);\n    for (int i = 0; i < n; i++) {\n        lower_pref[i + 1] = lower_pref[i] + (islower(s[i]) ? 1 : 0);\n    }\n    int ans = 1e9;\n    // Bug: incorrect state index evaluation causing boundary mismatch\n    for (int k = 1; k <= n; k++) {\n        int cost = lower_pref[k] + ((n - k) - (lower_pref[n] - lower_pref[k]));\n        ans = min(ans, cost);\n    }\n    cout << ans << \"\\n\";\n    return 0;\n}",
+      "error_message": "Wrong answer on test 5"
+    }
+  },
+  {
+    "submission_id": "lc_sub_109",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "70",
+      "title": "Climbing Stairs",
+      "difficulty": "Easy",
+      "topic_tags": ["Dynamic Programming", "Math"],
+      "url": "https://leetcode.com/problems/climbing-stairs/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "AC",
+      "runtime_ms": 35,
+      "memory_mb": 16.5,
+      "timestamp": 1709214400,
+      "code": "class Solution:\n    def climbStairs(self, n: int) -> int:\n        if n <= 2: return n\n        a, b = 1, 2\n        for _ in range(3, n + 1):\n            a, b = b, a + b\n        return b"
+    }
+  },
+  {
+    "submission_id": "lc_sub_110",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "198",
+      "title": "House Robber",
+      "difficulty": "Medium",
+      "topic_tags": ["Dynamic Programming", "Array"],
+      "url": "https://leetcode.com/problems/house-robber/"
+    },
+    "submission": {
+      "language": "javascript",
+      "verdict": "WA",
+      "runtime_ms": 50,
+      "memory_mb": 42.1,
+      "timestamp": 1709218000,
+      "code": "var rob = function(nums) {\n    if (nums.length === 0) return 0;\n    if (nums.length === 1) return nums[0];\n    let dp = new Array(nums.length);\n    dp[0] = nums[0];\n    dp[1] = Math.max(nums[0], nums[1]);\n    for (let i = 2; i < nums.length; i++) {\n        // Bug: state definition error omitting skip-two transition\n        dp[i] = dp[i-1] + nums[i];\n    }\n    return dp[nums.length - 1];\n};",
+      "error_message": "Wrong Answer: Input [2,7,9,3,1] -> Output 20, Expected 12"
+    }
+  },
+  {
+    "submission_id": "lc_sub_111",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "200",
+      "title": "Number of Islands",
+      "difficulty": "Medium",
+      "topic_tags": ["Graphs", "Breadth-First Search", "Depth-First Search"],
+      "url": "https://leetcode.com/problems/number-of-islands/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "MLE",
+      "runtime_ms": 1200,
+      "memory_mb": 512.0,
+      "timestamp": 1709300000,
+      "code": "class Solution:\n    def numIslands(self, grid: List[List[str]]) -> int:\n        if not grid: return 0\n        m, n = len(grid), len(grid[0])\n        count = 0\n        for r in range(m):\n            for c in range(n):\n                if grid[r][c] == '1':\n                    count += 1\n                    q = collections.deque([(r, c)])\n                    while q:\n                        curr_r, curr_c = q.popleft()\n                        grid[curr_r][curr_c] = '0' # Bug: Marking visited AFTER pop instead of push causes huge duplicates\n                        for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n                            nr, nc = curr_r + dr, curr_c + dc\n                            if 0 <= nr < m and 0 <= nc < n and grid[nr][nc] == '1':\n                                q.append((nr, nc))\n        return count",
+      "error_message": "Memory Limit Exceeded / TLE due to exponential queue duplication"
+    }
+  },
+  {
+    "submission_id": "lc_sub_112",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "785",
+      "title": "Is Graph Bipartite?",
+      "difficulty": "Medium",
+      "topic_tags": ["Graphs", "Depth-First Search", "Breadth-First Search"],
+      "url": "https://leetcode.com/problems/is-graph-bipartite/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 18,
+      "memory_mb": 14.8,
+      "timestamp": 1709303600,
+      "code": "class Solution {\npublic:\n    bool isBipartite(vector<vector<int>>& graph) {\n        int n = graph.size();\n        vector<int> color(n, 0);\n        // Bug: Only starting traversal from node 0, failing on disconnected graphs\n        queue<int> q;\n        q.push(0);\n        color[0] = 1;\n        while (!q.empty()) {\n            int u = q.front(); q.pop();\n            for (int v : graph[u]) {\n                if (color[v] == 0) {\n                    color[v] = -color[u];\n                    q.push(v);\n                } else if (color[v] == color[u]) {\n                    return false;\n                }\n            }\n        }\n        return true;\n    }\n};",
+      "error_message": "Wrong Answer: Input [[],[2,4,6],[1,4,8,9],...] -> Output true, Expected false"
+    }
+  },
+  {
+    "submission_id": "lc_sub_113",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "207",
+      "title": "Course Schedule",
+      "difficulty": "Medium",
+      "topic_tags": ["Graphs", "Topological Sort", "Depth-First Search"],
+      "url": "https://leetcode.com/problems/course-schedule/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "TLE",
+      "runtime_ms": 2500,
+      "memory_mb": 22.4,
+      "timestamp": 1709307200,
+      "code": "class Solution:\n    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:\n        adj = collections.defaultdict(list)\n        for dest, src in prerequisites:\n            adj[src].append(dest)\n        \n        visited = set()\n        def has_cycle(node):\n            if node in visited: # Bug: Doesn't differentiate recursion stack vs fully explored, causing false positive / infinite loop\n                return True\n            visited.add(node)\n            for neighbor in adj[node]:\n                if has_cycle(neighbor): return True\n            return False\n        \n        for i in range(numCourses):\n            if has_cycle(i): return False\n        return True",
+      "error_message": "Time Limit Exceeded / Recursion Error"
+    }
+  },
+  {
+    "submission_id": "cf_sub_203",
+    "user_id": "user_demo",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1829F",
+      "title": "Forever Winter",
+      "difficulty": "1300",
+      "topic_tags": ["Graphs", "Trees"],
+      "url": "https://codeforces.com/problemset/problem/1829/F"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 95,
+      "memory_mb": 6.8,
+      "timestamp": 1709310800,
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvoid solve() {\n    int n, m;\n    cin >> n >> m;\n    vector<int> deg(n + 1, 0);\n    for (int i = 0; i < m; i++) {\n        int u, v; cin >> u >> v;\n        deg[u]++; deg[v]++;\n    }\n    map<int, int> count_deg;\n    for (int i = 1; i <= n; i++) {\n        count_deg[deg[i]]++;\n    }\n    // Bug: assumes fixed degree ordering without accounting for center-vertex degree collision\n    int x = count_deg.begin()->first;\n    int y = count_deg.rbegin()->first;\n    cout << x << \" \" << y << \"\\n\";\n}\n\nint main() {\n    int t; if (cin >> t) while (t--) solve();\n    return 0;\n}",
+      "error_message": "Wrong answer on test 3"
+    }
+  },
+  {
+    "submission_id": "lc_sub_114",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "743",
+      "title": "Network Delay Time",
+      "difficulty": "Medium",
+      "topic_tags": ["Graphs", "Shortest Path", "Heap (Priority Queue)"],
+      "url": "https://leetcode.com/problems/network-delay-time/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 480,
+      "memory_mb": 19.3,
+      "timestamp": 1709314400,
+      "code": "class Solution:\n    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:\n        graph = collections.defaultdict(list)\n        for u, v, w in times:\n            graph[u].append((v, w))\n        dist = {i: float('inf') for i in range(1, n + 1)}\n        dist[k] = 0\n        pq = [(0, k)]\n        while pq:\n            d, u = heapq.heappop(pq)\n            # Bug: missing if d > dist[u]: continue check, allowing stale entries to overwrite\n            for v, w in graph[u]:\n                if d + w < dist[v]:\n                    dist[v] = d + w\n                    heapq.heappush(pq, (dist[v], v))\n        res = max(dist.values())\n        return res if res != float('inf') else -1",
+      "error_message": "Wrong Answer / Inefficient on dense edge cycles"
+    }
+  },
+  {
+    "submission_id": "lc_sub_115",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "133",
+      "title": "Clone Graph",
+      "difficulty": "Medium",
+      "topic_tags": ["Graphs", "Depth-First Search", "Breadth-First Search", "Hash Table"],
+      "url": "https://leetcode.com/problems/clone-graph/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "runtime_ms": 7,
+      "memory_mb": 9.4,
+      "timestamp": 1709318000,
+      "code": "class Solution {\n    unordered_map<Node*, Node*> clones;\npublic:\n    Node* cloneGraph(Node* node) {\n        if (!node) return nullptr;\n        if (clones.find(node) != clones.end()) return clones[node];\n        Node* copy = new Node(node->val);\n        clones[node] = copy;\n        for (Node* neighbor : node->neighbors) {\n            copy->neighbors.push_back(cloneGraph(neighbor));\n        }\n        return copy;\n    }\n};"
+    }
+  },
+  {
+    "submission_id": "lc_sub_116",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "11",
+      "title": "Container With Most Water",
+      "difficulty": "Medium",
+      "topic_tags": ["Two Pointers", "Array", "Greedy"],
+      "url": "https://leetcode.com/problems/container-with-most-water/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 65,
+      "memory_mb": 59.2,
+      "timestamp": 1709400000,
+      "code": "class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        int l = 0, r = height.size() - 1;\n        int max_water = 0;\n        while (l < r) {\n            int h = min(height[l], height[r]);\n            max_water = max(max_water, h * (r - l));\n            // Bug: Inverted pointer movement condition\n            if (height[l] > height[r]) {\n                l++;\n            } else {\n                r--;\n            }\n        }\n        return max_water;\n    }\n};",
+      "error_message": "Wrong Answer: Input [1,8,6,2,5,4,8,3,7] -> Output 28, Expected 49"
+    }
+  },
+  {
+    "submission_id": "lc_sub_117",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "15",
+      "title": "3Sum",
+      "difficulty": "Medium",
+      "topic_tags": ["Two Pointers", "Array", "Sorting"],
+      "url": "https://leetcode.com/problems/3sum/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 520,
+      "memory_mb": 19.8,
+      "timestamp": 1709403600,
+      "code": "class Solution:\n    def threeSum(self, nums: List[int]) -> List[List[int]]:\n        nums.sort()\n        res = []\n        for i in range(len(nums) - 2):\n            if i > 0 and nums[i] == nums[i-1]: continue\n            l, r = i + 1, len(nums) - 1\n            while l < r:\n                s = nums[i] + nums[l] + nums[r]\n                if s == 0:\n                    res.append([nums[i], nums[l], nums[r]])\n                    # Bug: forgetting duplicate skipping for internal pointers\n                    l += 1\n                    r -= 1\n                elif s < 0:\n                    l += 1\n                else:\n                    r -= 1\n        return res",
+      "error_message": "Wrong Answer: Output contains duplicate triplets [[-2,0,2],[-2,0,2]]"
+    }
+  },
+  {
+    "submission_id": "lc_sub_118",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "167",
+      "title": "Two Sum II - Input Array Is Sorted",
+      "difficulty": "Medium",
+      "topic_tags": ["Two Pointers", "Array", "Binary Search"],
+      "url": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "runtime_ms": 11,
+      "memory_mb": 16.0,
+      "timestamp": 1709407200,
+      "code": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        int l = 0, r = numbers.size() - 1;\n        while (l < r) {\n            int s = numbers[l] + numbers[r];\n            if (s == target) return {l + 1, r + 1};\n            if (s < target) l++;\n            else r--;\n        }\n        return {};\n    }\n};"
+    }
+  },
+  {
+    "submission_id": "cf_sub_204",
+    "user_id": "user_demo",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1462A",
+      "title": "Favorite Sequence",
+      "difficulty": "800",
+      "topic_tags": ["Two Pointers", "Implementation"],
+      "url": "https://codeforces.com/problemset/problem/1462/A"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "memory_mb": 1.2,
+      "timestamp": 1709410800,
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvoid solve() {\n    int n; cin >> n;\n    vector<int> a(n);\n    for (int i = 0; i < n; i++) cin >> a[i];\n    int l = 0, r = n - 1;\n    while (l <= r) {\n        if (l == r) {\n            cout << a[l] << \" \";\n            break;\n        }\n        cout << a[l] << \" \" << a[r] << \" \";\n        l++; r--;\n    }\n    cout << \"\\n\";\n}\n\nint main() {\n    int t; if (cin >> t) while (t--) solve();\n    return 0;\n}"
+    }
+  },
+  {
+    "submission_id": "lc_sub_119",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "42",
+      "title": "Trapping Rain Water",
+      "difficulty": "Hard",
+      "topic_tags": ["Two Pointers", "Array", "Dynamic Programming", "Stack"],
+      "url": "https://leetcode.com/problems/trapping-rain-water/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 115,
+      "memory_mb": 18.9,
+      "timestamp": 1709414400,
+      "code": "class Solution:\n    def trap(self, height: List[int]) -> int:\n        if not height: return 0\n        l, r = 0, len(height) - 1\n        l_max, r_max = height[l], height[r]\n        ans = 0\n        while l < r:\n            if height[l] < height[r]:\n                ans += l_max - height[l] # Bug: water added before updating l_max causes negative/wrong values\n                l += 1\n                l_max = max(l_max, height[l])\n            else:\n                ans += r_max - height[r]\n                r -= 1\n                r_max = max(r_max, height[r])\n        return ans",
+      "error_message": "Wrong Answer: Output negative trapped capacity"
+    }
+  },
+  {
+    "submission_id": "lc_sub_120",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "3",
+      "title": "Longest Substring Without Repeating Characters",
+      "difficulty": "Medium",
+      "topic_tags": ["Sliding Window", "Hash Table", "String"],
+      "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/"
+    },
+    "submission": {
+      "language": "javascript",
+      "verdict": "WA",
+      "runtime_ms": 78,
+      "memory_mb": 47.1,
+      "timestamp": 1709500000,
+      "code": "var lengthOfLongestSubstring = function(s) {\n    let seen = new Map();\n    let left = 0, maxLen = 0;\n    for (let right = 0; right < s.length; right++) {\n        if (seen.has(s[right])) {\n            // Bug: left can move backward if character was seen before current left pointer\n            left = seen.get(s[right]) + 1;\n        }\n        seen.set(s[right], right);\n        maxLen = Math.max(maxLen, right - left + 1);\n    }\n    return maxLen;\n};",
+      "error_message": "Wrong Answer: Input \"abba\" -> Output 3, Expected 2"
+    }
+  },
+  {
+    "submission_id": "lc_sub_121",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "209",
+      "title": "Minimum Size Subarray Sum",
+      "difficulty": "Medium",
+      "topic_tags": ["Sliding Window", "Array", "Binary Search"],
+      "url": "https://leetcode.com/problems/minimum-size-subarray-sum/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 38,
+      "memory_mb": 28.5,
+      "timestamp": 1709503600,
+      "code": "class Solution {\npublic:\n    int minSubArrayLen(int target, vector<int>& nums) {\n        int l = 0, sum = 0, min_len = INT_MAX;\n        for (int r = 0; r < nums.size(); r++) {\n            sum += nums[r];\n            // Bug: used if instead of while to shrink sliding window\n            if (sum >= target) {\n                min_len = min(min_len, r - l + 1);\n                sum -= nums[l++];\n            }\n        }\n        return min_len == INT_MAX ? 0 : min_len;\n    }\n};",
+      "error_message": "Wrong Answer: Input target 7, nums [2,3,1,2,4,3] -> Output 3, Expected 2"
+    }
+  },
+  {
+    "submission_id": "lc_sub_122",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "76",
+      "title": "Minimum Window Substring",
+      "difficulty": "Hard",
+      "topic_tags": ["Sliding Window", "Hash Table", "String"],
+      "url": "https://leetcode.com/problems/minimum-window-substring/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "TLE",
+      "runtime_ms": 2800,
+      "memory_mb": 34.2,
+      "timestamp": 1709507200,
+      "code": "class Solution:\n    def minWindow(self, s: str, t: str) -> str:\n        from collections import Counter\n        target = Counter(t)\n        min_len = float('inf')\n        res = \"\"\n        for i in range(len(s)):\n            for j in range(i + 1, len(s) + 1):\n                # Bug: O(N^3) brute substring check rather than dynamic sliding window\n                sub = s[i:j]\n                sub_count = Counter(sub)\n                if all(sub_count[k] >= target[k] for k in target):\n                    if len(sub) < min_len:\n                        min_len = len(sub)\n                        res = sub\n        return res",
+      "error_message": "Time Limit Exceeded on test 268/268"
+    }
+  },
+  {
+    "submission_id": "lc_sub_123",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "438",
+      "title": "Find All Anagrams in a String",
+      "difficulty": "Medium",
+      "topic_tags": ["Sliding Window", "Hash Table", "String"],
+      "url": "https://leetcode.com/problems/find-all-anagrams-in-a-string/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "runtime_ms": 12,
+      "memory_mb": 8.9,
+      "timestamp": 1709510800,
+      "code": "class Solution {\npublic:\n    vector<int> findAnagrams(string s, string p) {\n        if (s.size() < p.size()) return {};\n        vector<int> p_cnt(26, 0), s_cnt(26, 0), res;\n        for (char c : p) p_cnt[c - 'a']++;\n        int k = p.size();\n        for (int i = 0; i < s.size(); i++) {\n            s_cnt[s[i] - 'a']++;\n            if (i >= k) s_cnt[s[i - k] - 'a']--;\n            if (s_cnt == p_cnt) res.push_back(i - k + 1);\n        }\n        return res;\n    }\n};"
+    }
+  },
+  {
+    "submission_id": "lc_sub_124",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "104",
+      "title": "Maximum Depth of Binary Tree",
+      "difficulty": "Easy",
+      "topic_tags": ["Trees", "Depth-First Search", "Binary Tree"],
+      "url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "runtime_ms": 4,
+      "memory_mb": 19.1,
+      "timestamp": 1709600000,
+      "code": "class Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        if (!root) return 0;\n        return 1 + max(maxDepth(root->left), maxDepth(root->right));\n    }\n};"
+    }
+  },
+  {
+    "submission_id": "lc_sub_125",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "98",
+      "title": "Validate Binary Search Tree",
+      "difficulty": "Medium",
+      "topic_tags": ["Trees", "Binary Search Tree", "Depth-First Search"],
+      "url": "https://leetcode.com/problems/validate-binary-search-tree/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 45,
+      "memory_mb": 18.2,
+      "timestamp": 1709603600,
+      "code": "class Solution:\n    def isValidBST(self, root: Optional[TreeNode]) -> bool:\n        if not root: return True\n        # Bug: Only checking immediate children instead of entire subtree min/max boundaries\n        if root.left and root.left.val >= root.val: return False\n        if root.right and root.right.val <= root.val: return False\n        return self.isValidBST(root.left) and self.isValidBST(root.right)",
+      "error_message": "Wrong Answer: Input [5,4,6,null,null,3,7] -> Output True, Expected False"
+    }
+  },
+  {
+    "submission_id": "lc_sub_126",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "236",
+      "title": "Lowest Common Ancestor of a Binary Tree",
+      "difficulty": "Medium",
+      "topic_tags": ["Trees", "Depth-First Search", "Binary Tree"],
+      "url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 14,
+      "memory_mb": 14.5,
+      "timestamp": 1709607200,
+      "code": "class Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        if (!root) return nullptr;\n        // Bug: Early return on p without exploring subtree containing q if p is ancestor\n        if (root->val == p->val) return p;\n        if (root->val == q->val) return q;\n        TreeNode* left = lowestCommonAncestor(root->left, p, q);\n        TreeNode* right = lowestCommonAncestor(root->right, p, q);\n        if (left && right) return root;\n        return left ? left : right;\n    }\n};",
+      "error_message": "Wrong Answer when one node is descendant of another"
+    }
+  },
+  {
+    "submission_id": "lc_sub_127",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "102",
+      "title": "Binary Tree Level Order Traversal",
+      "difficulty": "Medium",
+      "topic_tags": ["Trees", "Breadth-First Search", "Binary Tree"],
+      "url": "https://leetcode.com/problems/binary-tree-level-order-traversal/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 8,
+      "memory_mb": 12.8,
+      "timestamp": 1709610800,
+      "code": "class Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        if (!root) return {};\n        vector<vector<int>> res;\n        queue<TreeNode*> q;\n        q.push(root);\n        while (!q.empty()) {\n            vector<int> level;\n            // Bug: q.size() evaluates dynamically during loop, breaking level-by-level boundaries\n            for (int i = 0; i < q.size(); i++) {\n                TreeNode* curr = q.front(); q.pop();\n                level.push_back(curr->val);\n                if (curr->left) q.push(curr->left);\n                if (curr->right) q.push(curr->right);\n            }\n            res.push_back(level);\n        }\n        return res;\n    }\n};",
+      "error_message": "Wrong Answer: Levels corrupted with mixed child nodes"
+    }
+  },
+  {
+    "submission_id": "lc_sub_128",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "55",
+      "title": "Jump Game",
+      "difficulty": "Medium",
+      "topic_tags": ["Greedy", "Dynamic Programming", "Array"],
+      "url": "https://leetcode.com/problems/jump-game/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 320,
+      "memory_mb": 17.8,
+      "timestamp": 1709700000,
+      "code": "class Solution:\n    def canJump(self, nums: List[int]) -> bool:\n        # Bug: jumps greedily from current index without checking unreachable zero traps\n        curr = 0\n        while curr < len(nums) - 1:\n            if nums[curr] == 0: return False\n            curr += nums[curr]\n        return True",
+      "error_message": "Wrong Answer: Input [2,3,1,1,4] -> Output False, Expected True"
+    }
+  },
+  {
+    "submission_id": "lc_sub_129",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "45",
+      "title": "Jump Game II",
+      "difficulty": "Medium",
+      "topic_tags": ["Greedy", "Dynamic Programming", "Array"],
+      "url": "https://leetcode.com/problems/jump-game-ii/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 15,
+      "memory_mb": 16.9,
+      "timestamp": 1709703600,
+      "code": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        int jumps = 0, cur_end = 0, cur_farthest = 0;\n        for (int i = 0; i < nums.size(); i++) { // Bug: looping up to n-1 instead of n-2 adds extra redundant jump\n            cur_farthest = max(cur_farthest, i + nums[i]);\n            if (i == cur_end) {\n                jumps++;\n                cur_end = cur_farthest;\n            }\n        }\n        return jumps;\n    }\n};",
+      "error_message": "Wrong Answer: Input [2,3,1,1,4] -> Output 3, Expected 2"
+    }
+  },
+  {
+    "submission_id": "cf_sub_205",
+    "user_id": "user_demo",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1850C",
+      "title": "Word on the Paper",
+      "difficulty": "800",
+      "topic_tags": ["Greedy", "Strings", "Implementation"],
+      "url": "https://codeforces.com/problemset/problem/1850/C"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "memory_mb": 0.8,
+      "timestamp": 1709707200,
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvoid solve() {\n    string res = \"\";\n    for (int i = 0; i < 8; i++) {\n        string s; cin >> s;\n        for (char c : s) if (c != '.') res += c;\n    }\n    cout << res << \"\\n\";\n}\n\nint main() {\n    int t; if (cin >> t) while (t--) solve();\n    return 0;\n}"
+    }
+  },
+  {
+    "submission_id": "lc_sub_130",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "435",
+      "title": "Non-overlapping Intervals",
+      "difficulty": "Medium",
+      "topic_tags": ["Greedy", "Array", "Dynamic Programming", "Sorting"],
+      "url": "https://leetcode.com/problems/non-overlapping-intervals/"
+    },
+    "submission": {
+      "language": "python",
+      "verdict": "WA",
+      "runtime_ms": 1200,
+      "memory_mb": 53.4,
+      "timestamp": 1709710800,
+      "code": "class Solution:\n    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:\n        # Bug: Sorting by start time instead of end time\n        intervals.sort(key=lambda x: x[0])\n        count = 0\n        prev = intervals[0]\n        for curr in intervals[1:]:\n            if curr[0] < prev[1]:\n                count += 1\n            else:\n                prev = curr\n        return count",
+      "error_message": "Wrong Answer: Input [[1,100],[11,22],[1,11],[2,12]] -> Output 2, Expected 1"
+    }
+  },
+  {
+    "submission_id": "lc_sub_131",
+    "user_id": "user_demo",
+    "platform": "leetcode",
+    "problem": {
+      "id": "134",
+      "title": "Gas Station",
+      "difficulty": "Medium",
+      "topic_tags": ["Greedy", "Array"],
+      "url": "https://leetcode.com/problems/gas-station/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 68,
+      "memory_mb": 69.1,
+      "timestamp": 1709714400,
+      "code": "class Solution {\npublic:\n    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {\n        int curr_tank = 0, start_idx = 0;\n        for (int i = 0; i < gas.size(); i++) {\n            curr_tank += gas[i] - cost[i];\n            if (curr_tank < 0) {\n                start_idx = i + 1;\n                curr_tank = 0;\n            }\n        }\n        // Bug: missing check whether total_gas >= total_cost\n        return start_idx;\n    }\n};",
+      "error_message": "Wrong Answer: Input gas=[2,3,4], cost=[3,4,3] -> Output 3, Expected -1"
+    }
+  },
+  {
+    "submission_id": "cf_sub_206",
+    "user_id": "user_demo",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1352C",
+      "title": "K-th Not Divisible by n",
+      "difficulty": "1200",
+      "topic_tags": ["Binary Search", "Math"],
+      "url": "https://codeforces.com/problemset/problem/1352/C"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "runtime_ms": 46,
+      "memory_mb": 0.4,
+      "timestamp": 1709718000,
+      "code": "#include <bits/stdc++.h>\nusing namespace std;\n\nvoid solve() {\n    long long n, k;\n    cin >> n >> k;\n    long long low = 1, high = 2e9, ans = high;\n    while (low <= high) {\n        long long mid = low + (high - low) / 2;\n        long long not_div = mid - (mid / n);\n        if (not_div == k) { // Bug: stops immediately at mid even if mid % n == 0\n            ans = mid;\n            break;\n        } else if (not_div < k) {\n            low = mid + 1;\n        } else {\n            high = mid - 1;\n        }\n    }\n    cout << ans << \"\\n\";\n}\n\nint main() {\n    int t; if (cin >> t) while (t--) solve();\n    return 0;\n}",
+      "error_message": "Wrong answer on test 1"
+    }
+  }
+]

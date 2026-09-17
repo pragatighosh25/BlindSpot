@@ -1,15 +1,30 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Database, RefreshCw, Layers, ShieldCheck } from "lucide-react";
+import { Sparkles, Database, RefreshCw, Globe, CheckCircle2 } from "lucide-react";
 
 interface NavbarProps {
   onSync: () => void;
   isSyncing: boolean;
   onOpenIngest: () => void;
+  onOpenConnectProfile: () => void;
+  isLiveMode?: boolean;
+  totalSubmissions?: number;
+  profile?: {
+    leetcodeUsername?: string;
+    codeforcesHandle?: string;
+  };
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onSync, isSyncing, onOpenIngest }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onSync,
+  isSyncing,
+  onOpenIngest,
+  onOpenConnectProfile,
+  isLiveMode,
+  totalSubmissions = 0,
+  profile,
+}) => {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-[#070b12]/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -23,22 +38,48 @@ export const Navbar: React.FC<NavbarProps> = ({ onSync, isSyncing, onOpenIngest 
               <span className="px-2 py-0.5 text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full">
                 AI Coach
               </span>
+              {isLiveMode ? (
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full flex items-center space-x-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>LIVE API</span>
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 rounded-full">
+                  Mock Data
+                </span>
+              )}
             </div>
             <p className="text-[11px] text-slate-400 hidden sm:block">
-              Data Ingestion &bull; OpenSearch &bull; Spaced Repetition
+              {isLiveMode && (profile?.leetcodeUsername || profile?.codeforcesHandle) ? (
+                <span>
+                  Connected: {profile?.leetcodeUsername ? `LC @${profile.leetcodeUsername}` : ""}
+                  {profile?.leetcodeUsername && profile?.codeforcesHandle ? " • " : ""}
+                  {profile?.codeforcesHandle ? `CF @${profile.codeforcesHandle}` : ""}
+                </span>
+              ) : (
+                "Data Ingestion • OpenSearch • Spaced Repetition"
+              )}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>OpenSearch Synced (37 Submissions)</span>
+        <div className="flex items-center space-x-2.5">
+          <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>OpenSearch ({totalSubmissions} Submissions)</span>
           </div>
 
           <button
+            onClick={onOpenConnectProfile}
+            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 shadow-sm transition"
+          >
+            <Globe className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Connect Accounts</span>
+          </button>
+
+          <button
             onClick={onOpenIngest}
-            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
           >
             <Database className="w-3.5 h-3.5 text-blue-400" />
             <span>Test Ingestion</span>

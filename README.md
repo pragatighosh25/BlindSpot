@@ -15,8 +15,6 @@ BlindSpot analyzes a competitive programmer's LeetCode and Codeforces submission
 
 ## 📁 Monorepo Structure
 
-The project is cleanly split into independent **Frontend** and **Backend** directories:
-
 ```text
 d:/BlindSpot/
 ├── backend/                             # Backend API, Ingestion, OpenSearch & Scheduler
@@ -28,6 +26,8 @@ d:/BlindSpot/
 │   │   └── analysis.schema.ts           # AI analysis output schema (Zod + TS types)
 │   ├── services/
 │   │   ├── ingestion/
+│   │   │   ├── config.ts                # Configured profile IDs (LeetCode & Codeforces)
+│   │   │   ├── live-fetcher.ts          # Real API integration (alfa-leetcode-api & Codeforces)
 │   │   │   ├── leetcode.ts              # LeetCode raw response parser
 │   │   │   └── codeforces.ts            # Codeforces API response parser
 │   │   ├── normalization.ts             # Unified normalization gateway
@@ -57,7 +57,8 @@ d:/BlindSpot/
 │   │   ├── RecommendationsSection.tsx   # Curated problem recommendations
 │   │   ├── PracticeSchedulerSection.tsx # Spaced repetition practice board
 │   │   ├── SubmissionsExplorer.tsx      # OpenSearch search & filter table
-│   │   └── IngestModal.tsx              # Interactive raw payload ingestion test modal
+│   │   ├── IngestModal.tsx              # Interactive raw payload ingestion test modal
+│   │   └── SyncProfileModal.tsx         # Account connection & sync modal
 │   ├── next.config.ts                   # Proxies /api/* to Backend (http://localhost:5000)
 │   ├── package.json
 │   └── tsconfig.json
@@ -68,106 +69,35 @@ d:/BlindSpot/
 
 ---
 
-## 📐 Shared Data Contracts (A ⇄ B Interface)
+## ⚡ Live API Integrations (Configured in Code)
 
-### 1. Ingestion → AI Contract: `CanonicalSubmission`
-File: [`backend/schemas/submission.schema.ts`](./backend/schemas/submission.schema.ts)
+Your profile credentials are configured in [`backend/services/ingestion/config.ts`](./backend/services/ingestion/config.ts):
 
-```typescript
-export interface CanonicalSubmission {
-  submission_id: string;
-  user_id?: string;
-  platform: "leetcode" | "codeforces";
-  problem: {
-    id: string;
-    title: string;
-    difficulty?: string;
-    topic_tags: string[];
-    url?: string;
-  };
-  submission: {
-    language: string;
-    verdict: "AC" | "WA" | "TLE" | "MLE" | "RE" | "CE" | "OTHER";
-    runtime_ms?: number;
-    memory_mb?: number;
-    timestamp: number;
-    code: string;
-    error_message?: string;
-  };
-}
-```
+* **LeetCode**: `@pragatighosh25` &rarr; queried via [alfa-leetcode-api](https://github.com/alfaarghya/alfa-leetcode-api) & LeetCode GraphQL
+* **Codeforces**: `@pragati25` &rarr; queried via [Codeforces API](https://codeforces.com/apiHelp)
 
-### 2. AI → Scheduler / Dashboard Contract: `AnalysisOutput`
-File: [`backend/schemas/analysis.schema.ts`](./backend/schemas/analysis.schema.ts)
-
-```typescript
-export interface AnalysisOutput {
-  user_id?: string;
-  analyzed_at?: number;
-  summary?: string;
-  weak_topics: Array<{
-    topic: string;
-    failure_mode: string;
-    confidence: number;
-    evidence_count: number;
-    example_submissions: string[];
-    description?: string;
-  }>;
-  recommended_problems: Array<{
-    platform: "leetcode" | "codeforces";
-    problem_id: string;
-    title?: string;
-    difficulty?: string;
-    reason: string;
-    url?: string;
-  }>;
-}
-```
+On server startup, real submissions are fetched automatically, normalized into the canonical schema, indexed in OpenSearch, diagnosed for recurring failure modes, and populated in your review schedule.
 
 ---
 
 ## 🚀 Running the Project
 
-### 1. Install All Dependencies
 ```bash
-# In the root folder:
-npm install
-npm --prefix backend install
-npm --prefix frontend install
-```
-
-### 2. Run Both Backend & Frontend Concurrently
-```bash
+# Start BOTH Backend (port 5000) and Frontend (port 3000)
 npm run dev
 ```
-* **Backend API**: `http://localhost:5000`
+
 * **Frontend Dashboard**: `http://localhost:3000`
-
-### 3. Run Backend Only
-```bash
-npm run dev:backend
-```
-
-### 4. Run Frontend Only
-```bash
-npm run dev:frontend
-```
-
-### 5. Run Unit Tests & Data Validation
-```bash
-npm test
-npm run validate:data
-```
+* **Backend API**: `http://localhost:5000`
 
 ---
 
-## 📡 Backend API Endpoints (Port 5000)
+## 🧪 Testing
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/health` | Backend service health check |
-| `GET` | `/api/submissions` | Search and filter OpenSearch submissions (`?q=`, `?platform=`, `?verdict=`, `?topic=`) |
-| `POST` | `/api/submissions` | Ingest raw payload, normalize to `CanonicalSubmission`, index to OpenSearch |
-| `GET` | `/api/analysis` | Retrieve AI weakness analysis & recommendations (Person B contract) |
-| `GET` | `/api/schedule` | Get upcoming spaced repetition practice problems |
-| `POST` | `/api/schedule` | Schedule problem or mark review step completed |
+```bash
+# Run all 15 automated unit tests
+npm test
+
+# Run mock dataset verification
+npm run validate:data
+```

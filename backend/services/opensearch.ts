@@ -17,10 +17,11 @@ export interface SearchSubmissionsQuery {
 
 /**
  * In-memory simulated OpenSearch store for standalone local development and testing.
- * Automatically loads and pre-diagnoses 37+ mock submissions.
+ * Supports indexing both mock datasets and live fetched LeetCode/Codeforces submissions.
  */
 class LocalOpenSearchStore {
   private documents: Map<string, OpenSearchSubmissionDocument> = new Map();
+  private isLive = false;
 
   constructor() {
     this.seed();
@@ -34,6 +35,21 @@ class LocalOpenSearchStore {
         analysis: diag,
       });
     }
+  }
+
+  public clearAll() {
+    this.documents.clear();
+    this.isLive = true;
+  }
+
+  public resetToMock() {
+    this.documents.clear();
+    this.isLive = false;
+    this.seed();
+  }
+
+  public isLiveMode(): boolean {
+    return this.isLive;
   }
 
   public async save(sub: CanonicalSubmission, analysis?: SubmissionAnalysis): Promise<void> {
@@ -50,16 +66,19 @@ class LocalOpenSearchStore {
   }
 
   public async getByUser(userId: string): Promise<OpenSearchSubmissionDocument[]> {
+    if (!userId || userId === "all") {
+      return Array.from(this.documents.values());
+    }
     return Array.from(this.documents.values()).filter(
-      (d) => !userId || d.user_id === userId || d.user_id === "user_demo" || d.user_id === "default_user"
+      (d) => d.user_id === userId || (!this.isLive && (d.user_id === "user_demo" || d.user_id === "default_user"))
     );
   }
 
   public async search(options: SearchSubmissionsQuery): Promise<OpenSearchSubmissionDocument[]> {
     let results = Array.from(this.documents.values());
 
-    if (options.userId) {
-      results = results.filter((d) => d.user_id === options.userId || d.user_id === "user_demo" || d.user_id === "default_user");
+    if (options.userId && options.userId !== "all") {
+      results = results.filter((d) => d.user_id === options.userId || (!this.isLive && (d.user_id === "user_demo" || d.user_id === "default_user")));
     }
 
     if (options.platform) {
@@ -155,4 +174,16 @@ export async function searchSimilarMistakes(
   userId = "user_demo"
 ): Promise<OpenSearchSubmissionDocument[]> {
   return globalStore.searchSimilarMistakes(topic, verdict, userId);
+}
+
+export function clearOpenSearch() {
+  globalStore.clearAll();
+}
+
+export function resetOpenSearchToMock() {
+  globalStore.resetToMock();
+}
+
+export function isOpenSearchLive(): boolean {
+  return globalStore.isLiveMode();
 }

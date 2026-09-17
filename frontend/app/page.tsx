@@ -9,6 +9,7 @@ import { RecommendationsSection } from "@/components/RecommendationsSection";
 import { PracticeSchedulerSection } from "@/components/PracticeSchedulerSection";
 import { SubmissionsExplorer } from "@/components/SubmissionsExplorer";
 import { IngestModal } from "@/components/IngestModal";
+import { SyncProfileModal } from "@/components/SyncProfileModal";
 import { WeakTopic, RecommendedProblem, AnalysisOutput } from "@/schemas/analysis.schema";
 import { CanonicalSubmission } from "@/schemas/submission.schema";
 import { ScheduledReviewItem } from "@/types/schedule";
@@ -16,6 +17,8 @@ import { ScheduledReviewItem } from "@/types/schedule";
 export default function DashboardPage() {
   const [analysis, setAnalysis] = useState<AnalysisOutput | null>(null);
   const [submissions, setSubmissions] = useState<CanonicalSubmission[]>([]);
+  const [isLiveMode, setIsLiveMode] = useState<boolean>(false);
+  const [profile, setProfile] = useState<{ leetcodeUsername?: string; codeforcesHandle?: string }>({});
   const [scheduleData, setScheduleData] = useState<{
     today: ScheduledReviewItem[];
     tomorrow: ScheduledReviewItem[];
@@ -33,8 +36,8 @@ export default function DashboardPage() {
   });
 
   const [selectedWeakness, setSelectedWeakness] = useState<WeakTopic | null>(null);
-  const [inspectionSubmission, setInspectionSubmission] = useState<CanonicalSubmission | null>(null);
   const [isIngestOpen, setIsIngestOpen] = useState(false);
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
 
   // Filters
@@ -54,6 +57,8 @@ export default function DashboardPage() {
       const data = await res.json();
       if (data.submissions) {
         setSubmissions(data.submissions);
+        setIsLiveMode(Boolean(data.isLive));
+        if (data.profile) setProfile(data.profile);
       }
     } catch (e) {
       console.error("Failed to load submissions:", e);
@@ -86,17 +91,15 @@ export default function DashboardPage() {
     }
   }, []);
 
-  useEffect(() => {
-    loadSubmissions();
-    loadAnalysis();
-    loadSchedule();
-  }, [loadSubmissions, loadAnalysis, loadSchedule]);
-
-  const handleSyncAll = async () => {
+  const handleSyncAll = useCallback(async () => {
     setIsSyncing(true);
     await Promise.all([loadSubmissions(), loadAnalysis(), loadSchedule()]);
-    setTimeout(() => setIsSyncing(false), 600);
-  };
+    setTimeout(() => setIsSyncing(false), 500);
+  }, [loadSubmissions, loadAnalysis, loadSchedule]);
+
+  useEffect(() => {
+    handleSyncAll();
+  }, [handleSyncAll]);
 
   const handleScheduleProblem = async (problem: RecommendedProblem) => {
     await fetch("/api/schedule", {
@@ -107,7 +110,7 @@ export default function DashboardPage() {
         problem: {
           problem_id: problem.problem_id,
           title: problem.title || `Problem ${problem.problem_id}`,
-          topic: problem.topic || "Algorithms",
+          topic: problem.topic || "Targeted Practice",
           platform: problem.platform,
           reason: problem.reason,
           url: problem.url,
@@ -141,6 +144,10 @@ export default function DashboardPage() {
         onSync={handleSyncAll}
         isSyncing={isSyncing}
         onOpenIngest={() => setIsIngestOpen(true)}
+        onOpenConnectProfile={() => setIsConnectModalOpen(true)}
+        isLiveMode={isLiveMode}
+        totalSubmissions={totalSubmissions}
+        profile={profile}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -179,7 +186,6 @@ export default function DashboardPage() {
         <SubmissionsExplorer
           submissions={submissions}
           onSelectSubmission={(sub) => {
-            // Find if there is an associated weakness or construct one
             const topic = sub.problem.topic_tags[0] || "General";
             setSelectedWeakness({
               topic,
@@ -187,7 +193,7 @@ export default function DashboardPage() {
               confidence: 1.0,
               evidence_count: 1,
               example_submissions: [sub.submission_id],
-              description: sub.submission.error_message || "Inspecting historical code submission.",
+              description: sub.submission.error_message || "Inspecting submission record from OpenSearch.",
             });
           }}
           onSearchChange={(q) => setSearchQuery(q)}
@@ -214,8 +220,18 @@ export default function DashboardPage() {
         isOpen={isIngestOpen}
         onClose={() => setIsIngestOpen(false)}
         onIngestSuccess={() => {
-          loadSubmissions();
+          handleSyncAll();
         }}
+      />
+
+      {/* Connect Real Accounts (LeetCode & Codeforces) Modal */}
+      <SyncProfileModal
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+        onSyncComplete={() => {
+          handleSyncAll();
+        }}
+        currentProfile={profile}
       />
     </div>
   );

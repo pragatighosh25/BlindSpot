@@ -1,19 +1,12 @@
-import { AnalysisOutput, AnalysisOutputSchema } from "@/schemas/analysis.schema";
-import mockAnalysisData from "@/data/mock-analysis.json";
+import { AnalysisOutput } from "@/schemas/analysis.schema";
+import { analyzeUserHistory, analyzeSubmission, getWeaknessProfile, getRecommendations } from "./agent";
 
 /**
  * Service function to retrieve AI analysis for a user.
- * Currently uses mock data; Person B can replace this implementation with the live Strands agent.
+ * Dispatches to Person B's Agent analysis engine.
  */
 export async function getAnalysisForUser(userId = "user_demo"): Promise<AnalysisOutput> {
-  // Validate against schema to ensure strict type compliance
-  const parsed = AnalysisOutputSchema.safeParse(mockAnalysisData);
-  if (!parsed.success) {
-    throw new Error(`Invalid analysis mock data: ${JSON.stringify(parsed.error.format())}`);
-  }
-
-  return {
-    ...parsed.data,
-    user_id: userId,
-  };
+  return analyzeUserHistory(userId);
 }
+
+export { analyzeSubmission, analyzeUserHistory, getWeaknessProfile, getRecommendations };

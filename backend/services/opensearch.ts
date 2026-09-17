@@ -1,13 +1,9 @@
-import { CanonicalSubmission } from "@/schemas/submission.schema";
+import { CanonicalSubmission, SubmissionAnalysis } from "@/schemas/submission.schema";
 import initialSubmissions from "@/data/mock-submissions.json";
+import { diagnoseSubmissionPattern } from "./agent/agent";
 
 export interface OpenSearchSubmissionDocument extends CanonicalSubmission {
-  analysis?: {
-    failure_mode?: string;
-    explanation?: string;
-    topic?: string;
-    confidence?: number;
-  };
+  analysis?: SubmissionAnalysis;
 }
 
 export interface SearchSubmissionsQuery {
@@ -21,7 +17,7 @@ export interface SearchSubmissionsQuery {
 
 /**
  * In-memory simulated OpenSearch store for standalone local development and testing.
- * Automatically loads 37+ mock submissions.
+ * Automatically loads and pre-diagnoses 37+ mock submissions.
  */
 class LocalOpenSearchStore {
   private documents: Map<string, OpenSearchSubmissionDocument> = new Map();
@@ -32,14 +28,19 @@ class LocalOpenSearchStore {
 
   private seed() {
     for (const sub of initialSubmissions as CanonicalSubmission[]) {
-      this.documents.set(sub.submission_id, { ...sub });
+      const diag = diagnoseSubmissionPattern(sub);
+      this.documents.set(sub.submission_id, {
+        ...sub,
+        analysis: diag,
+      });
     }
   }
 
-  public async save(sub: CanonicalSubmission, analysis?: OpenSearchSubmissionDocument["analysis"]): Promise<void> {
+  public async save(sub: CanonicalSubmission, analysis?: SubmissionAnalysis): Promise<void> {
+    const diag = analysis || (sub.analysis as SubmissionAnalysis) || diagnoseSubmissionPattern(sub);
     const doc: OpenSearchSubmissionDocument = {
       ...sub,
-      analysis: analysis || this.documents.get(sub.submission_id)?.analysis,
+      analysis: diag,
     };
     this.documents.set(sub.submission_id, doc);
   }
@@ -83,6 +84,8 @@ class LocalOpenSearchStore {
           d.problem.id.toLowerCase().includes(q) ||
           d.submission.code.toLowerCase().includes(q) ||
           (d.submission.error_message && d.submission.error_message.toLowerCase().includes(q)) ||
+          (d.analysis?.root_cause && d.analysis.root_cause.toLowerCase().includes(q)) ||
+          (d.analysis?.failure_mode && d.analysis.failure_mode.toLowerCase().includes(q)) ||
           d.problem.topic_tags.some((t) => t.toLowerCase().includes(q))
         );
       });
@@ -123,7 +126,7 @@ const globalStore = new LocalOpenSearchStore();
  */
 export async function saveSubmission(
   submission: CanonicalSubmission,
-  analysis?: OpenSearchSubmissionDocument["analysis"]
+  analysis?: SubmissionAnalysis
 ): Promise<void> {
   await globalStore.save(submission, analysis);
 }

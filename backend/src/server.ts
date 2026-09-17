@@ -7,7 +7,7 @@ import {
   saveSubmission,
 } from "../services/opensearch";
 import { normalizeSubmission } from "../services/normalization";
-import { getAnalysisForUser } from "../services/analysis";
+import { getAnalysisForUser, analyzeSubmission } from "../services/analysis";
 import {
   getUpcomingPractice,
   markProblemCompleted,
@@ -78,12 +78,28 @@ app.post("/api/submissions", async (req: Request, res: Response) => {
     }
 
     const canonical = normalizeSubmission(platform, raw, userId || "user_demo");
-    await saveSubmission(canonical);
+    const diagnosis = await analyzeSubmission(canonical);
+    await saveSubmission(canonical, diagnosis);
 
     res.status(201).json({
       success: true,
-      submission: canonical,
+      submission: {
+        ...canonical,
+        analysis: diagnosis,
+      },
+      diagnosis,
     });
+  } catch (error) {
+    res.status(400).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/submissions/analyze (Direct single-submission diagnosis)
+app.post("/api/submissions/analyze", async (req: Request, res: Response) => {
+  try {
+    const submission = req.body;
+    const diagnosis = await analyzeSubmission(submission);
+    res.json({ success: true, diagnosis });
   } catch (error) {
     res.status(400).json({ success: false, error: (error as Error).message });
   }

@@ -11,7 +11,7 @@ import { getUserHistory } from "./tools";
 
 /**
  * Phase 2 & 3: Single submission analysis
- * Analyzes a canonical submission and returns structured diagnosis.
+ * Analyzes a canonical submission and returns structured deep algorithmic diagnosis.
  */
 export async function analyzeSubmission(
   submission: CanonicalSubmission
@@ -27,7 +27,7 @@ export async function analyzeSubmission(
 }
 
 /**
- * Analyze user's entire submission history to detect recurring weaknesses
+ * Analyze user's entire submission history to detect recurring algorithmic weaknesses
  */
 export async function analyzeUserHistory(userId = "user_demo"): Promise<AnalysisOutput> {
   const history = await getUserHistory(userId);
@@ -51,40 +51,61 @@ export async function analyzeUserHistory(userId = "user_demo"): Promise<Analysis
   const weakTopics: WeakTopic[] = [];
 
   for (const [topic, { diagnoses, subIds }] of topicMap.entries()) {
-    // Tally failure modes
-    const modeCounts = new Map<string, { count: number; totalConf: number; explanations: string[] }>();
+    // Tally failure modes and collect diagnostic exemplars
+    const modeCounts = new Map<
+      string,
+      {
+        count: number;
+        totalConf: number;
+        primaryDiag: SubmissionDiagnosis;
+      }
+    >();
+
     for (const d of diagnoses) {
       const mode = d.failure_pattern;
       if (!modeCounts.has(mode)) {
-        modeCounts.set(mode, { count: 0, totalConf: 0, explanations: [] });
+        modeCounts.set(mode, {
+          count: 0,
+          totalConf: 0,
+          primaryDiag: d,
+        });
       }
       const m = modeCounts.get(mode)!;
       m.count += 1;
       m.totalConf += d.confidence;
-      m.explanations.push(d.explanation);
+      // Keep the most confident diagnosis as primary exemplar
+      if (d.confidence > m.primaryDiag.confidence) {
+        m.primaryDiag = d;
+      }
     }
 
     // Find dominant failure mode
     let topMode = "unknown";
     let maxCount = 0;
     let avgConf = 0.5;
+    let exemplarDiag: SubmissionDiagnosis | null = null;
 
     for (const [mode, stat] of modeCounts.entries()) {
       if (stat.count > maxCount) {
         maxCount = stat.count;
         topMode = mode;
         avgConf = stat.totalConf / stat.count;
+        exemplarDiag = stat.primaryDiag;
       }
     }
 
-    if (maxCount >= 1) {
+    if (maxCount >= 1 && exemplarDiag) {
       weakTopics.push({
         topic,
-        failure_mode: topMode.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        confidence: Math.min(1.0, Math.round((avgConf + (maxCount > 2 ? 0.1 : 0)) * 100) / 100),
+        failure_mode: exemplarDiag.failure_mode || topMode.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        confidence: Math.min(1.0, Math.round((avgConf + (maxCount > 2 ? 0.05 : 0)) * 100) / 100),
         evidence_count: maxCount,
         example_submissions: subIds.slice(0, 5),
-        description: `Identified ${maxCount} instances of ${topMode.replace(/_/g, " ")} in ${topic} submissions.`,
+        description: `Identified ${maxCount} occurrences exhibiting ${exemplarDiag.failure_mode.toLowerCase()}.`,
+        root_cause: exemplarDiag.root_cause,
+        why_it_fails: exemplarDiag.why_it_fails,
+        correct_concept: exemplarDiag.correct_concept,
+        suggested_fix: exemplarDiag.suggested_fix,
       });
     }
   }
@@ -113,6 +134,15 @@ export async function analyzeUserHistory(userId = "user_demo"): Promise<Analysis
     },
     {
       platform: "leetcode",
+      problem_id: "198",
+      title: "House Robber",
+      difficulty: "Medium",
+      topic: "Dynamic Programming",
+      reason: "Master non-adjacent optimal substructure recurrence dp[i] = max(dp[i-1], dp[i-2] + nums[i]).",
+      url: "https://leetcode.com/problems/house-robber/",
+    },
+    {
+      platform: "leetcode",
       problem_id: "300",
       title: "Longest Increasing Subsequence",
       difficulty: "Medium",
@@ -134,7 +164,7 @@ export async function analyzeUserHistory(userId = "user_demo"): Promise<Analysis
   const output: AnalysisOutput = {
     user_id: userId,
     analyzed_at: Date.now(),
-    summary: `Analyzed ${history.length} total submissions with ${failedSubmissions.length} failed attempts. Identified ${weakTopics.length} recurring blind spot patterns.`,
+    summary: `Analyzed ${history.length} total submissions with ${failedSubmissions.length} failed attempts. Identified ${weakTopics.length} recurring algorithmic blind spots with root-cause diagnoses.`,
     weak_topics: weakTopics,
     recommended_problems: recommendedProblems,
   };

@@ -8,6 +8,10 @@ export const WeakTopicSchema = z.object({
   evidence_count: z.number().int().nonnegative(),
   example_submissions: z.array(z.string()),
   description: z.string().optional(),
+  root_cause: z.string().optional(),
+  why_it_fails: z.string().optional(),
+  correct_concept: z.string().optional(),
+  suggested_fix: z.string().optional(),
 });
 export type WeakTopic = z.infer<typeof WeakTopicSchema>;
 

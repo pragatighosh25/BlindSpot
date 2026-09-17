@@ -26,16 +26,34 @@ export const FailurePatternSchema = z.enum(FailurePatterns);
 export type FailurePattern = z.infer<typeof FailurePatternSchema>;
 
 /**
- * Single submission diagnosis result returned by analyzeSubmission()
+ * Execution evidence extracted from compiler / judge / test runner
+ */
+export const SubmissionEvidenceSchema = z.object({
+  input: z.string().optional(),
+  actual_output: z.string().optional(),
+  expected_output: z.string().optional(),
+  error_message: z.string().optional(),
+});
+export type SubmissionEvidence = z.infer<typeof SubmissionEvidenceSchema>;
+
+/**
+ * Single submission deep algorithmic diagnosis result returned by analyzeSubmission()
  */
 export const SubmissionDiagnosisSchema = z.object({
   submission_id: z.string(),
   topic: z.string(),
   verdict: z.string(),
   failure_pattern: FailurePatternSchema,
+  failure_mode: z.string(),
+  root_cause: z.string(),
+  why_it_fails: z.string(),
+  correct_concept: z.string(),
+  suggested_fix: z.string(),
+  code_location: z.string().optional(),
   explanation: z.string(),
   confidence: z.number().min(0).max(1),
   is_failure: z.boolean(),
+  evidence: SubmissionEvidenceSchema.optional(),
 });
 
 export type SubmissionDiagnosis = z.infer<typeof SubmissionDiagnosisSchema>;

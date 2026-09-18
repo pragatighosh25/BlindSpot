@@ -176,12 +176,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={onLaunchDemo}
                 className="group btn-weevolve-primary py-2 px-4 text-xs"
               >
-                <Sparkles size={13} className="mr-1.5" />
+                
                 <span>Launch Demo</span>
-                <div className="arrow-swap ml-1.5">
-                  <span>&rarr;</span>
-                  <span>&rarr;</span>
-                </div>
+                
               </button>
             </div>
           </div>
@@ -247,12 +244,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   onClick={onLaunchDemo}
                   className="group btn-weevolve-primary text-xs py-3.5 px-6 shadow-[0_0_30px_rgba(228,0,124,0.4)]"
                 >
-                  <Sparkles size={15} className="mr-2" />
-                  <span>Launch Demo (@pragatighosh25)</span>
-                  <div className="arrow-swap ml-2">
-                    <span>&rarr;</span>
-                    <span>&rarr;</span>
-                  </div>
+                
+                  <span>Launch Demo</span>
+                  
                 </button>
                 <button
                   onClick={() => onOpenAuth("signup")}
@@ -626,12 +620,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={onLaunchDemo}
                 className="group btn-weevolve-primary text-xs py-4 px-8 shadow-[0_0_35px_rgba(228,0,124,0.5)]"
               >
-                <Sparkles size={16} className="mr-2" />
-                <span>Launch Demo Workspace (@pragatighosh25)</span>
-                <div className="arrow-swap ml-2">
-                  <span>&rarr;</span>
-                  <span>&rarr;</span>
-                </div>
+                <span>Launch Demo Workspace</span>
               </button>
               <button
                 onClick={() => onOpenAuth("signup")}

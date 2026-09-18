@@ -294,7 +294,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 : "text-white/60 hover:text-white"
             }`}
           >
-            ⚡ Demo Acc
+           Demo Acc
           </button>
           <button
             type="button"
@@ -370,7 +370,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             >
               <Sparkles size={15} />
               {isLoading ? "Launching Demo Workspace..." : "Launch Demo Account Now"}
-              <ArrowRight size={15} />
+              
             </button>
           </div>
         )}
@@ -501,7 +501,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               {cfStatus.error && (
                 <div className="text-[11px] font-mono text-rose-400">
-                  ⚠️ {cfStatus.error}
+                  {cfStatus.error}
                 </div>
               )}
 
@@ -539,7 +539,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               className="w-full btn-weevolve-primary py-3 px-4 flex items-center justify-center gap-2 text-xs"
             >
               {isLoading ? "Verifying & Syncing Accounts..." : "Create Account & Sync Live Profiles"}
-              <ArrowRight size={15} />
+              
             </button>
           </form>
         )}
@@ -579,7 +579,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               className="w-full btn-weevolve-primary py-3 px-4 flex items-center justify-center gap-2 text-xs"
             >
               {isLoading ? "Signing In..." : "Sign In to Dashboard"}
-              <ArrowRight size={15} />
+              
             </button>
           </form>
         )}

@@ -1,86 +1,99 @@
+"use client";
+
 import React from "react";
-import { CheckCircle2, XCircle, AlertTriangle, Target, Layers } from "lucide-react";
+import { Fire, Sparkles, Calendar, Command } from "akar-icons";
 
 interface StatsOverviewProps {
-  totalCount: number;
-  solvedCount: number;
-  failureCount: number;
+  totalSubmissions: number;
+  failedSubmissions: number;
   weaknessCount: number;
+  dueTodayCount: number;
+  accuracyRate: number;
+  isLive?: boolean;
 }
 
 export const StatsOverview: React.FC<StatsOverviewProps> = ({
-  totalCount,
-  solvedCount,
-  failureCount,
+  totalSubmissions,
+  failedSubmissions,
   weaknessCount,
+  dueTodayCount,
+  accuracyRate,
+  isLive = false,
 }) => {
-  const solveRate = totalCount > 0 ? Math.round((solvedCount / totalCount) * 100) : 0;
-
-  const cards = [
-    {
-      label: "Total Submissions",
-      value: totalCount,
-      subtext: "LeetCode & Codeforces combined",
-      icon: Layers,
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
-    },
-    {
-      label: "Accepted (AC)",
-      value: solvedCount,
-      subtext: `${solveRate}% solution accuracy`,
-      icon: CheckCircle2,
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
-    },
-    {
-      label: "Mistakes (WA / TLE / MLE)",
-      value: failureCount,
-      subtext: "Clustered for pattern analysis",
-      icon: XCircle,
-      color: "text-rose-400",
-      bg: "bg-rose-500/10",
-      border: "border-rose-500/20",
-    },
-    {
-      label: "Detected Blind Spots",
-      value: weaknessCount,
-      subtext: "High confidence failure modes",
-      icon: Target,
-      color: "text-amber-400",
-      bg: "bg-amber-500/10",
-      border: "border-amber-500/20",
-    },
-  ];
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card, i) => {
-        const Icon = card.icon;
-        return (
-          <div
-            key={i}
-            className={`glass-panel rounded-xl p-5 border ${card.border} flex flex-col justify-between`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                {card.label}
-              </span>
-              <div className={`p-2 rounded-lg ${card.bg}`}>
-                <Icon className={`w-4 h-4 ${card.color}`} />
-              </div>
-            </div>
-            <div className="mt-3">
-              <div className="text-3xl font-extrabold text-white tracking-tight">
-                {card.value}
-              </div>
-              <p className="text-xs text-slate-400 mt-1">{card.subtext}</p>
-            </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Metric 1: Total Processed */}
+      <div className="surface-panel-hover rounded-2xl p-5 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono text-[#FAFAF8]/60 uppercase tracking-wider">
+            Total Submissions
+          </span>
+          <div className="p-2 rounded-xl bg-[#1B1BFF]/10 text-[#1B1BFF] border border-[#1B1BFF]/30">
+            <Command size={16} />
           </div>
-        );
-      })}
+        </div>
+        <div className="text-3xl font-extrabold font-headline text-[#FAFAF8] tracking-tight">
+          {totalSubmissions}
+        </div>
+        <div className="flex items-center gap-1.5 mt-2 text-xs font-mono text-[#FAFAF8]/50">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00FF9C]" />
+          <span>LeetCode & Codeforces</span>
+        </div>
+      </div>
+
+      {/* Metric 2: Accuracy & Failures */}
+      <div className="surface-panel-hover rounded-2xl p-5 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono text-[#FAFAF8]/60 uppercase tracking-wider">
+            Accuracy Rate
+          </span>
+          <div className="p-2 rounded-xl bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30">
+            <Fire size={16} />
+          </div>
+        </div>
+        <div className="text-3xl font-extrabold font-headline text-[#00FF9C] tracking-tight">
+          {accuracyRate}%
+        </div>
+        <div className="flex items-center gap-1.5 mt-2 text-xs font-mono text-[#FAFAF8]/50">
+          <span className="text-[#FAFAF8]/80 font-bold">{failedSubmissions}</span> failed attempts mined
+        </div>
+      </div>
+
+      {/* Metric 3: Active Blind Spots */}
+      <div className="surface-panel-hover rounded-2xl p-5 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono text-[#FAFAF8]/60 uppercase tracking-wider">
+            Active Blind Spots
+          </span>
+          <div className="p-2 rounded-xl bg-[#1B1BFF]/10 text-[#1B1BFF] border border-[#1B1BFF]/30">
+            <Sparkles size={16} />
+          </div>
+        </div>
+        <div className="text-3xl font-extrabold font-headline text-[#FAFAF8] tracking-tight">
+          {weaknessCount}
+        </div>
+        <div className="flex items-center gap-1.5 mt-2 text-xs font-mono text-[#FAFAF8]/50">
+          <span>Recurrent algorithmic patterns</span>
+        </div>
+      </div>
+
+      {/* Metric 4: Spaced Repetition Due */}
+      <div className="surface-panel-hover rounded-2xl p-5 relative overflow-hidden">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono text-[#FAFAF8]/60 uppercase tracking-wider">
+            SM-2 Queue Due
+          </span>
+          <div className="p-2 rounded-xl bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30">
+            <Calendar size={16} />
+          </div>
+        </div>
+        <div className="text-3xl font-extrabold font-headline text-[#FAFAF8] tracking-tight">
+          {dueTodayCount} <span className="text-sm font-normal text-[#FAFAF8]/50 font-sans">items</span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-2 text-xs font-mono text-[#00FF9C]">
+          <span>Scheduled for today</span>
+        </div>
+      </div>
     </div>
   );
 };

@@ -2,64 +2,118 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --card: 224 71% 6%;
-    --card-foreground: 213 31% 91%;
-    --popover: 224 71% 6%;
-    --popover-foreground: 213 31% 91%;
-    --primary: 210 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 222 47% 11%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --ring: 216 34% 17%;
+    --font-inter: "Inter", sans-serif;
+    --font-jetbrains-mono: "JetBrains Mono", monospace;
+
+    /* BlindSpot Exact Color Tokens */
+    --color-text: #FAFAF8;
+    --color-primary: #1B1BFF;
+    --color-accent: #00FF9C;
+    --color-surface: #1A1A1A;
+    --color-border: #2C2C2C;
+    --color-bg-deep: #0D0D0D;
+    --color-surface-hover: #222222;
   }
 
   body {
-    background-color: #090d16;
-    color: #f1f5f9;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--color-bg-deep);
+    color: var(--color-text);
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-headline {
+    font-family: var(--font-jetbrains-mono), monospace;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-jetbrains-mono), monospace;
   }
 }
 
-/* Glassmorphism card utilities */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Surface & Card Utilities */
+.surface-panel {
+  background-color: #1A1A1A;
+  border: 1px solid #2C2C2C;
 }
 
-.glass-panel-hover {
-  transition: all 0.2s ease-in-out;
+.surface-panel-hover {
+  background-color: #1A1A1A;
+  border: 1px solid #2C2C2C;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.glass-panel-hover:hover {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(59, 130, 246, 0.3);
+
+.surface-panel-hover:hover {
+  background-color: #222222;
+  border-color: #3D3D3D;
   transform: translateY(-2px);
 }
 
-/* Custom scrollbar */
+/* Glass Surface with exact theme tint */
+.glass-surface {
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #2C2C2C;
+}
+
+/* Glow effects */
+.glow-primary {
+  box-shadow: 0 0 24px rgba(27, 27, 255, 0.35);
+}
+
+.glow-accent {
+  box-shadow: 0 0 24px rgba(0, 255, 156, 0.3);
+}
+
+.glow-subtle {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #1B1BFF;
+  color: #FAFAF8;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 600;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #3434ff;
+  box-shadow: 0 0 20px rgba(27, 27, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-accent {
+  background-color: #00FF9C;
+  color: #0D0D0D;
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-accent:hover {
+  background-color: #26ffaa;
+  box-shadow: 0 0 20px rgba(0, 255, 156, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #0b0f19;
+  background: #0D0D0D;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #2C2C2C;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #3D3D3D;
 }

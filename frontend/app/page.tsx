@@ -10,15 +10,30 @@ import { PracticeSchedulerSection } from "@/components/PracticeSchedulerSection"
 import { SubmissionsExplorer } from "@/components/SubmissionsExplorer";
 import { IngestModal } from "@/components/IngestModal";
 import { SyncProfileModal } from "@/components/SyncProfileModal";
+import { LandingPage } from "@/components/LandingPage";
+import { AuthModal } from "@/components/AuthModal";
 import { WeakTopic, RecommendedProblem, AnalysisOutput } from "@/schemas/analysis.schema";
 import { CanonicalSubmission } from "@/schemas/submission.schema";
 import { ScheduledReviewItem } from "@/types/schedule";
+import { Sparkles, CircleAlert } from "akar-icons";
 
-export default function DashboardPage() {
+export default function App() {
+  const [currentView, setCurrentView] = useState<"landing" | "dashboard">("landing");
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authInitialMode, setAuthInitialMode] = useState<"demo" | "login" | "signup">("demo");
+
+  // Active User Profile
+  const [activeProfile, setActiveProfile] = useState({
+    leetcode: "pragatighosh25",
+    codeforces: "pragatighosh",
+    userId: "pragatighosh25",
+    isDemo: true,
+  });
+
+  // App Data State
   const [analysis, setAnalysis] = useState<AnalysisOutput | null>(null);
   const [submissions, setSubmissions] = useState<CanonicalSubmission[]>([]);
   const [isLiveMode, setIsLiveMode] = useState<boolean>(false);
-  const [profile, setProfile] = useState<{ userId?: string; leetcodeUsername?: string; codeforcesHandle?: string }>({});
   const [scheduleData, setScheduleData] = useState<{
     today: ScheduledReviewItem[];
     tomorrow: ScheduledReviewItem[];
@@ -39,6 +54,7 @@ export default function DashboardPage() {
   const [isIngestOpen, setIsIngestOpen] = useState(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
   // Filters
@@ -63,7 +79,6 @@ export default function DashboardPage() {
       if (data.submissions) {
         setSubmissions(data.submissions);
         setIsLiveMode(Boolean(data.isLive));
-        if (data.profile) setProfile(data.profile);
       }
     } catch (e) {
       console.error("Failed to load submissions:", e);
@@ -75,6 +90,7 @@ export default function DashboardPage() {
     try {
       let res;
       if (forceTrigger) {
+        setIsAnalyzing(true);
         res = await fetch("/api/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,6 +109,8 @@ export default function DashboardPage() {
       }
     } catch (e) {
       console.error("Failed to load analysis:", e);
+    } finally {
+      setIsAnalyzing(false);
     }
   }, []);
 
@@ -113,7 +131,7 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Initial load on page mount (loads persisted analysis WITHOUT running Strands)
+  // Initial load on page mount
   useEffect(() => {
     const init = async () => {
       setIsSyncing(true);
@@ -131,8 +149,8 @@ export default function DashboardPage() {
 
   // Explicit User Action: Run Fresh Strands Analysis
   const handleRunAnalysis = useCallback(async () => {
-    if (isSyncing) return;
-    setIsSyncing(true);
+    if (isAnalyzing || isSyncing) return;
+    setIsAnalyzing(true);
     setApiError(null);
     try {
       await loadAnalysis(true);
@@ -140,11 +158,38 @@ export default function DashboardPage() {
     } catch (err) {
       setApiError((err as Error).message);
     } finally {
+      setIsAnalyzing(false);
+    }
+  }, [isAnalyzing, isSyncing, loadAnalysis, loadSchedule]);
+
+  // Live Sync submissions trigger
+  const handleLiveSync = useCallback(async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+    setApiError(null);
+    try {
+      const res = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leetcodeUsername: activeProfile.leetcode,
+          codeforcesHandle: activeProfile.codeforces,
+          userId: activeProfile.userId,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error(data.error || "Sync failed");
+      }
+      await Promise.all([loadSubmissions(), loadAnalysis(false), loadSchedule()]);
+    } catch (err) {
+      setApiError((err as Error).message);
+    } finally {
       setIsSyncing(false);
     }
-  }, [isSyncing, loadAnalysis, loadSchedule]);
+  }, [isSyncing, activeProfile, loadSubmissions, loadAnalysis, loadSchedule]);
 
-  // Sync complete handler for modals
+  // Modal Sync Complete
   const handleModalSyncComplete = useCallback(async () => {
     setIsSyncing(true);
     try {
@@ -197,128 +242,181 @@ export default function DashboardPage() {
     }
   };
 
+  // Launch Demo Account
+  const handleLaunchDemo = () => {
+    setActiveProfile({
+      leetcode: "pragatighosh25",
+      codeforces: "pragatighosh",
+      userId: "pragatighosh25",
+      isDemo: true,
+    });
+    setCurrentView("dashboard");
+  };
+
+  // Auth Success Handler
+  const handleAuthSuccess = (handles: {
+    leetcode: string;
+    codeforces: string;
+    userId: string;
+    isDemo: boolean;
+  }) => {
+    setActiveProfile(handles);
+    setCurrentView("dashboard");
+  };
+
+  // Open Auth Modal helper
+  const handleOpenAuth = (mode: "demo" | "login" | "signup") => {
+    setAuthInitialMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
   // Compute metrics
   const totalSubmissions = submissions.length;
   const solvedCount = submissions.filter((s) => s.submission.verdict === "AC").length;
   const failureCount = submissions.filter((s) => s.submission.verdict !== "AC").length;
+  const accuracyRate = totalSubmissions > 0 ? Math.round((solvedCount / totalSubmissions) * 100) : 0;
   const weaknessCount = analysis?.weak_topics.length || 0;
+  const dueTodayCount = scheduleData.today.length;
 
   return (
-    <div className="min-h-screen bg-[#070b12] text-slate-100 flex flex-col">
-      <Navbar
-        onSync={handleRunAnalysis}
-        isSyncing={isSyncing}
-        onOpenIngest={() => setIsIngestOpen(true)}
-        onOpenConnectProfile={() => setIsConnectModalOpen(true)}
-        isLiveMode={isLiveMode}
-        totalSubmissions={totalSubmissions}
-        profile={profile}
-      />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* KPI Overview */}
-        <StatsOverview
-          totalCount={totalSubmissions}
-          solvedCount={solvedCount}
-          failureCount={failureCount}
-          weaknessCount={weaknessCount}
+    <div className="min-h-screen bg-[#0D0D0D] text-[#FAFAF8] flex flex-col selection:bg-[#1B1BFF] selection:text-[#FAFAF8]">
+      {currentView === "landing" ? (
+        <LandingPage
+          onOpenAuth={handleOpenAuth}
+          onLaunchDemo={handleLaunchDemo}
         />
+      ) : (
+        <>
+          <Navbar
+            onSync={handleLiveSync}
+            onAnalyze={handleRunAnalysis}
+            onOpenIngestModal={() => setIsIngestOpen(true)}
+            onOpenSyncModal={() => setIsConnectModalOpen(true)}
+            onSignOut={() => setCurrentView("landing")}
+            isSyncing={isSyncing}
+            isAnalyzing={isAnalyzing}
+            activeProfile={activeProfile}
+          />
 
-        {/* API Error Notification */}
-        {apiError && (
-          <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
-            <span>⚠️ {apiError}</span>
-            <button
-              onClick={() => setApiError(null)}
-              className="text-slate-400 hover:text-white"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-300">
+            {/* KPI Overview */}
+            <StatsOverview
+              totalSubmissions={totalSubmissions}
+              failedSubmissions={failureCount}
+              weaknessCount={weaknessCount}
+              dueTodayCount={dueTodayCount}
+              accuracyRate={accuracyRate}
+              isLive={isLiveMode}
+            />
 
-        {/* Strands AI Agent Reasoning Banner */}
-        {analysis?.summary && (
-          <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-indigo-950/20">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-sm">🧠</span>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h4 className="text-xs font-bold text-indigo-300 uppercase tracking-wider">
-                    Strands AI Agent Diagnosis
-                  </h4>
-                  {analysis.analyzed_at && (
-                    <span className="text-[10px] text-slate-500">
-                      • Updated {new Date(analysis.analyzed_at).toLocaleTimeString()}
-                    </span>
-                  )}
+            {/* API Error Notification */}
+            {apiError && (
+              <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-mono flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CircleAlert size={16} className="text-rose-400" />
+                  <span>{apiError}</span>
                 </div>
-                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                  {analysis.summary}
-                </p>
+                <button
+                  onClick={() => setApiError(null)}
+                  className="text-[#FAFAF8]/60 hover:text-[#FAFAF8] px-2 py-1 rounded"
+                >
+                  Dismiss
+                </button>
               </div>
+            )}
+
+            {/* Strands AI Agent Reasoning Banner */}
+            {analysis?.summary && (
+              <div className="surface-panel rounded-2xl p-5 border border-[#1B1BFF]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-[#1B1BFF]/10 border border-[#1B1BFF]/30 text-[#1B1BFF] flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles size={20} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-mono font-bold text-[#FAFAF8] uppercase tracking-wider">
+                        Strands AI Agent Reasoning Summary
+                      </h4>
+                      {analysis.analyzed_at && (
+                        <span className="text-[10px] font-mono text-[#FAFAF8]/40">
+                          • Updated {new Date(analysis.analyzed_at).toLocaleTimeString()}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-sans text-[#FAFAF8]/80 mt-1 leading-relaxed">
+                      {analysis.summary}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleRunAnalysis}
+                  disabled={isAnalyzing}
+                  className="shrink-0 px-4 py-2 text-xs font-headline font-semibold rounded-xl bg-[#1A1A1A] hover:bg-[#222222] text-[#FAFAF8] border border-[#2C2C2C] transition-all disabled:opacity-50"
+                >
+                  {isAnalyzing ? "Running Strands..." : "Run Fresh Analysis"}
+                </button>
+              </div>
+            )}
+
+            {/* Section: Weaknesses & Recommendations */}
+            <div className="space-y-8">
+              {analysis && (
+                <WeaknessSection
+                  weaknesses={analysis.weak_topics}
+                  onSelectEvidence={(w) => setSelectedWeakness(w)}
+                />
+              )}
+
+              {analysis && (
+                <RecommendationsSection
+                  recommendations={analysis.recommended_problems}
+                  onScheduleProblem={handleScheduleProblem}
+                />
+              )}
             </div>
-            <button
-              onClick={handleRunAnalysis}
-              disabled={isSyncing}
-              className="shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30 transition disabled:opacity-50"
-            >
-              {isSyncing ? "Running Strands..." : "Run Fresh Analysis"}
-            </button>
-          </div>
-        )}
 
-        {/* Section: Weaknesses & Recommendations */}
-        <div className="space-y-8">
-          {analysis && (
-            <WeaknessSection
-              weaknesses={analysis.weak_topics}
-              onSelectEvidence={(w) => setSelectedWeakness(w)}
+            {/* Section: Spaced Repetition Practice Schedule */}
+            <PracticeSchedulerSection
+              scheduleData={scheduleData}
+              onMarkCompleted={handleMarkCompleted}
             />
-          )}
 
-          {analysis && (
-            <RecommendationsSection
-              recommendations={analysis.recommended_problems}
-              onScheduleProblem={handleScheduleProblem}
+            {/* Section: OpenSearch Explorer */}
+            <SubmissionsExplorer
+              submissions={submissions}
+              onSelectSubmission={(sub) => {
+                const topic = sub.problem.topic_tags[0] || "General";
+                setSelectedWeakness({
+                  topic,
+                  failure_mode: `Submission Inspection: ${sub.problem.title}`,
+                  confidence: 1.0,
+                  evidence_count: 1,
+                  example_submissions: [sub.submission_id],
+                  description: sub.submission.error_message || "Inspecting submission record from OpenSearch.",
+                });
+              }}
+              onSearchChange={(q) => setSearchQuery(q)}
+              selectedPlatform={platformFilter}
+              onSelectPlatform={(p) => setPlatformFilter(p)}
+              selectedVerdict={verdictFilter}
+              onSelectVerdict={(v) => setVerdictFilter(v)}
             />
-          )}
-        </div>
+          </main>
 
-        {/* Section: Spaced Repetition Practice Schedule */}
-        <PracticeSchedulerSection
-          scheduleData={scheduleData}
-          onMarkCompleted={handleMarkCompleted}
-        />
+          {/* Dashboard Footer */}
+          <footer className="border-t border-[#2C2C2C] bg-[#0D0D0D] py-6 text-center text-xs font-mono text-[#FAFAF8]/40">
+            BlindSpot &bull; AI Competitive-Programming Coach &bull; LeetCode (@pragatighosh25) & Codeforces (@pragatighosh)
+          </footer>
+        </>
+      )}
 
-        {/* Section: OpenSearch Explorer */}
-        <SubmissionsExplorer
-          submissions={submissions}
-          onSelectSubmission={(sub) => {
-            const topic = sub.problem.topic_tags[0] || "General";
-            setSelectedWeakness({
-              topic,
-              failure_mode: `Submission Inspection: ${sub.problem.title}`,
-              confidence: 1.0,
-              evidence_count: 1,
-              example_submissions: [sub.submission_id],
-              description: sub.submission.error_message || "Inspecting submission record from OpenSearch.",
-            });
-          }}
-          onSearchChange={(q) => setSearchQuery(q)}
-          selectedPlatform={platformFilter}
-          onSelectPlatform={(p) => setPlatformFilter(p)}
-          selectedVerdict={verdictFilter}
-          onSelectVerdict={(v) => setVerdictFilter(v)}
-        />
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
-        BlindSpot &bull; Hackathon Person A Data & Ingestion Pipeline &bull; OpenSearch & Spaced Repetition Active
-      </footer>
+      {/* Auth & Demo Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={handleAuthSuccess}
+        initialMode={authInitialMode}
+      />
 
       {/* Evidence Code Inspection Modal */}
       <EvidenceModal
@@ -330,19 +428,19 @@ export default function DashboardPage() {
       <IngestModal
         isOpen={isIngestOpen}
         onClose={() => setIsIngestOpen(false)}
-        onIngestSuccess={() => {
-          handleModalSyncComplete();
-        }}
+        onIngestSuccess={handleModalSyncComplete}
       />
 
       {/* Connect Real Accounts (LeetCode & Codeforces) Modal */}
       <SyncProfileModal
         isOpen={isConnectModalOpen}
         onClose={() => setIsConnectModalOpen(false)}
-        onSyncComplete={() => {
-          handleModalSyncComplete();
+        onSyncComplete={handleModalSyncComplete}
+        currentProfile={{
+          leetcodeUsername: activeProfile.leetcode,
+          codeforcesHandle: activeProfile.codeforces,
+          isLive: isLiveMode,
         }}
-        currentProfile={profile}
       />
     </div>
   );

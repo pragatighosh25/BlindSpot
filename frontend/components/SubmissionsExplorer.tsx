@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { CanonicalSubmission } from "@/schemas/submission.schema";
-import { Search, Filter, Code2, ExternalLink, Database } from "lucide-react";
+import { Search, Command, EyeOpen } from "akar-icons";
 
 interface SubmissionsExplorerProps {
   submissions: CanonicalSubmission[];
@@ -34,11 +34,11 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-            <Database className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-bold font-headline text-[#FAFAF8] flex items-center gap-2">
+            <Command className="w-5 h-5 text-[#1B1BFF]" />
             <span>OpenSearch Submissions Explorer</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-xs font-sans text-[#FAFAF8]/60 mt-0.5">
             Normalized submission store across LeetCode & Codeforces platforms
           </p>
         </div>
@@ -55,16 +55,16 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                 setSearchInput(e.target.value);
                 onSearchChange(e.target.value);
               }}
-              className="w-48 sm:w-64 pl-8 pr-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+              className="w-48 sm:w-64 pl-8 pr-3 py-2 text-xs font-mono bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
             />
-            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
+            <Search size={14} className="text-[#FAFAF8]/40 absolute left-2.5 top-2.5" />
           </form>
 
           {/* Platform Filter */}
           <select
             value={selectedPlatform}
             onChange={(e) => onSelectPlatform(e.target.value)}
-            className="text-xs bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-blue-500"
+            className="text-xs font-mono bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl px-3 py-2 text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] transition-colors"
           >
             <option value="">All Platforms</option>
             <option value="leetcode">LeetCode</option>
@@ -75,7 +75,7 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
           <select
             value={selectedVerdict}
             onChange={(e) => onSelectVerdict(e.target.value)}
-            className="text-xs bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-blue-500"
+            className="text-xs font-mono bg-[#1A1A1A] border border-[#2C2C2C] rounded-xl px-3 py-2 text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] transition-colors"
           >
             <option value="">All Verdicts</option>
             <option value="AC">AC (Accepted)</option>
@@ -87,10 +87,10 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
       </div>
 
       {/* Submissions Table / Cards */}
-      <div className="glass-panel rounded-xl border border-slate-800 overflow-hidden">
+      <div className="surface-panel rounded-2xl border border-[#2C2C2C] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-900/80 text-slate-400 uppercase font-semibold border-b border-slate-800">
+          <table className="w-full text-left text-xs font-mono text-[#FAFAF8]/80">
+            <thead className="bg-[#0D0D0D] text-[#FAFAF8]/50 uppercase font-semibold border-b border-[#2C2C2C]">
               <tr>
                 <th className="px-4 py-3">Platform & ID</th>
                 <th className="px-4 py-3">Problem Title</th>
@@ -100,10 +100,10 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                 <th className="px-4 py-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#2C2C2C]/70">
               {submissions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-500 italic">
+                  <td colSpan={6} className="text-center py-8 text-[#FAFAF8]/40 italic font-sans">
                     No matching submissions found in OpenSearch.
                   </td>
                 </tr>
@@ -113,21 +113,21 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                   return (
                     <tr
                       key={sub.submission_id}
-                      className="hover:bg-slate-800/40 transition"
+                      className="hover:bg-[#222222] transition-colors"
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-bold uppercase text-blue-400">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold uppercase text-[#1B1BFF]">
                             {sub.platform}
                           </span>
-                          <span className="text-slate-400">#{sub.problem.id}</span>
+                          <span className="text-[#FAFAF8]/60">#{sub.problem.id}</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 block">
+                        <span className="text-[10px] text-[#FAFAF8]/40 block">
                           {sub.submission_id}
                         </span>
                       </td>
 
-                      <td className="px-4 py-3 font-medium text-white max-w-xs truncate">
+                      <td className="px-4 py-3 font-semibold font-headline text-[#FAFAF8] max-w-xs truncate">
                         {sub.problem.title}
                       </td>
 
@@ -135,8 +135,8 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                         <span
                           className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${
                             isAC
-                              ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                              : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                              ? "bg-[#00FF9C]/20 text-[#00FF9C] border border-[#00FF9C]/30"
+                              : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
                           }`}
                         >
                           {sub.submission.verdict}
@@ -148,23 +148,23 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                           {sub.problem.topic_tags.slice(0, 3).map((tag, i) => (
                             <span
                               key={i}
-                              className="px-1.5 py-0.5 text-[10px] bg-slate-800 text-slate-300 rounded border border-slate-700/60"
+                              className="px-1.5 py-0.5 text-[10px] bg-[#0D0D0D] text-[#FAFAF8]/80 rounded border border-[#2C2C2C]"
                             >
                               {tag}
                             </span>
                           ))}
                           {sub.problem.topic_tags.length > 3 && (
-                            <span className="text-[10px] text-slate-500">
+                            <span className="text-[10px] text-[#FAFAF8]/40">
                               +{sub.problem.topic_tags.length - 3}
                             </span>
                           )}
                         </div>
                       </td>
 
-                      <td className="px-4 py-3 whitespace-nowrap text-slate-400 text-[11px]">
+                      <td className="px-4 py-3 whitespace-nowrap text-[#FAFAF8]/60 text-[11px]">
                         <div>{sub.submission.language}</div>
                         {sub.submission.runtime_ms !== undefined && (
-                          <div className="text-[10px] text-slate-500">
+                          <div className="text-[10px] text-[#FAFAF8]/40">
                             {sub.submission.runtime_ms}ms &bull; {sub.submission.memory_mb || "-"}MB
                           </div>
                         )}
@@ -173,7 +173,7 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                       <td className="px-4 py-3 text-right whitespace-nowrap">
                         <button
                           onClick={() => onSelectSubmission(sub)}
-                          className="px-2.5 py-1 text-xs font-semibold rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+                          className="px-3 py-1 text-xs font-semibold rounded-xl bg-[#1A1A1A] hover:bg-[#2C2C2C] text-[#FAFAF8] border border-[#2C2C2C] transition-all"
                         >
                           View Code
                         </button>

@@ -135,26 +135,26 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#1A1A1A] border border-[#2C2C2C] rounded-2xl w-full max-w-lg flex flex-col shadow-2xl overflow-hidden text-[#FAFAF8]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="card-candle-glow bg-[#121212] w-full max-w-lg flex flex-col shadow-2xl overflow-hidden text-white">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#2C2C2C] flex items-center justify-between bg-[#0D0D0D]">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0A0A0A]">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-[#1B1BFF]/10 border border-[#1B1BFF]/30 text-[#1B1BFF]">
-              <Globe size={18} />
+            <div className="p-2 rounded-full bg-[#E4007C]/15 border border-[#E4007C]/30 text-[#E4007C]">
+              <Globe size={16} />
             </div>
             <div>
-              <h2 className="text-base font-bold font-headline text-[#FAFAF8]">
+              <h2 className="text-base font-bold font-mono text-white">
                 Connect & Verify Profiles
               </h2>
-              <p className="text-xs font-mono text-[#FAFAF8]/50">
+              <p className="text-[10px] font-mono text-white/50 uppercase tracking-wider">
                 Validate and fetch real LeetCode & Codeforces submissions
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] transition-colors"
+            className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
           >
             <Cross size={16} />
           </button>
@@ -164,7 +164,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
         <form onSubmit={handleSync} className="p-6 space-y-4">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider">
+              <label className="block text-[10px] font-mono font-semibold text-white/70 uppercase tracking-wider">
                 LeetCode Username
               </label>
               {lcVerified && (
@@ -184,13 +184,13 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
                   setLcVerified(false);
                 }}
                 disabled={loading}
-                className="flex-1 px-3.5 py-2.5 text-xs font-mono bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
+                className="flex-1 px-3.5 py-2 text-xs font-mono bg-[#0A0A0A] border border-white/10 rounded-full text-white placeholder-white/40 focus:outline-none focus:border-[#E4007C] transition-colors"
               />
               <button
                 type="button"
                 onClick={() => handleVerify("leetcode")}
                 disabled={isVerifying === "leetcode" || !leetcodeUsername.trim()}
-                className="px-3 py-2 text-xs font-mono font-semibold rounded-xl bg-[#1B1BFF]/20 text-[#1B1BFF] hover:bg-[#1B1BFF] hover:text-[#FAFAF8] border border-[#1B1BFF]/40 transition-colors"
+                className="px-3.5 py-1.5 text-xs font-mono font-semibold rounded-full bg-white/10 text-white hover:bg-[#E4007C] hover:text-white border border-white/15 transition-colors"
               >
                 {isVerifying === "leetcode" ? "Checking..." : "Verify"}
               </button>
@@ -199,7 +199,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider">
+              <label className="block text-[10px] font-mono font-semibold text-white/70 uppercase tracking-wider">
                 Codeforces Handle
               </label>
               {cfVerified && (
@@ -219,13 +219,13 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
                   setCfVerified(false);
                 }}
                 disabled={loading}
-                className="flex-1 px-3.5 py-2.5 text-xs font-mono bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
+                className="flex-1 px-3.5 py-2 text-xs font-mono bg-[#0A0A0A] border border-white/10 rounded-full text-white placeholder-white/40 focus:outline-none focus:border-[#E4007C] transition-colors"
               />
               <button
                 type="button"
                 onClick={() => handleVerify("codeforces")}
                 disabled={isVerifying === "codeforces" || !codeforcesHandle.trim()}
-                className="px-3 py-2 text-xs font-mono font-semibold rounded-xl bg-[#1B1BFF]/20 text-[#1B1BFF] hover:bg-[#1B1BFF] hover:text-[#FAFAF8] border border-[#1B1BFF]/40 transition-colors"
+                className="px-3.5 py-1.5 text-xs font-mono font-semibold rounded-full bg-white/10 text-white hover:bg-[#E4007C] hover:text-white border border-white/15 transition-colors"
               >
                 {isVerifying === "codeforces" ? "Checking..." : "Verify"}
               </button>
@@ -233,7 +233,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
           </div>
 
           {stepText && (
-            <div className="p-3 bg-[#1B1BFF]/10 border border-[#1B1BFF]/30 rounded-xl text-xs font-mono text-[#FAFAF8] flex items-center gap-2 animate-pulse">
+            <div className="p-3 bg-[#E4007C]/10 border border-[#E4007C]/30 rounded-xl text-xs font-mono text-white flex items-center gap-2 animate-pulse">
               <ArrowCycle size={14} className="animate-spin text-[#00FF9C]" />
               <span>{stepText}</span>
             </div>
@@ -256,12 +256,12 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
             </div>
           )}
 
-          <div className="pt-2 flex items-center justify-between border-t border-[#2C2C2C]">
+          <div className="pt-2 flex items-center justify-between border-t border-white/10">
             <button
               type="button"
               onClick={handleResetMock}
               disabled={loading}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] rounded-xl transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors"
             >
               <ArrowCycle size={12} />
               <span>Reset to Demo</span>
@@ -272,7 +272,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-3.5 py-2 text-xs font-mono rounded-xl text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] transition-colors"
+                className="px-3.5 py-2 text-xs font-mono rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
               >
                 Cancel
               </button>
@@ -280,7 +280,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="flex items-center gap-1.5 px-4 py-2 text-xs font-headline font-bold rounded-xl bg-[#00FF9C] text-[#0D0D0D] hover:bg-[#26ffaa] shadow-md shadow-[#00FF9C]/20 transition-all disabled:opacity-50"
+                className="btn-weevolve-primary py-2 px-4 text-xs flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Sparkles size={14} />
                 <span>{loading ? "Verifying & Syncing..." : "Verify & Sync Real Data"}</span>

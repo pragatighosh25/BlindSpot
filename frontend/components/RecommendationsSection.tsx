@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { RecommendedProblem } from "@/schemas/analysis.schema";
-import { Sparkles, Calendar, Check, LinkOut } from "akar-icons";
+import { Check, LinkOut } from "akar-icons";
 
 interface RecommendationsSectionProps {
   recommendations: RecommendedProblem[];
@@ -28,17 +28,20 @@ export const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-3 border-b border-white/10">
         <div>
-          <h2 className="text-lg font-bold font-headline text-[#FAFAF8] flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#1B1BFF]" />
-            <span>Targeted Practice Recommendations</span>
+          <div className="font-mono text-xs uppercase tracking-widest text-[#E4007C] font-semibold">
+            01 / TARGETED CURATION
+          </div>
+          <h2 className="text-xl font-bold font-mono text-white mt-1">
+            Targeted Practice Recommendations
           </h2>
-          <p className="text-xs font-sans text-[#FAFAF8]/60 mt-0.5">
+          <p className="text-xs font-sans text-white/60 mt-0.5">
             Curated problem sets specifically addressing your recurring algorithmic failure modes
           </p>
         </div>
-        <span className="text-xs font-mono font-semibold px-2.5 py-1 bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30 rounded-full">
+        <span className="text-xs font-mono font-semibold px-3 py-1 bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30 rounded-full w-fit">
           {recommendations.length} Recommended
         </span>
       </div>
@@ -51,35 +54,35 @@ export const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
           return (
             <div
               key={i}
-              className="surface-panel-hover rounded-2xl p-5 flex flex-col justify-between"
+              className="card-candle-glow p-5 flex flex-col justify-between border-t-2 border-t-[#00FF9C]"
             >
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono font-bold uppercase px-2 py-0.5 bg-[#1B1BFF]/20 text-[#1B1BFF] border border-[#1B1BFF]/30 rounded-md">
+                    <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 rounded-full">
                       {rec.platform}
                     </span>
                     {rec.topic && (
-                      <span className="text-[11px] font-mono px-2 py-0.5 bg-[#0D0D0D] text-[#FAFAF8]/80 border border-[#2C2C2C] rounded-md font-medium">
+                      <span className="text-[10px] font-mono px-2 py-0.5 bg-white/5 text-white/80 border border-white/10 rounded-full font-medium">
                         {rec.topic}
                       </span>
                     )}
                   </div>
                   {rec.difficulty && (
-                    <span className="text-xs font-mono text-[#FAFAF8]/60 font-medium">
+                    <span className="text-xs font-mono text-white/60 font-medium">
                       {rec.difficulty}
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-base font-bold font-headline text-[#FAFAF8] mt-3 flex items-center justify-between">
+                <h3 className="text-base font-bold font-mono text-white mt-3 flex items-center justify-between">
                   <span>{rec.title || `Problem ${rec.problem_id}`}</span>
                   {rec.url && (
                     <a
                       href={rec.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#FAFAF8]/40 hover:text-[#00FF9C] transition-colors"
+                      className="text-white/40 hover:text-[#00FF9C] transition-colors"
                       title="Open Problem"
                     >
                       <LinkOut size={14} />
@@ -87,37 +90,33 @@ export const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
                   )}
                 </h3>
 
-                <div className="mt-3 p-3 rounded-xl bg-[#0D0D0D] border border-[#2C2C2C] text-xs">
-                  <div className="flex items-center gap-1.5 font-mono font-semibold text-[#00FF9C] mb-1">
-                    <Sparkles size={12} />
-                    <span>Pedagogical Objective</span>
+                <div className="mt-3 p-3 rounded-xl bg-[#0A0A0A] border border-white/10 text-xs">
+                  <div className="font-mono text-[10px] font-bold text-[#00FF9C] uppercase tracking-wider mb-1">
+                    Pedagogical Objective
                   </div>
-                  <p className="leading-relaxed text-[11px] text-[#FAFAF8]/80 font-sans">
+                  <p className="leading-relaxed text-[11px] text-white/80 font-sans">
                     {rec.reason}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#2C2C2C] flex items-center justify-end">
+              <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-end">
                 <button
                   onClick={() => handleSchedule(rec)}
                   disabled={isScheduled || isLoading}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono font-semibold rounded-xl transition-all shadow-sm ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono font-semibold rounded-full transition-all shadow-sm ${
                     isScheduled
-                      ? "bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30"
-                      : "bg-[#1B1BFF] hover:bg-[#3434ff] text-[#FAFAF8]"
+                      ? "bg-[#00FF9C]/15 text-[#00FF9C] border border-[#00FF9C]/30"
+                      : "btn-weevolve-primary text-xs py-1.5 px-4"
                   }`}
                 >
                   {isScheduled ? (
                     <>
-                      <Check size={14} />
+                      <Check size={13} />
                       <span>Scheduled</span>
                     </>
                   ) : (
-                    <>
-                      <Calendar size={14} />
-                      <span>{isLoading ? "Scheduling..." : "Add to Review Schedule"}</span>
-                    </>
+                    <span>{isLoading ? "Scheduling..." : "Add to Review Schedule"}</span>
                   )}
                 </button>
               </div>

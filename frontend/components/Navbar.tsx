@@ -4,14 +4,14 @@ import React from "react";
 import {
   CloudDownload,
   Sparkles,
-  ArrowCycle,
   SignOut,
-  Person,
-  LinkOut,
-  Check,
 } from "akar-icons";
 
+export type WorkspaceTab = "diagnostics" | "practice" | "submissions";
+
 interface NavbarProps {
+  activeTab: WorkspaceTab;
+  onTabChange: (tab: WorkspaceTab) => void;
   onSync: () => void;
   onAnalyze: () => void;
   onOpenIngestModal: () => void;
@@ -24,9 +24,16 @@ interface NavbarProps {
     codeforces: string;
     isDemo: boolean;
   };
+  stats?: {
+    weaknessCount: number;
+    dueCount: number;
+    submissionCount: number;
+  };
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  onTabChange,
   onSync,
   onAnalyze,
   onOpenIngestModal,
@@ -39,84 +46,123 @@ export const Navbar: React.FC<NavbarProps> = ({
     codeforces: "pragatighosh",
     isDemo: true,
   },
+  stats = {
+    weaknessCount: 0,
+    dueCount: 0,
+    submissionCount: 0,
+  },
 }) => {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-[#2C2C2C] bg-[#1A1A1A]/95 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand Logo & Tag */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#1B1BFF] flex items-center justify-center font-headline font-black text-sm text-[#FAFAF8] shadow-lg shadow-[#1B1BFF]/30 border border-[#1B1BFF]/60">
-            BS
+    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#0A0A0A]/90 backdrop-blur-xl">
+      <div className="px-6 h-16 flex items-center justify-between gap-4">
+        {/* Brand Logo & Handle Pill */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-7 h-7 rounded-full bg-[#E4007C] flex items-center justify-center font-mono font-black text-xs text-white shadow-lg shadow-[#E4007C]/50 border border-white/20 relative">
+            <span className="relative z-10">BS</span>
+            <span className="absolute inset-0 rounded-full pulse-dot-pink" />
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-headline font-black text-lg tracking-tight text-[#FAFAF8]">
-                BlindSpot
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30 uppercase font-semibold">
-                AI Coach
-              </span>
-            </div>
-            <span className="text-[10px] font-mono text-[#FAFAF8]/50 hidden sm:inline">
-              Competitive Programming Diagnostic Engine
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono font-extrabold text-sm tracking-tight text-white">
+              BlindSpot
             </span>
+            <button
+              onClick={onOpenSyncModal}
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 hover:border-[#E4007C]/40 transition-colors text-[10px] font-mono text-white/70"
+              title="Manage verified profiles"
+            >
+              <span>@{activeProfile.leetcode}</span>
+              {activeProfile.isDemo && (
+                <span className="text-[#E4007C] font-bold">DEMO</span>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* User Handle Pill */}
-        <button
-          onClick={onOpenSyncModal}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0D0D0D] border border-[#2C2C2C] hover:border-[#3D3D3D] transition-colors"
-          title="Click to manage profile connections"
-        >
-          <div className="w-2 h-2 rounded-full bg-[#00FF9C] animate-pulse" />
-          <div className="text-xs font-mono">
-            <span className="text-[#FAFAF8]/50">LC:</span>
-            <span className="text-[#FAFAF8] font-bold mx-1">@{activeProfile.leetcode}</span>
-            <span className="text-[#FAFAF8]/30">|</span>
-            <span className="text-[#FAFAF8]/50 ml-1">CF:</span>
-            <span className="text-[#FAFAF8] font-bold ml-1">@{activeProfile.codeforces}</span>
-          </div>
-          {activeProfile.isDemo && (
-            <span className="text-[9px] font-mono uppercase bg-[#1B1BFF]/20 text-[#1B1BFF] border border-[#1B1BFF]/30 px-1.5 py-0.2 rounded font-semibold ml-1">
-              Demo
+        {/* Dedicated Workspace Navigation Tabs (Clean minimal lines) */}
+        <nav className="flex items-center gap-1 bg-[#121212] p-1 rounded-full border border-white/10 font-mono text-xs">
+          <button
+            onClick={() => onTabChange("diagnostics")}
+            className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+              activeTab === "diagnostics"
+                ? "bg-[#E4007C] text-white font-bold shadow-[0_0_15px_rgba(228,0,124,0.35)]"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <span>01. Diagnostics</span>
+            {stats.weaknessCount > 0 && (
+              <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
+                activeTab === "diagnostics" ? "bg-white/20 text-white" : "bg-white/10 text-white/60"
+              }`}>
+                {stats.weaknessCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => onTabChange("practice")}
+            className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+              activeTab === "practice"
+                ? "bg-[#E4007C] text-white font-bold shadow-[0_0_15px_rgba(228,0,124,0.35)]"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <span>02. Practice &amp; SM-2</span>
+            {stats.dueCount > 0 && (
+              <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
+                activeTab === "practice" ? "bg-[#00FF9C] text-[#0A0A0A] font-bold" : "bg-[#00FF9C]/20 text-[#00FF9C]"
+              }`}>
+                {stats.dueCount} due
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => onTabChange("submissions")}
+            className={`px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 ${
+              activeTab === "submissions"
+                ? "bg-[#E4007C] text-white font-bold shadow-[0_0_15px_rgba(228,0,124,0.35)]"
+                : "text-white/60 hover:text-white"
+            }`}
+          >
+            <span>03. Submissions</span>
+            <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
+              activeTab === "submissions" ? "bg-white/20 text-white" : "bg-white/10 text-white/60"
+            }`}>
+              {stats.submissionCount}
             </span>
-          )}
-        </button>
+          </button>
+        </nav>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Live Sync Button */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onSync}
             disabled={isSyncing}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1A1A1A] text-[#FAFAF8] border border-[#2C2C2C] text-xs font-mono font-semibold hover:bg-[#222222] hover:border-[#3D3D3D] transition-all disabled:opacity-50"
+            className="px-3 py-1.5 rounded-full bg-[#141414] text-white border border-white/10 text-xs font-mono hover:bg-[#1C1C1C] hover:border-[#E4007C]/40 transition-all disabled:opacity-50 flex items-center gap-1.5"
             title="Fetch live submissions from LeetCode & Codeforces"
           >
-            <CloudDownload size={14} className={isSyncing ? "animate-bounce text-[#00FF9C]" : "text-[#FAFAF8]/70"} />
-            <span className="hidden sm:inline">{isSyncing ? "Syncing API..." : "Live Sync"}</span>
+            <CloudDownload size={13} className={isSyncing ? "animate-bounce text-[#00FF9C]" : "text-white/60"} />
+            <span className="hidden sm:inline text-[11px]">{isSyncing ? "Syncing..." : "Sync"}</span>
           </button>
 
-          {/* AI Trigger Analysis Button */}
           <button
             onClick={onAnalyze}
             disabled={isAnalyzing}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00FF9C] text-[#0D0D0D] font-headline font-bold text-xs tracking-wide hover:bg-[#26ffaa] transition-all shadow-md shadow-[#00FF9C]/20 disabled:opacity-50"
+            className="btn-weevolve-primary py-1.5 px-3.5 text-xs flex items-center gap-1.5 disabled:opacity-50"
             title="Trigger Strands AI Agent weakness diagnosis"
           >
-            <Sparkles size={14} className={isAnalyzing ? "animate-spin" : ""} />
-            <span>{isAnalyzing ? "Analyzing Code..." : "Run AI Analysis"}</span>
+            <Sparkles size={13} className={isAnalyzing ? "animate-spin" : ""} />
+            <span>{isAnalyzing ? "Analyzing..." : "Run AI Analysis"}</span>
           </button>
 
-          {/* Sign Out / Exit to Landing */}
           {onSignOut && (
             <button
               onClick={onSignOut}
-              className="p-2 rounded-xl bg-[#0D0D0D] border border-[#2C2C2C] text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#222222] transition-colors"
+              className="p-1.5 rounded-full bg-[#141414] border border-white/10 text-white/60 hover:text-white hover:bg-[#1C1C1C] transition-colors"
               title="Return to Landing Page"
               aria-label="Return to Landing"
             >
-              <SignOut size={16} />
+              <SignOut size={15} />
             </button>
           )}
         </div>

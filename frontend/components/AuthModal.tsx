@@ -99,29 +99,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setLcStatus({ verifying: false, verified: false, error: "Enter LeetCode username first." });
       return;
     }
-    setLcStatus({ verifying: true, verified: false });
+
+    setLcStatus({ verifying: true, verified: false, error: undefined });
     try {
-      const res = await fetch("/api/verify-handle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          platform: "leetcode",
-          handle: leetcodeHandle.trim(),
-          token: verificationToken,
-        }),
-      });
+      const res = await fetch(
+        `/api/verify-handle?platform=leetcode&handle=${encodeURIComponent(leetcodeHandle.trim())}&token=${encodeURIComponent(verificationToken)}`
+      );
       const data = await res.json();
-      if (data.success) {
-        setLcStatus({ verifying: false, verified: true, profile: data.result?.profile });
+      if (!data.exists) {
+        setLcStatus({ verifying: false, verified: false, error: data.message || "User not found on LeetCode." });
       } else {
         setLcStatus({
           verifying: false,
-          verified: false,
-          error: data.result?.error || data.error || "LeetCode profile not found.",
+          verified: true,
+          profile: data.profile,
         });
       }
-    } catch (e) {
-      setLcStatus({ verifying: false, verified: false, error: (e as Error).message });
+    } catch (err) {
+      setLcStatus({ verifying: false, verified: false, error: (err as Error).message });
     }
   };
 
@@ -131,47 +126,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setCfStatus({ verifying: false, verified: false, error: "Enter Codeforces handle first." });
       return;
     }
-    setCfStatus({ verifying: true, verified: false });
+
+    setCfStatus({ verifying: true, verified: false, error: undefined });
     try {
-      const res = await fetch("/api/verify-handle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          platform: "codeforces",
-          handle: codeforcesHandle.trim(),
-          token: verificationToken,
-        }),
-      });
+      const res = await fetch(
+        `/api/verify-handle?platform=codeforces&handle=${encodeURIComponent(codeforcesHandle.trim())}&token=${encodeURIComponent(verificationToken)}`
+      );
       const data = await res.json();
-      if (data.success) {
-        setCfStatus({ verifying: false, verified: true, profile: data.result?.profile });
+      if (!data.exists) {
+        setCfStatus({ verifying: false, verified: false, error: data.message || "User not found on Codeforces." });
       } else {
         setCfStatus({
           verifying: false,
-          verified: false,
-          error: data.result?.error || data.error || "Codeforces handle not found.",
+          verified: true,
+          profile: data.profile,
         });
       }
-    } catch (e) {
-      setCfStatus({ verifying: false, verified: false, error: (e as Error).message });
+    } catch (err) {
+      setCfStatus({ verifying: false, verified: false, error: (err as Error).message });
     }
   };
 
-  // Handle Sign Up
+  // Handle Dynamic Registration
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
 
     if (!email.trim() || !password.trim()) {
-      setFormError("Please enter email and password.");
+      setFormError("Email and password are required.");
       return;
     }
-    if (!leetcodeHandle.trim()) {
-      setFormError("Please provide your LeetCode username.");
-      return;
-    }
-    if (!codeforcesHandle.trim()) {
-      setFormError("Please provide your Codeforces handle.");
+
+    if (!leetcodeHandle.trim() && !codeforcesHandle.trim()) {
+      setFormError("Please provide at least one LeetCode or Codeforces handle.");
       return;
     }
 
@@ -183,8 +170,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         body: JSON.stringify({
           email: email.trim(),
           password: password.trim(),
-          leetcodeUsername: leetcodeHandle.trim(),
-          codeforcesHandle: codeforcesHandle.trim(),
+          leetcodeUsername: leetcodeHandle.trim() || undefined,
+          codeforcesHandle: codeforcesHandle.trim() || undefined,
           verificationToken,
         }),
       });
@@ -194,8 +181,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
 
       onLoginSuccess({
-        leetcode: data.user.leetcodeUsername,
-        codeforces: data.user.codeforcesHandle,
+        leetcode: data.user.leetcodeUsername || leetcodeHandle || "pragatighosh25",
+        codeforces: data.user.codeforcesHandle || codeforcesHandle || "pragatighosh",
         userId: data.user.userId,
         email: data.user.email,
         isDemo: false,
@@ -255,36 +242,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#1A1A1A] border border-[#2C2C2C] rounded-2xl p-6 md:p-8 shadow-2xl text-[#FAFAF8] overflow-hidden max-h-[94vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="card-candle-glow relative w-full max-w-lg p-6 md:p-8 text-white overflow-hidden max-h-[94vh] overflow-y-auto">
         {/* Glow Accent Header */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1B1BFF] via-[#00FF9C] to-[#1B1BFF]" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#E4007C] via-[#00FF9C] to-[#E4007C]" />
 
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] rounded-xl transition-colors"
+          className="absolute top-5 right-5 p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           aria-label="Close modal"
         >
-          <Cross size={18} />
+          <Cross size={16} />
         </button>
 
         {/* Modal Title */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#00FF9C] animate-pulse" />
-            <span className="text-xs font-mono font-semibold tracking-wider text-[#00FF9C] uppercase">
-              BlindSpot Dynamic Access
+            <span className="badge-pill-accent">
+              BLINDSPOT DYNAMIC ACCESS
             </span>
           </div>
-          <h2 className="text-2xl font-bold font-headline text-[#FAFAF8] tracking-tight">
+          <h2 className="text-2xl font-bold font-mono text-white tracking-tight">
             {tab === "demo"
               ? "Instant Demo Workspace"
               : tab === "login"
               ? "Welcome Back"
               : "Verify & Connect Handles"}
           </h2>
-          <p className="text-xs text-[#FAFAF8]/60 mt-1">
+          <p className="text-xs text-white/60 mt-1">
             {tab === "demo"
               ? "Explore verified diagnostics with pre-configured developer profiles."
               : tab === "login"
@@ -294,17 +281,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="grid grid-cols-3 gap-1 bg-[#0D0D0D] p-1 rounded-xl border border-[#2C2C2C] mb-6 font-mono text-xs">
+        <div className="grid grid-cols-3 gap-1 bg-[#0A0A0A] p-1 rounded-full border border-white/10 mb-6 font-mono text-xs">
           <button
             type="button"
             onClick={() => {
               setTab("demo");
               setFormError(null);
             }}
-            className={`py-2 font-semibold rounded-lg transition-all ${
+            className={`py-1.5 font-semibold rounded-full transition-all ${
               tab === "demo"
-                ? "bg-[#1A1A1A] text-[#00FF9C] border border-[#2C2C2C] shadow-sm"
-                : "text-[#FAFAF8]/60 hover:text-[#FAFAF8]"
+                ? "bg-[#E4007C] text-white shadow-sm"
+                : "text-white/60 hover:text-white"
             }`}
           >
             ⚡ Demo Acc
@@ -315,10 +302,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               setTab("signup");
               setFormError(null);
             }}
-            className={`py-2 font-semibold rounded-lg transition-all ${
+            className={`py-1.5 font-semibold rounded-full transition-all ${
               tab === "signup"
-                ? "bg-[#1A1A1A] text-[#FAFAF8] border border-[#2C2C2C] shadow-sm"
-                : "text-[#FAFAF8]/60 hover:text-[#FAFAF8]"
+                ? "bg-[#E4007C] text-white shadow-sm"
+                : "text-white/60 hover:text-white"
             }`}
           >
             Create Account
@@ -329,10 +316,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               setTab("login");
               setFormError(null);
             }}
-            className={`py-2 font-semibold rounded-lg transition-all ${
+            className={`py-1.5 font-semibold rounded-full transition-all ${
               tab === "login"
-                ? "bg-[#1A1A1A] text-[#FAFAF8] border border-[#2C2C2C] shadow-sm"
-                : "text-[#FAFAF8]/60 hover:text-[#FAFAF8]"
+                ? "bg-[#E4007C] text-white shadow-sm"
+                : "text-white/60 hover:text-white"
             }`}
           >
             Sign In
@@ -342,7 +329,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Global Form Error Message */}
         {formError && (
           <div className="mb-4 p-3 rounded-xl bg-rose-950/50 border border-rose-800/50 text-rose-300 text-xs font-mono flex items-center gap-2">
-            <CircleAlert size={16} className="shrink-0 text-rose-400" />
+            <CircleAlert size={15} className="shrink-0 text-rose-400" />
             <span>{formError}</span>
           </div>
         )}
@@ -350,28 +337,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Tab 1: 1-Click Demo Account */}
         {tab === "demo" && (
           <div className="space-y-4 animate-in fade-in duration-150">
-            <div className="bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl p-4 space-y-3 font-mono text-xs">
+            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-[#FAFAF8]/50 uppercase tracking-wider">
+                <span className="text-[10px] text-white/50 uppercase tracking-wider">
                   Verified Demo Handles
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/20 font-semibold">
+                <span className="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/20 font-semibold">
                   <Check size={10} /> Pre-Verified
                 </span>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between p-2.5 bg-[#1A1A1A] rounded-lg border border-[#2C2C2C]">
-                  <span className="text-[#FAFAF8]/60">LeetCode Profile</span>
-                  <span className="font-bold text-[#FAFAF8]">@pragatighosh25</span>
+                <div className="flex items-center justify-between p-2.5 bg-[#141414] rounded-xl border border-white/5">
+                  <span className="text-white/60">LeetCode Profile</span>
+                  <span className="font-bold text-white">@pragatighosh25</span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 bg-[#1A1A1A] rounded-lg border border-[#2C2C2C]">
-                  <span className="text-[#FAFAF8]/60">Codeforces Profile</span>
-                  <span className="font-bold text-[#FAFAF8]">@pragatighosh</span>
+                <div className="flex items-center justify-between p-2.5 bg-[#141414] rounded-xl border border-white/5">
+                  <span className="text-white/60">Codeforces Profile</span>
+                  <span className="font-bold text-white">@pragatighosh</span>
                 </div>
               </div>
 
-              <div className="text-[11px] text-[#FAFAF8]/60 leading-relaxed font-sans pt-1">
+              <div className="text-[11px] text-white/60 leading-relaxed font-sans pt-1">
                 Loads real submissions, OpenSearch indices, Strands AI reasoning diagnoses, and spaced repetition practice without manual handle setup.
               </div>
             </div>
@@ -379,11 +366,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               onClick={handleLaunchDemo}
               disabled={isLoading}
-              className="w-full py-3.5 px-4 rounded-xl bg-[#00FF9C] text-[#0D0D0D] font-headline font-bold text-sm tracking-wide hover:bg-[#26ffaa] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#00FF9C]/20 disabled:opacity-50"
+              className="w-full btn-weevolve-primary py-3 px-4 flex items-center justify-center gap-2 text-xs"
             >
-              <Sparkles size={16} />
+              <Sparkles size={15} />
               {isLoading ? "Launching Demo Workspace..." : "Launch Demo Account Now"}
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </button>
           </div>
         )}
@@ -394,34 +381,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             {/* Account Credentials */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-mono text-[#FAFAF8]/70 mb-1">Email / Username</label>
+                <label className="block text-xs font-mono text-white/70 mb-1">Email / Username</label>
                 <input
                   type="text"
                   required
                   placeholder="you@domain.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl py-2 px-3 text-xs text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] transition-colors"
+                  className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#E4007C] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono text-[#FAFAF8]/70 mb-1">Password</label>
+                <label className="block text-xs font-mono text-white/70 mb-1">Password</label>
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl py-2 px-3 text-xs text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] transition-colors"
+                  className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#E4007C] transition-colors"
                 />
               </div>
             </div>
 
             {/* LeetCode Handle Input & Verification */}
-            <div className="bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl p-3 space-y-2">
+            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-mono font-semibold text-[#FAFAF8]/80">
+                <label className="text-xs font-mono font-semibold text-white/80">
                   LeetCode Username
                 </label>
                 {lcStatus.verified && (
@@ -441,13 +428,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     setLeetcodeHandle(e.target.value);
                     setLcStatus({ verifying: false, verified: false });
                   }}
-                  className="flex-1 bg-[#1A1A1A] border border-[#2C2C2C] rounded-lg py-1.5 px-3 text-xs font-mono text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF]"
+                  className="flex-1 bg-[#141414] border border-white/10 rounded-full py-1.5 px-3 text-xs font-mono text-white focus:outline-none focus:border-[#E4007C]"
                 />
                 <button
                   type="button"
                   onClick={handleVerifyLeetCode}
                   disabled={lcStatus.verifying}
-                  className="px-3 py-1.5 rounded-lg bg-[#1B1BFF]/20 text-[#1B1BFF] hover:bg-[#1B1BFF] hover:text-[#FAFAF8] border border-[#1B1BFF]/40 text-xs font-mono font-semibold transition-all flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-full bg-white/10 text-white hover:bg-[#E4007C] hover:text-white border border-white/15 text-xs font-mono font-semibold transition-all flex items-center gap-1"
                 >
                   {lcStatus.verifying ? (
                     <ArrowCycle size={12} className="animate-spin" />
@@ -465,7 +452,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               )}
 
               {lcStatus.verified && lcStatus.profile && (
-                <div className="text-[11px] font-mono text-[#FAFAF8]/70 flex items-center gap-3 pt-1 border-t border-[#2C2C2C]">
+                <div className="text-[11px] font-mono text-white/70 flex items-center gap-3 pt-1 border-t border-white/10">
                   <span>Rank: <strong className="text-[#00FF9C]">{lcStatus.profile.ranking || "N/A"}</strong></span>
                   <span>Solved: <strong className="text-[#00FF9C]">{lcStatus.profile.totalSolved ?? "N/A"}</strong></span>
                 </div>
@@ -473,9 +460,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
 
             {/* Codeforces Handle Input & Verification */}
-            <div className="bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl p-3 space-y-2">
+            <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-mono font-semibold text-[#FAFAF8]/80">
+                <label className="text-xs font-mono font-semibold text-white/80">
                   Codeforces Handle
                 </label>
                 {cfStatus.verified && (
@@ -495,13 +482,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     setCodeforcesHandle(e.target.value);
                     setCfStatus({ verifying: false, verified: false });
                   }}
-                  className="flex-1 bg-[#1A1A1A] border border-[#2C2C2C] rounded-lg py-1.5 px-3 text-xs font-mono text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF]"
+                  className="flex-1 bg-[#141414] border border-white/10 rounded-full py-1.5 px-3 text-xs font-mono text-white focus:outline-none focus:border-[#E4007C]"
                 />
                 <button
                   type="button"
                   onClick={handleVerifyCodeforces}
                   disabled={cfStatus.verifying}
-                  className="px-3 py-1.5 rounded-lg bg-[#1B1BFF]/20 text-[#1B1BFF] hover:bg-[#1B1BFF] hover:text-[#FAFAF8] border border-[#1B1BFF]/40 text-xs font-mono font-semibold transition-all flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-full bg-white/10 text-white hover:bg-[#E4007C] hover:text-white border border-white/15 text-xs font-mono font-semibold transition-all flex items-center gap-1"
                 >
                   {cfStatus.verifying ? (
                     <ArrowCycle size={12} className="animate-spin" />
@@ -519,7 +506,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               )}
 
               {cfStatus.verified && cfStatus.profile && (
-                <div className="text-[11px] font-mono text-[#FAFAF8]/70 flex items-center gap-3 pt-1 border-t border-[#2C2C2C]">
+                <div className="text-[11px] font-mono text-white/70 flex items-center gap-3 pt-1 border-t border-white/10">
                   <span>Rating: <strong className="text-[#00FF9C]">{cfStatus.profile.rating || 0}</strong></span>
                   <span>Rank: <strong className="text-[#00FF9C]">{cfStatus.profile.rank || "unrated"}</strong></span>
                 </div>
@@ -527,9 +514,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
 
             {/* Ownership Token Proof Assistant */}
-            <div className="p-3 bg-[#1A1A1A] rounded-xl border border-[#2C2C2C] text-[11px] font-mono space-y-1.5">
+            <div className="p-3 bg-[#141414] rounded-2xl border border-white/10 text-[11px] font-mono space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[#FAFAF8]/70">Profile Ownership Token:</span>
+                <span className="text-white/70">Profile Ownership Token:</span>
                 <button
                   type="button"
                   onClick={copyToken}
@@ -538,10 +525,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   {copiedToken ? "Copied! ✓" : "Copy Token"}
                 </button>
               </div>
-              <div className="p-1.5 bg-[#0D0D0D] rounded border border-[#2C2C2C] text-[#00FF9C] select-all">
+              <div className="p-1.5 bg-[#0A0A0A] rounded-xl border border-white/10 text-[#00FF9C] select-all">
                 {verificationToken}
               </div>
-              <p className="text-[10px] text-[#FAFAF8]/50 leading-tight">
+              <p className="text-[10px] text-white/50 leading-tight">
                 To confirm account ownership, you can paste this code in your LeetCode or Codeforces bio.
               </p>
             </div>
@@ -549,10 +536,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 rounded-xl bg-[#00FF9C] text-[#0D0D0D] font-headline font-bold text-sm hover:bg-[#26ffaa] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#00FF9C]/20 disabled:opacity-50"
+              className="w-full btn-weevolve-primary py-3 px-4 flex items-center justify-center gap-2 text-xs"
             >
               {isLoading ? "Verifying & Syncing Accounts..." : "Create Account & Sync Live Profiles"}
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </button>
           </form>
         )}
@@ -561,7 +548,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {tab === "login" && (
           <form onSubmit={handleSignIn} className="space-y-4 animate-in fade-in duration-150">
             <div>
-              <label className="block text-xs font-mono text-[#FAFAF8]/70 mb-1.5">
+              <label className="block text-xs font-mono text-white/70 mb-1.5">
                 Account Email or Handle
               </label>
               <input
@@ -570,29 +557,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 placeholder="you@domain.com or pragatighosh25"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl py-2.5 px-3.5 text-xs text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] transition-colors"
+                className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#E4007C] transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono text-[#FAFAF8]/70 mb-1.5">Password</label>
+              <label className="block text-xs font-mono text-white/70 mb-1.5">Password</label>
               <input
                 type="password"
                 required
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl py-2.5 px-3.5 text-xs text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] transition-colors"
+                className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-[#E4007C] transition-colors"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 px-4 rounded-xl bg-[#1B1BFF] text-[#FAFAF8] font-headline font-semibold text-sm hover:bg-[#3434ff] transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#1B1BFF]/30 disabled:opacity-50"
+              className="w-full btn-weevolve-primary py-3 px-4 flex items-center justify-center gap-2 text-xs"
             >
               {isLoading ? "Signing In..." : "Sign In to Dashboard"}
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </button>
           </form>
         )}

@@ -81,63 +81,61 @@ export const IngestModal: React.FC<IngestModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#1A1A1A] border border-[#2C2C2C] rounded-2xl w-full max-w-2xl flex flex-col shadow-2xl overflow-hidden text-[#FAFAF8]">
-        <div className="px-6 py-4 border-b border-[#2C2C2C] flex items-center justify-between bg-[#0D0D0D]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="card-candle-glow bg-[#121212] w-full max-w-2xl flex flex-col shadow-2xl overflow-hidden text-white">
+        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0A0A0A]">
           <div className="flex items-center gap-2">
-            <Command size={18} className="text-[#1B1BFF]" />
-            <h2 className="text-base font-bold font-headline text-[#FAFAF8]">
+            <Command size={16} className="text-[#E4007C]" />
+            <h2 className="text-base font-bold font-mono text-white">
               Test Live Ingestion & Normalization
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] transition-colors"
+            className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors"
           >
             <Cross size={16} />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
-          <div>
-            <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider mb-2">
-              Select Source Platform
-            </label>
-            <div className="flex gap-3 font-mono">
+          <div className="flex items-center gap-4">
+            <label className="text-xs font-mono text-white/70">Platform Engine:</label>
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setPlatform("leetcode")}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all ${
+                className={`px-3.5 py-1 text-xs font-mono font-semibold rounded-full border transition-all ${
                   platform === "leetcode"
-                    ? "bg-[#1B1BFF]/20 text-[#1B1BFF] border-[#1B1BFF]"
-                    : "bg-[#0D0D0D] text-[#FAFAF8]/60 border-[#2C2C2C] hover:bg-[#222222]"
+                    ? "bg-[#E4007C] text-white border-[#E4007C]"
+                    : "bg-[#141414] text-white/60 border-white/10"
                 }`}
               >
-                LeetCode (GraphQL / REST)
+                LeetCode
               </button>
               <button
                 type="button"
                 onClick={() => setPlatform("codeforces")}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-all ${
+                className={`px-3.5 py-1 text-xs font-mono font-semibold rounded-full border transition-all ${
                   platform === "codeforces"
-                    ? "bg-[#1B1BFF]/20 text-[#1B1BFF] border-[#1B1BFF]"
-                    : "bg-[#0D0D0D] text-[#FAFAF8]/60 border-[#2C2C2C] hover:bg-[#222222]"
+                    ? "bg-[#E4007C] text-white border-[#E4007C]"
+                    : "bg-[#141414] text-white/60 border-white/10"
                 }`}
               >
-                Codeforces (user.status API)
+                Codeforces
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider mb-2">
-              Raw Payload JSON
+            <label className="block text-xs font-mono text-white/70 mb-1.5">
+              Raw Platform JSON Payload:
             </label>
             <textarea
               rows={8}
               value={rawPayload}
               onChange={(e) => setRawPayload(e.target.value)}
-              className="w-full p-3 font-mono text-xs bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] focus:outline-none focus:border-[#1B1BFF] leading-relaxed"
+              className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3 font-mono text-xs text-white focus:outline-none focus:border-[#E4007C] leading-relaxed"
             />
           </div>
 
@@ -157,25 +155,23 @@ export const IngestModal: React.FC<IngestModalProps> = ({
               <span>{message.text}</span>
             </div>
           )}
-        </div>
 
-        <div className="px-6 py-4 bg-[#0D0D0D] border-t border-[#2C2C2C] flex items-center justify-end gap-3 font-mono">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs rounded-xl text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] transition-colors"
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            onClick={handleIngest}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-headline font-bold rounded-xl bg-[#00FF9C] text-[#0D0D0D] hover:bg-[#26ffaa] shadow-md shadow-[#00FF9C]/20 transition-all disabled:opacity-50"
-          >
-            <Send size={14} />
-            <span>{loading ? "Normalizing..." : "Normalize & Ingest to OpenSearch"}</span>
-          </button>
+          <div className="pt-2 flex justify-end gap-2 border-t border-white/10">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-mono rounded-full text-white/60 hover:text-white hover:bg-white/10"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleIngest}
+              disabled={loading}
+              className="btn-weevolve-primary py-2 px-4 text-xs flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <Send size={14} />
+              <span>{loading ? "Normalizing..." : "Normalize & Ingest"}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

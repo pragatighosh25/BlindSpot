@@ -6,176 +6,37 @@ import {
   RecommendedProblem,
 } from "@/schemas/analysis.schema";
 import { SubmissionDiagnosis, SubmissionDiagnosisSchema } from "./types";
-import { runStrandsAnalysisAgent } from "./agent";
-import { getUserHistory } from "./tools";
+import {
+  analyzeSingleSubmissionWithStrands,
+  runStrandsUserAnalysis,
+} from "./strandsAgent";
 
 /**
- * Phase 2 & 3: Single submission analysis
- * Analyzes a canonical submission and returns structured deep algorithmic diagnosis.
+ * Single submission deep algorithmic diagnosis with Strands agent
  */
 export async function analyzeSubmission(
-  submission: CanonicalSubmission
+  submission: CanonicalSubmission,
+  userId = "default_user"
 ): Promise<SubmissionDiagnosis> {
-  // Validate input
   const validatedSub = CanonicalSubmissionSchema.parse(submission);
-
-  // Run agent analysis
-  const diagnosis = await runStrandsAnalysisAgent(validatedSub);
-
-  // Validate output against schema
+  const diagnosis = await analyzeSingleSubmissionWithStrands(validatedSub, userId);
   return SubmissionDiagnosisSchema.parse(diagnosis);
 }
 
 /**
- * Analyze user's entire submission history to detect recurring algorithmic weaknesses
+ * Strands Agent User History Analysis: Analyzes real user submission history,
+ * correlates historical context from OpenSearch, determines recurring failure patterns,
+ * generates targeted pedagogical recommendations, and persists to DynamoDB.
  */
-export async function analyzeUserHistory(userId = "user_demo"): Promise<AnalysisOutput> {
-  const history = await getUserHistory(userId);
-  const failedSubmissions = history.filter((s) => s.submission.verdict !== "AC");
-
-  // Group by topic and detect patterns
-  const topicMap = new Map<string, { diagnoses: SubmissionDiagnosis[]; subIds: string[] }>();
-
-  for (const sub of failedSubmissions) {
-    const diag = await analyzeSubmission(sub);
-    const topic = diag.topic || sub.problem.topic_tags[0] || "General";
-
-    if (!topicMap.has(topic)) {
-      topicMap.set(topic, { diagnoses: [], subIds: [] });
-    }
-    const entry = topicMap.get(topic)!;
-    entry.diagnoses.push(diag);
-    entry.subIds.push(sub.submission_id);
-  }
-
-  const weakTopics: WeakTopic[] = [];
-
-  for (const [topic, { diagnoses, subIds }] of topicMap.entries()) {
-    // Tally failure modes and collect diagnostic exemplars
-    const modeCounts = new Map<
-      string,
-      {
-        count: number;
-        totalConf: number;
-        primaryDiag: SubmissionDiagnosis;
-      }
-    >();
-
-    for (const d of diagnoses) {
-      const mode = d.failure_pattern;
-      if (!modeCounts.has(mode)) {
-        modeCounts.set(mode, {
-          count: 0,
-          totalConf: 0,
-          primaryDiag: d,
-        });
-      }
-      const m = modeCounts.get(mode)!;
-      m.count += 1;
-      m.totalConf += d.confidence;
-      // Keep the most confident diagnosis as primary exemplar
-      if (d.confidence > m.primaryDiag.confidence) {
-        m.primaryDiag = d;
-      }
-    }
-
-    // Find dominant failure mode
-    let topMode = "unknown";
-    let maxCount = 0;
-    let avgConf = 0.5;
-    let exemplarDiag: SubmissionDiagnosis | null = null;
-
-    for (const [mode, stat] of modeCounts.entries()) {
-      if (stat.count > maxCount) {
-        maxCount = stat.count;
-        topMode = mode;
-        avgConf = stat.totalConf / stat.count;
-        exemplarDiag = stat.primaryDiag;
-      }
-    }
-
-    if (maxCount >= 1 && exemplarDiag) {
-      weakTopics.push({
-        topic,
-        failure_mode: exemplarDiag.failure_mode || topMode.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        confidence: Math.min(1.0, Math.round((avgConf + (maxCount > 2 ? 0.05 : 0)) * 100) / 100),
-        evidence_count: maxCount,
-        example_submissions: subIds.slice(0, 5),
-        description: `Identified ${maxCount} occurrences exhibiting ${exemplarDiag.failure_mode.toLowerCase()}.`,
-        root_cause: exemplarDiag.root_cause,
-        why_it_fails: exemplarDiag.why_it_fails,
-        correct_concept: exemplarDiag.correct_concept,
-        suggested_fix: exemplarDiag.suggested_fix,
-      });
-    }
-  }
-
-  // Sort by evidence count desc
-  weakTopics.sort((a, b) => b.evidence_count - a.evidence_count);
-
-  const recommendedProblems: RecommendedProblem[] = [
-    {
-      platform: "leetcode",
-      problem_id: "704",
-      title: "Binary Search",
-      difficulty: "Easy",
-      topic: "Binary Search",
-      reason: "Reinforce strict left <= right loop invariants and exact target matching on single-element boundaries.",
-      url: "https://leetcode.com/problems/binary-search/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "35",
-      title: "Search Insert Position",
-      difficulty: "Easy",
-      topic: "Binary Search",
-      reason: "Practice lower_bound invariant preservation when target is not present in array.",
-      url: "https://leetcode.com/problems/search-insert-position/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "198",
-      title: "House Robber",
-      difficulty: "Medium",
-      topic: "Dynamic Programming",
-      reason: "Master non-adjacent optimal substructure recurrence dp[i] = max(dp[i-1], dp[i-2] + nums[i]).",
-      url: "https://leetcode.com/problems/house-robber/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "300",
-      title: "Longest Increasing Subsequence",
-      difficulty: "Medium",
-      topic: "Dynamic Programming",
-      reason: "Build intuition for precise 1D DP state formulation dp[i] = length of LIS ending strictly at index i.",
-      url: "https://leetcode.com/problems/longest-increasing-subsequence/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "200",
-      title: "Number of Islands",
-      difficulty: "Medium",
-      topic: "Graphs",
-      reason: "Master immediate queue-enqueue visited marking in 2D grid BFS to prevent redundant node expansions.",
-      url: "https://leetcode.com/problems/number-of-islands/",
-    },
-  ];
-
-  const output: AnalysisOutput = {
-    user_id: userId,
-    analyzed_at: Date.now(),
-    summary: `Analyzed ${history.length} total submissions with ${failedSubmissions.length} failed attempts. Identified ${weakTopics.length} recurring algorithmic blind spots with root-cause diagnoses.`,
-    weak_topics: weakTopics,
-    recommended_problems: recommendedProblems,
-  };
-
-  return AnalysisOutputSchema.parse(output);
+export async function analyzeUserHistory(userId = "default_user"): Promise<AnalysisOutput> {
+  const analysis = await runStrandsUserAnalysis(userId);
+  return AnalysisOutputSchema.parse(analysis);
 }
 
 /**
  * Convenience helper to get weak topics
  */
-export async function getWeaknessProfile(userId = "user_demo"): Promise<WeakTopic[]> {
+export async function getWeaknessProfile(userId = "default_user"): Promise<WeakTopic[]> {
   const analysis = await analyzeUserHistory(userId);
   return analysis.weak_topics;
 }
@@ -183,7 +44,7 @@ export async function getWeaknessProfile(userId = "user_demo"): Promise<WeakTopi
 /**
  * Convenience helper to get recommendations
  */
-export async function getRecommendations(userId = "user_demo"): Promise<RecommendedProblem[]> {
+export async function getRecommendations(userId = "default_user"): Promise<RecommendedProblem[]> {
   const analysis = await analyzeUserHistory(userId);
   return analysis.recommended_problems;
 }

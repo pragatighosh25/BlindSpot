@@ -136,16 +136,14 @@ class LocalOpenSearchStore {
     if (!userId || userId === "all") {
       return Array.from(this.documents.values());
     }
-    return Array.from(this.documents.values()).filter(
-      (d) => d.user_id === userId || (!this.isLive && (d.user_id === "user_demo" || d.user_id === "default_user"))
-    );
+    return Array.from(this.documents.values()).filter((d) => d.user_id === userId);
   }
 
   public async search(options: SearchSubmissionsQuery): Promise<OpenSearchSubmissionDocument[]> {
     let results = Array.from(this.documents.values());
 
     if (options.userId && options.userId !== "all") {
-      results = results.filter((d) => d.user_id === options.userId || (!this.isLive && (d.user_id === "user_demo" || d.user_id === "default_user")));
+      results = results.filter((d) => d.user_id === options.userId);
     }
 
     if (options.platform) {

@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/30 transition disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
-            <span>{isSyncing ? "Analyzing..." : "Re-Analyze"}</span>
+            <span>{isSyncing ? "Strands Analyzing..." : "Analyze My History"}</span>
           </button>
         </div>
       </div>

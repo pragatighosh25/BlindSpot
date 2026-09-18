@@ -46,6 +46,7 @@ class LocalDynamoDBStore {
   private weaknesses = new Map<string, WeakTopic[]>();
   private schedules = new Map<string, Map<string, ScheduledReviewItem>>();
   private analysisRuns = new Map<string, any[]>();
+  private fullAnalyses = new Map<string, any>();
 
   public async saveProfile(profile: UserProfileRecord) {
     this.profiles.set(profile.userId, { ...profile });
@@ -85,6 +86,14 @@ class LocalDynamoDBStore {
   public async getLatestAnalysisRun(userId: string): Promise<any | null> {
     const runs = this.analysisRuns.get(userId);
     return runs && runs.length > 0 ? runs[runs.length - 1] : null;
+  }
+
+  public async saveLatestAnalysis(userId: string, analysis: any) {
+    this.fullAnalyses.set(userId, { ...analysis });
+  }
+
+  public async getLatestAnalysis(userId: string): Promise<any | null> {
+    return this.fullAnalyses.get(userId) || null;
   }
 }
 
@@ -327,3 +336,50 @@ export async function recordAnalysisRun(
     await localStore.saveAnalysisRun(userId, run);
   }
 }
+
+// 5. Full Structured Analysis Document Persistence
+export async function saveLatestAnalysis(userId: string, analysis: any): Promise<void> {
+  const client = getDocClient();
+  if (client) {
+    await client.send(
+      new PutCommand({
+        TableName: TABLE_NAME,
+        Item: {
+          PK: `USER#${userId}`,
+          SK: `LATEST_ANALYSIS`,
+          Type: "LatestAnalysis",
+          userId,
+          analysis,
+          updatedAt: Date.now(),
+        },
+      })
+    );
+  } else {
+    await localStore.saveLatestAnalysis(userId, analysis);
+  }
+}
+
+export async function getLatestAnalysisFromDynamo(userId: string): Promise<any | null> {
+  const client = getDocClient();
+  if (client) {
+    try {
+      const res = await client.send(
+        new GetCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            PK: `USER#${userId}`,
+            SK: `LATEST_ANALYSIS`,
+          },
+        })
+      );
+      if (res.Item && res.Item.analysis) {
+        return res.Item.analysis;
+      }
+    } catch (e) {
+      console.warn(`[DynamoDB getLatestAnalysis Error]:`, (e as Error).message);
+    }
+  }
+
+  return localStore.getLatestAnalysis(userId);
+}
+

@@ -53,7 +53,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
         body: JSON.stringify({
           leetcodeUsername: leetcodeUsername.trim(),
           codeforcesHandle: codeforcesHandle.trim(),
-          userId: `user_${leetcodeUsername.trim() || codeforcesHandle.trim()}`,
+          userId: leetcodeUsername.trim() || codeforcesHandle.trim() || "pragatighosh25",
           clearMock: true,
         }),
       });

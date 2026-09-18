@@ -46,6 +46,22 @@ let currentProfile = {
   isLive: false,
 };
 
+let initialSyncPromise: Promise<void> | null = null;
+
+if (DEFAULT_USER_CONFIG.autoFetchOnStartup) {
+  initialSyncPromise = autoSeedLiveUserSubmissions();
+}
+
+// Ensure initial live sync completes before handling client API requests
+app.use(async (req: Request, res: Response, next) => {
+  if (initialSyncPromise && req.path.startsWith("/api/")) {
+    try {
+      await initialSyncPromise;
+    } catch {}
+  }
+  next();
+});
+
 /**
  * Auto-sync live profile data on server boot
  */
@@ -345,25 +361,38 @@ app.get("/api/recommendations", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/analysis (Person B AI Agent Output)
+// POST /api/analyze (Trigger Strands Agent analysis on demand)
+app.post("/api/analyze", async (req: Request, res: Response) => {
+  try {
+    const userId = req.body?.userId || (req.query.userId as string) || currentProfile.userId;
+    const analysis = await getAnalysisForUser(userId, true);
+    res.json({ success: true, isLive: isOpenSearchLive(), analysis });
+  } catch (error) {
+    console.error(`[POST /api/analyze Error]:`, error);
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// GET /api/analysis (Return persisted analysis without running Strands agent)
 app.get("/api/analysis", async (req: Request, res: Response) => {
   try {
     const userId = (req.query.userId as string) || currentProfile.userId;
-    const analysis = await getAnalysisForUser(userId);
+    const analysis = await getAnalysisForUser(userId, false);
     res.json({ success: true, isLive: isOpenSearchLive(), analysis });
   } catch (error) {
+    console.error(`[GET /api/analysis Error]:`, error);
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
 // POST /api/analysis/submission (Diagnose single submission on-the-fly)
-app.post("/api/analysis/submission", (req: Request, res: Response) => {
+app.post("/api/analysis/submission", async (req: Request, res: Response) => {
   try {
     const { submission } = req.body;
     if (!submission) {
       return res.status(400).json({ success: false, error: "Missing required field: submission" });
     }
-    const result = analyzeSubmission(submission);
+    const result = await analyzeSubmission(submission);
     res.json({ success: true, analysis: result });
   } catch (error) {
     res.status(400).json({ success: false, error: (error as Error).message });
@@ -430,9 +459,6 @@ app.post("/api/schedule", async (req: Request, res: Response) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 BlindSpot Backend API server running at http://localhost:${PORT}`);
-  if (DEFAULT_USER_CONFIG.autoFetchOnStartup) {
-    autoSeedLiveUserSubmissions();
-  }
 });
 
 export default app;

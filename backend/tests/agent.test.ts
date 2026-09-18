@@ -301,3 +301,91 @@ test("Test 7 - Helpers: getWeaknessProfile and getRecommendations return typed a
   assert.ok(weakTopics.length > 0);
   assert.ok(recommendations.length > 0);
 });
+
+// -------------------------------------------------------------
+// Test 8: Empty History Handling
+// -------------------------------------------------------------
+test("Test 8 - Empty History: Gracefully handles user with no submissions", async () => {
+  const output = await analyzeUserHistory("non_existent_user_xyz");
+
+  const validation = AnalysisOutputSchema.safeParse(output);
+  assert.equal(validation.success, true);
+  assert.equal(output.user_id, "non_existent_user_xyz");
+  assert.equal(output.weak_topics.length, 0);
+  assert.ok(output.summary?.includes("No submission history found"));
+});
+
+// -------------------------------------------------------------
+// Test 9: All-AC History Handling
+// -------------------------------------------------------------
+test("Test 9 - All-AC: Gracefully handles user with only Accepted submissions", async () => {
+  const { saveSubmission } = await import("../services/opensearch.js");
+  const perfectSub: CanonicalSubmission = {
+    submission_id: "perfect_sub_1",
+    user_id: "user_perfect_coder",
+    platform: "leetcode",
+    problem: {
+      id: "1",
+      title: "Two Sum",
+      difficulty: "Easy",
+      topic_tags: ["Array", "Hash Table"],
+    },
+    submission: {
+      language: "python",
+      verdict: "AC",
+      timestamp: Date.now(),
+      code: "class Solution: ...",
+    },
+  };
+
+  await saveSubmission(perfectSub);
+  const output = await analyzeUserHistory("user_perfect_coder");
+
+  assert.equal(output.user_id, "user_perfect_coder");
+  assert.equal(output.weak_topics.length, 0);
+  assert.ok(output.summary?.includes("Accepted (AC)"));
+});
+
+// -------------------------------------------------------------
+// Test 10: Strands Agent Tools Suite
+// -------------------------------------------------------------
+test("Test 10 - Agent Tools: getUserSubmissions, getFailedSubmissions, searchSimilarMistakes, getProblemContext", async () => {
+  const {
+    getUserSubmissions,
+    getFailedSubmissions,
+    searchSimilarMistakes,
+    getProblemContext,
+  } = await import("../services/agent/tools.js");
+
+  const allSubs = await getUserSubmissions("user_demo");
+  const failedSubs = await getFailedSubmissions("user_demo");
+
+  assert.ok(allSubs.length > 0);
+  assert.ok(failedSubs.length > 0);
+  assert.ok(allSubs.length >= failedSubs.length);
+
+  const mistakes = await searchSimilarMistakes("user_demo", "Binary Search");
+  assert.ok(Array.isArray(mistakes));
+
+  const ctx = await getProblemContext("704", "leetcode");
+  if (ctx) {
+    assert.equal(ctx.id, "704");
+    assert.ok(ctx.title);
+  }
+});
+
+// -------------------------------------------------------------
+// Test 11: DynamoDB Persistence of Analysis
+// -------------------------------------------------------------
+test("Test 11 - Persistence: Saves and verifies analysis in DynamoDB", async () => {
+  const { getWeaknessesFromDynamo } = await import("../services/storage/dynamodb.js");
+  
+  await analyzeUserHistory("user_demo");
+  const savedWeaknesses = await getWeaknessesFromDynamo("user_demo");
+
+  assert.ok(Array.isArray(savedWeaknesses));
+  assert.ok(savedWeaknesses.length > 0);
+  assert.ok(savedWeaknesses[0].topic);
+  assert.ok(savedWeaknesses[0].failure_mode);
+});
+

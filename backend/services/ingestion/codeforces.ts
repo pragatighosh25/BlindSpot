@@ -71,7 +71,7 @@ export function normalizeCodeforcesSubmission(
     ? parseFloat((raw.memoryConsumedBytes / (1024 * 1024)).toFixed(2))
     : undefined;
 
-  const userHandle = raw.author?.members?.[0]?.handle || raw.userId || userId;
+  const userHandle = userId || raw.userId || raw.author?.members?.[0]?.handle || "default_user";
 
   const url = contestId > 0
     ? `https://codeforces.com/problemset/problem/${contestId}/${problemIndex}`

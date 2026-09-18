@@ -3,7 +3,7 @@ import { FailurePatterns } from "./types";
 
 export const SYSTEM_PROMPT = `You are BlindSpot, an expert AI competitive programming coach and diagnostic engine.
 Your task is to analyze competitive programming submissions (from LeetCode and Codeforces) that failed (WA, TLE, RE, MLE, CE),
-diagnose the algorithmic root-cause failure pattern, and provide genuine algorithmic coaching.
+diagnose the algorithmic root-cause failure pattern, correlate with historical mistakes from OpenSearch, and provide genuine algorithmic coaching.
 
 Do NOT simply repeat execution logs or say "the code is wrong".
 You must explain:
@@ -27,7 +27,22 @@ Guidelines:
 6. For Graphs, check visited-state tracking (post-pop vs on-push in BFS queues), cycle checks, or disconnected component iteration.
 7. Distinguish execution evidence (test inputs/outputs) from the algorithmic diagnosis itself.`;
 
-export function buildSingleSubmissionPrompt(submission: CanonicalSubmission): string {
+export function buildSingleSubmissionPrompt(
+  submission: CanonicalSubmission,
+  historicalMistakes: CanonicalSubmission[] = []
+): string {
+  const contextSection =
+    historicalMistakes.length > 0
+      ? `\nHistorical Similar Mistakes Found in OpenSearch for User:
+${historicalMistakes
+  .slice(0, 3)
+  .map(
+    (m, idx) =>
+      `[Past Mistake ${idx + 1}] Problem: ${m.problem.title} (${m.platform}), Verdict: ${m.submission.verdict}, Language: ${m.submission.language}`
+  )
+  .join("\n")}\n`
+      : "";
+
   return `Analyze the following code submission and provide a deep algorithmic diagnosis.
 
 Problem Information:
@@ -44,7 +59,7 @@ Submission Information:
 - Runtime: ${submission.submission.runtime_ms ?? "N/A"} ms
 - Memory: ${submission.submission.memory_mb ?? "N/A"} MB
 ${submission.submission.error_message ? `- Error Message / Execution Trace: ${submission.submission.error_message}` : ""}
-
+${contextSection}
 Submitted Code:
 \`\`\`${submission.submission.language}
 ${submission.submission.code}

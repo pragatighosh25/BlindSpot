@@ -59,7 +59,7 @@ export const IngestModal: React.FC<IngestModalProps> = ({
         body: JSON.stringify({
           platform,
           raw: parsedRaw,
-          userId: "user_demo",
+          userId: "pragatighosh25",
         }),
       });
 

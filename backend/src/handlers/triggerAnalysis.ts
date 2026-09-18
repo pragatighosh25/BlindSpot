@@ -22,7 +22,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       if (!body.submission) {
         return apiError(400, "Missing required field: submission");
       }
-      const diagnosis = analyzeSubmission(body.submission);
+      const diagnosis = await analyzeSubmission(body.submission);
       return apiResponse(200, { success: true, analysis: diagnosis });
     }
 
@@ -30,8 +30,8 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
     const queryParams = event.queryStringParameters || {};
     const body = event.body ? JSON.parse(event.body) : {};
     const userId = body.userId || queryParams.userId || DEFAULT_USER_CONFIG.userId;
-
-    const analysis = await getAnalysisForUser(userId);
+    const isPost = event.httpMethod === "POST";
+    const analysis = await getAnalysisForUser(userId, isPost);
 
     // Persist weaknesses in DynamoDB
     if (analysis.weak_topics && analysis.weak_topics.length > 0) {

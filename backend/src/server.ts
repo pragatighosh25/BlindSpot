@@ -20,6 +20,16 @@ import {
   fetchLiveLeetCodeSubmissions,
   fetchLiveCodeforcesSubmissions,
 } from "../services/ingestion/live-fetcher";
+import { saveRawPayload } from "../services/storage/s3";
+import {
+  saveUserProfile,
+  getUserProfile,
+  saveWeaknesses,
+  getWeaknessesFromDynamo,
+  saveScheduleToDynamo,
+  getScheduleFromDynamo,
+  recordAnalysisRun,
+} from "../services/storage/dynamodb";
 import { DEFAULT_USER_CONFIG } from "../services/ingestion/config";
 
 const app = express();
@@ -56,20 +66,38 @@ async function autoSeedLiveUserSubmissions() {
 
     if (totalLive > 0) {
       clearOpenSearch();
+
+      // Save raw payloads to S3 / local storage
+      if (lcSubs.length > 0) await saveRawPayload(DEFAULT_USER_CONFIG.userId, "leetcode", lcSubs);
+      if (cfSubs.length > 0) await saveRawPayload(DEFAULT_USER_CONFIG.userId, "codeforces", cfSubs);
+
       for (const sub of [...lcSubs, ...cfSubs]) {
         await saveSubmission(sub);
       }
       currentProfile.isLive = true;
-      console.log(`✅ Loaded ${totalLive} real submissions into OpenSearch.`);
+      console.log(`✅ Loaded ${totalLive} real submissions into OpenSearch & S3.`);
+
+      // Save profile in DynamoDB
+      await saveUserProfile({
+        userId: DEFAULT_USER_CONFIG.userId,
+        leetcodeUsername: DEFAULT_USER_CONFIG.leetcodeUsername,
+        codeforcesHandle: DEFAULT_USER_CONFIG.codeforcesHandle,
+        lastSyncAt: Date.now(),
+      });
 
       // Run AI Agent Analysis on real user submissions
       const analysis = await getAnalysisForUser(DEFAULT_USER_CONFIG.userId);
       console.log(`🧠 AI Agent Analysis completed: ${analysis.weak_topics.length} blind spots detected.`);
 
-      // Auto-populate spaced repetition schedule
+      // Save weaknesses in DynamoDB
+      if (analysis.weak_topics && analysis.weak_topics.length > 0) {
+        await saveWeaknesses(DEFAULT_USER_CONFIG.userId, analysis.weak_topics);
+      }
+
+      // Auto-populate spaced repetition schedule in DynamoDB
       if (analysis.recommended_problems && analysis.recommended_problems.length > 0) {
         for (const rec of analysis.recommended_problems) {
-          scheduleProblem({
+          const scheduled = scheduleProblem({
             problem_id: rec.problem_id,
             title: rec.title || `Problem ${rec.problem_id}`,
             topic: rec.topic || "Targeted Practice",
@@ -77,8 +105,17 @@ async function autoSeedLiveUserSubmissions() {
             reason: rec.reason,
             url: rec.url,
           });
+          await saveScheduleToDynamo(DEFAULT_USER_CONFIG.userId, scheduled);
         }
       }
+
+      // Record analysis run in DynamoDB
+      await recordAnalysisRun(DEFAULT_USER_CONFIG.userId, {
+        analyzed_at: analysis.analyzed_at || Date.now(),
+        summary: analysis.summary,
+        weak_topics_count: analysis.weak_topics.length,
+        recommended_problems_count: analysis.recommended_problems.length,
+      });
     } else {
       console.log(`ℹ️ No live submissions retrieved for @${DEFAULT_USER_CONFIG.leetcodeUsername} / @${DEFAULT_USER_CONFIG.codeforcesHandle}. Keeping preloaded canonical dataset active.`);
     }
@@ -129,10 +166,13 @@ app.post("/api/sync", async (req: Request, res: Response) => {
     if (leetcodeUsername && leetcodeUsername.trim()) {
       try {
         const lcSubs = await fetchLiveLeetCodeSubmissions(leetcodeUsername.trim(), 50, userId);
-        for (const sub of lcSubs) {
-          await saveSubmission(sub);
+        if (lcSubs.length > 0) {
+          await saveRawPayload(userId, "leetcode", lcSubs);
+          for (const sub of lcSubs) {
+            await saveSubmission(sub);
+          }
+          lcCount = lcSubs.length;
         }
-        lcCount = lcSubs.length;
       } catch (e) {
         console.error("LeetCode fetch error:", e);
         errors.push(`LeetCode: ${(e as Error).message}`);
@@ -143,10 +183,13 @@ app.post("/api/sync", async (req: Request, res: Response) => {
     if (codeforcesHandle && codeforcesHandle.trim()) {
       try {
         const cfSubs = await fetchLiveCodeforcesSubmissions(codeforcesHandle.trim(), 50, userId);
-        for (const sub of cfSubs) {
-          await saveSubmission(sub);
+        if (cfSubs.length > 0) {
+          await saveRawPayload(userId, "codeforces", cfSubs);
+          for (const sub of cfSubs) {
+            await saveSubmission(sub);
+          }
+          cfCount = cfSubs.length;
         }
-        cfCount = cfSubs.length;
       } catch (e) {
         console.error("Codeforces fetch error:", e);
         errors.push(`Codeforces: ${(e as Error).message}`);
@@ -161,13 +204,26 @@ app.post("/api/sync", async (req: Request, res: Response) => {
       isLive: totalCount > 0,
     };
 
+    // Save profile to DynamoDB
+    await saveUserProfile({
+      userId,
+      leetcodeUsername: currentProfile.leetcodeUsername,
+      codeforcesHandle: currentProfile.codeforcesHandle,
+      lastSyncAt: Date.now(),
+    });
+
     // Run Person B's AI Agent analysis on the freshly fetched real data
     const analysis = await getAnalysisForUser(userId);
 
-    // Auto-schedule recommended problems into Spaced Repetition
+    // Save weaknesses in DynamoDB
+    if (analysis.weak_topics && analysis.weak_topics.length > 0) {
+      await saveWeaknesses(userId, analysis.weak_topics);
+    }
+
+    // Auto-schedule recommended problems into Spaced Repetition in DynamoDB
     if (analysis.recommended_problems && analysis.recommended_problems.length > 0) {
       for (const rec of analysis.recommended_problems) {
-        scheduleProblem({
+        const scheduled = scheduleProblem({
           problem_id: rec.problem_id,
           title: rec.title || `Problem ${rec.problem_id}`,
           topic: rec.topic || "Targeted Practice",
@@ -175,8 +231,17 @@ app.post("/api/sync", async (req: Request, res: Response) => {
           reason: rec.reason,
           url: rec.url,
         });
+        await saveScheduleToDynamo(userId, scheduled);
       }
     }
+
+    // Record analysis run in DynamoDB
+    await recordAnalysisRun(userId, {
+      analyzed_at: analysis.analyzed_at || Date.now(),
+      summary: analysis.summary,
+      weak_topics_count: analysis.weak_topics.length,
+      recommended_problems_count: analysis.recommended_problems.length,
+    });
 
     res.json({
       success: true,
@@ -226,11 +291,13 @@ app.get("/api/submissions", async (req: Request, res: Response) => {
       userId,
     });
 
+    const profile = await getUserProfile(userId);
+
     res.json({
       success: true,
       count: submissions.length,
       isLive: isOpenSearchLive(),
-      profile: currentProfile,
+      profile: profile || currentProfile,
       submissions,
     });
   } catch (error) {
@@ -252,26 +319,29 @@ app.get("/api/submissions/:id", async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/submissions (Ingest individual raw submission)
-app.post("/api/submissions", async (req: Request, res: Response) => {
+// GET /api/weaknesses
+app.get("/api/weaknesses", async (req: Request, res: Response) => {
   try {
-    const { platform, raw, userId } = req.body;
-    if (!platform || !raw) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required fields: platform, raw",
-      });
+    const userId = (req.query.userId as string) || currentProfile.userId;
+    let weaknesses = await getWeaknessesFromDynamo(userId);
+    if (!weaknesses || weaknesses.length === 0) {
+      const analysis = await getAnalysisForUser(userId);
+      weaknesses = analysis.weak_topics;
     }
-
-    const canonical = normalizeSubmission(platform, raw, userId || currentProfile.userId);
-    await saveSubmission(canonical);
-
-    res.status(201).json({
-      success: true,
-      submission: canonical,
-    });
+    res.json({ success: true, count: weaknesses.length, userId, weaknesses });
   } catch (error) {
-    res.status(400).json({ success: false, error: (error as Error).message });
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// GET /api/recommendations
+app.get("/api/recommendations", async (req: Request, res: Response) => {
+  try {
+    const userId = (req.query.userId as string) || currentProfile.userId;
+    const analysis = await getAnalysisForUser(userId);
+    res.json({ success: true, recommendations: analysis.recommended_problems || [] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -301,27 +371,54 @@ app.post("/api/analysis/submission", (req: Request, res: Response) => {
 });
 
 // GET /api/schedule
-app.get("/api/schedule", (req: Request, res: Response) => {
+app.get("/api/schedule", async (req: Request, res: Response) => {
   try {
-    const practice = getUpcomingPractice();
-    res.json({ success: true, practice });
+    const userId = (req.query.userId as string) || currentProfile.userId;
+    const dynamoItems = await getScheduleFromDynamo(userId);
+    let practice = getUpcomingPractice();
+
+    if (dynamoItems && dynamoItems.length > 0) {
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const today = dynamoItems.filter((i) => i.status === "due_today" || i.scheduled_date <= now + 12 * 3600 * 1000);
+      const tomorrow = dynamoItems.filter((i) => i.scheduled_date > now + 12 * 3600 * 1000 && i.scheduled_date <= now + 1.5 * dayMs);
+      const in3Days = dynamoItems.filter((i) => i.scheduled_date > now + 1.5 * dayMs && i.scheduled_date <= now + 3.5 * dayMs);
+      const in7Days = dynamoItems.filter((i) => i.scheduled_date > now + 3.5 * dayMs && i.scheduled_date <= now + 7.5 * dayMs);
+      const later = dynamoItems.filter((i) => i.scheduled_date > now + 7.5 * dayMs);
+
+      practice = {
+        today,
+        tomorrow,
+        in3Days,
+        in7Days,
+        later,
+        all: dynamoItems,
+      };
+    }
+
+    res.json({ success: true, userId, practice });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });
   }
 });
 
 // POST /api/schedule
-app.post("/api/schedule", (req: Request, res: Response) => {
+app.post("/api/schedule", async (req: Request, res: Response) => {
   try {
     const { action, scheduleId, problem } = req.body;
+    const userId = currentProfile.userId;
 
     if (action === "complete" && scheduleId) {
       const updated = markProblemCompleted(scheduleId);
+      if (updated) {
+        await saveScheduleToDynamo(userId, updated);
+      }
       return res.json({ success: true, item: updated });
     }
 
     if (action === "schedule" && problem) {
       const scheduled = scheduleProblem(problem);
+      await saveScheduleToDynamo(userId, scheduled);
       return res.json({ success: true, item: scheduled });
     }
 

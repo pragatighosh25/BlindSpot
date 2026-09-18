@@ -1,0 +1,317 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  BlindSpot - AI Competitive-Programming Coach
+  Data Ingestion, OpenSearch Indexing, DynamoDB Core, S3 Raw Storage, and API Gateway Lambda Pipeline
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Application deployment environment
+  OpenSearchEndpoint:
+    Type: String
+    Default: ''
+    Description: Amazon OpenSearch Service domain endpoint or OpenSearch Serverless collection URL (optional)
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        NODE_ENV: !Ref Environment
+        DYNAMODB_TABLE: !Ref BlindSpotCoreTable
+        S3_BUCKET: !Ref RawSubmissionsBucket
+        OPENSEARCH_URL: !Ref OpenSearchEndpoint
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+
+Resources:
+  ##############################################################################
+  # API GATEWAY (HTTP API)
+  ##############################################################################
+  BlindSpotHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Environment
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Amz-Date
+          - X-Api-Key
+          - X-Amz-Security-Token
+        AllowOrigins:
+          - '*'
+        MaxAge: 3600
+
+  ##############################################################################
+  # DYNAMODB TABLE (Single-table design: User profiles, weaknesses, schedules)
+  ##############################################################################
+  BlindSpotCoreTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'blindspot-core-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: BlindSpot
+        - Key: Environment
+          Value: !Ref Environment
+
+  ##############################################################################
+  # S3 BUCKET (Raw API responses & JSON payloads)
+  ##############################################################################
+  RawSubmissionsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'blindspot-raw-submissions-${AWS::AccountId}-${Environment}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+      Tags:
+        - Key: Project
+          Value: BlindSpot
+        - Key: Environment
+          Value: !Ref Environment
+
+  ##############################################################################
+  # LAMBDA FUNCTIONS
+  ##############################################################################
+
+  # 1. Sync Submissions (POST /api/sync)
+  SyncSubmissionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/handlers/syncSubmissions.handler
+      Description: Ingests LeetCode & Codeforces submissions, stores raw JSON in S3, indexes into OpenSearch, records user profile in DynamoDB.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BlindSpotCoreTable
+        - S3CrudPolicy:
+            BucketName: !Ref RawSubmissionsBucket
+      Events:
+        SyncApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/sync
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/syncSubmissions.ts
+
+  # 2. Get Submissions (GET /api/submissions, GET /api/submissions/{id})
+  GetSubmissionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/handlers/getSubmissions.handler
+      Description: Queries OpenSearch or in-memory index for normalized submissions with filters.
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BlindSpotCoreTable
+      Events:
+        ListSubmissions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/submissions
+            Method: GET
+        GetSubmissionById:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/submissions/{id}
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/getSubmissions.ts
+
+  # 3. Get Weaknesses (GET /api/weaknesses)
+  GetWeaknessesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/handlers/getWeaknesses.handler
+      Description: Returns detected weakness patterns and recurring failure tags from DynamoDB.
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BlindSpotCoreTable
+      Events:
+        GetWeaknesses:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/weaknesses
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/getWeaknesses.ts
+
+  # 4. Get Recommendations (GET /api/recommendations)
+  GetRecommendationsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/handlers/getRecommendations.handler
+      Description: Provides targeted problem recommendations matched to user weakness patterns.
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref BlindSpotCoreTable
+      Events:
+        GetRecommendations:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/recommendations
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/getRecommendations.ts
+
+  # 5. Schedule (GET /api/schedule, POST /api/schedule)
+  ScheduleFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/handlers/schedule.handler
+      Description: Manages SM-2 spaced repetition review schedules and item completion in DynamoDB.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BlindSpotCoreTable
+      Events:
+        GetSchedule:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/schedule
+            Method: GET
+        PostSchedule:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/schedule
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/schedule.ts
+
+  # 6. Trigger Analysis (POST /api/analyze, GET /api/analysis)
+  TriggerAnalysisFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: src/handlers/triggerAnalysis.handler
+      Description: Triggers weakness analysis on stored submissions and stores the results in DynamoDB.
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref BlindSpotCoreTable
+      Events:
+        PostAnalyze:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/analyze
+            Method: POST
+        GetAnalysis:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref BlindSpotHttpApi
+            Path: /api/analysis
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/triggerAnalysis.ts
+
+Outputs:
+  HttpApiUrl:
+    Description: Base URL for the BlindSpot HTTP API Gateway
+    Value: !Sub 'https://${BlindSpotHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${AWS::StackName}-HttpApiUrl'
+
+  DynamoDBTableName:
+    Description: DynamoDB Core table for user profiles, weaknesses, and schedules
+    Value: !Ref BlindSpotCoreTable
+    Export:
+      Name: !Sub '${AWS::StackName}-DynamoDBTable'
+
+  RawSubmissionsBucketName:
+    Description: S3 Bucket for raw API payload backups
+    Value: !Ref RawSubmissionsBucket
+    Export:
+      Name: !Sub '${AWS::StackName}-S3Bucket'

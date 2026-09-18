@@ -1,3 +1,4 @@
+import { Client } from "@opensearch-project/opensearch";
 import { CanonicalSubmission, SubmissionAnalysis } from "@/schemas/submission.schema";
 import initialSubmissions from "@/data/mock-submissions.json";
 import { diagnoseSubmissionPattern } from "./agent/agent";
@@ -15,9 +16,75 @@ export interface SearchSubmissionsQuery {
   limit?: number;
 }
 
+const OPENSEARCH_ENDPOINT = process.env.OPENSEARCH_URL || process.env.OPENSEARCH_ENDPOINT;
+const INDEX_NAME = process.env.OPENSEARCH_INDEX || "blindspot-submissions";
+
+let openSearchClient: Client | null = null;
+let isIndexInitialized = false;
+
+function getOpenSearchClient(): Client | null {
+  if (!OPENSEARCH_ENDPOINT) return null;
+  if (!openSearchClient) {
+    openSearchClient = new Client({
+      node: OPENSEARCH_ENDPOINT,
+    });
+  }
+  return openSearchClient;
+}
+
+async function ensureOpenSearchIndex(client: Client) {
+  if (isIndexInitialized) return;
+  try {
+    const exists = await client.indices.exists({ index: INDEX_NAME });
+    if (!exists.body) {
+      await client.indices.create({
+        index: INDEX_NAME,
+        body: {
+          mappings: {
+            properties: {
+              user_id: { type: "keyword" },
+              submission_id: { type: "keyword" },
+              platform: { type: "keyword" },
+              problem: {
+                properties: {
+                  id: { type: "keyword" },
+                  title: { type: "text" },
+                  difficulty: { type: "keyword" },
+                  topic_tags: { type: "keyword" },
+                },
+              },
+              submission: {
+                properties: {
+                  verdict: { type: "keyword" },
+                  language: { type: "keyword" },
+                  timestamp: { type: "long" },
+                  code: { type: "text" },
+                  error_message: { type: "text" },
+                },
+              },
+              analysis: {
+                properties: {
+                  topic: { type: "keyword" },
+                  failure_mode: { type: "text", fields: { keyword: { type: "keyword" } } },
+                  root_cause: { type: "text" },
+                  confidence: { type: "float" },
+                  is_failure: { type: "boolean" },
+                },
+              },
+            },
+          },
+        },
+      });
+      console.log(`[OpenSearch] Created index: ${INDEX_NAME}`);
+    }
+    isIndexInitialized = true;
+  } catch (e) {
+    console.warn(`[OpenSearch ensureIndex notice]:`, (e as Error).message);
+  }
+}
+
 /**
  * In-memory simulated OpenSearch store for standalone local development and testing.
- * Supports indexing both mock datasets and live fetched LeetCode/Codeforces submissions.
  */
 class LocalOpenSearchStore {
   private documents: Map<string, OpenSearchSubmissionDocument> = new Map();
@@ -137,35 +204,146 @@ class LocalOpenSearchStore {
   }
 }
 
-// Global singleton instance for local dev
-const globalStore = new LocalOpenSearchStore();
+const globalLocalStore = new LocalOpenSearchStore();
 
 /**
- * OpenSearch Service API (Facade for Person A pipeline)
+ * ============================================================================
+ * Unified OpenSearch Service API (AWS OpenSearch + Local Fallback)
+ * ============================================================================
  */
+
 export async function saveSubmission(
   submission: CanonicalSubmission,
   analysis?: SubmissionAnalysis
 ): Promise<void> {
-  await globalStore.save(submission, analysis);
+  const diag = analysis || (submission.analysis as SubmissionAnalysis) || diagnoseSubmissionPattern(submission);
+  const doc: OpenSearchSubmissionDocument = {
+    ...submission,
+    analysis: diag,
+  };
+
+  const client = getOpenSearchClient();
+  if (client) {
+    try {
+      await ensureOpenSearchIndex(client);
+      await client.index({
+        index: INDEX_NAME,
+        id: submission.submission_id,
+        body: doc,
+        refresh: true,
+      });
+      return;
+    } catch (e) {
+      console.warn(`[AWS OpenSearch save error, falling back]:`, (e as Error).message);
+    }
+  }
+
+  await globalLocalStore.save(submission, diag);
 }
 
 export async function getSubmission(
   submissionId: string
 ): Promise<OpenSearchSubmissionDocument | null> {
-  return globalStore.get(submissionId);
+  const client = getOpenSearchClient();
+  if (client) {
+    try {
+      const res = await client.get({
+        index: INDEX_NAME,
+        id: submissionId,
+      });
+      if (res.body?._source) {
+        return res.body._source as OpenSearchSubmissionDocument;
+      }
+    } catch (e) {
+      // Return null or check local
+    }
+  }
+
+  return globalLocalStore.get(submissionId);
 }
 
 export async function getUserSubmissions(
   userId = "user_demo"
 ): Promise<OpenSearchSubmissionDocument[]> {
-  return globalStore.getByUser(userId);
+  const client = getOpenSearchClient();
+  if (client) {
+    try {
+      const res = await client.search({
+        index: INDEX_NAME,
+        body: {
+          query: {
+            term: { user_id: userId },
+          },
+          sort: [{ "submission.timestamp": { order: "desc" } }],
+          size: 100,
+        },
+      });
+
+      if (res.body?.hits?.hits) {
+        return res.body.hits.hits.map((h: any) => h._source as OpenSearchSubmissionDocument);
+      }
+    } catch (e) {
+      console.warn(`[AWS OpenSearch getUserSubmissions error]:`, (e as Error).message);
+    }
+  }
+
+  return globalLocalStore.getByUser(userId);
 }
 
 export async function searchSubmissions(
   query: SearchSubmissionsQuery
 ): Promise<OpenSearchSubmissionDocument[]> {
-  return globalStore.search(query);
+  const client = getOpenSearchClient();
+  if (client) {
+    try {
+      const mustClauses: any[] = [];
+
+      if (query.userId && query.userId !== "all") {
+        mustClauses.push({ term: { user_id: query.userId } });
+      }
+      if (query.platform) {
+        mustClauses.push({ term: { platform: query.platform.toLowerCase() } });
+      }
+      if (query.verdict) {
+        mustClauses.push({ term: { "submission.verdict": query.verdict.toUpperCase() } });
+      }
+      if (query.topic) {
+        mustClauses.push({ match: { "problem.topic_tags": query.topic } });
+      }
+      if (query.query && query.query.trim().length > 0) {
+        mustClauses.push({
+          multi_match: {
+            query: query.query,
+            fields: [
+              "problem.title^2",
+              "problem.id",
+              "problem.topic_tags",
+              "submission.code",
+              "analysis.failure_mode",
+              "analysis.root_cause",
+            ],
+          },
+        });
+      }
+
+      const res = await client.search({
+        index: INDEX_NAME,
+        body: {
+          query: mustClauses.length > 0 ? { bool: { must: mustClauses } } : { match_all: {} },
+          sort: [{ "submission.timestamp": { order: "desc" } }],
+          size: query.limit || 50,
+        },
+      });
+
+      if (res.body?.hits?.hits) {
+        return res.body.hits.hits.map((h: any) => h._source as OpenSearchSubmissionDocument);
+      }
+    } catch (e) {
+      console.warn(`[AWS OpenSearch search error, falling back to local]:`, (e as Error).message);
+    }
+  }
+
+  return globalLocalStore.search(query);
 }
 
 export async function searchSimilarMistakes(
@@ -173,17 +351,45 @@ export async function searchSimilarMistakes(
   verdict = "WA",
   userId = "user_demo"
 ): Promise<OpenSearchSubmissionDocument[]> {
-  return globalStore.searchSimilarMistakes(topic, verdict, userId);
+  const client = getOpenSearchClient();
+  if (client) {
+    try {
+      const res = await client.search({
+        index: INDEX_NAME,
+        body: {
+          query: {
+            bool: {
+              must: [
+                { term: { user_id: userId } },
+                { match: { "problem.topic_tags": topic } },
+                { term: { "submission.verdict": verdict } },
+              ],
+            },
+          },
+          sort: [{ "submission.timestamp": { order: "desc" } }],
+          size: 20,
+        },
+      });
+
+      if (res.body?.hits?.hits) {
+        return res.body.hits.hits.map((h: any) => h._source as OpenSearchSubmissionDocument);
+      }
+    } catch (e) {
+      console.warn(`[AWS OpenSearch searchSimilarMistakes error]:`, (e as Error).message);
+    }
+  }
+
+  return globalLocalStore.searchSimilarMistakes(topic, verdict, userId);
 }
 
 export function clearOpenSearch() {
-  globalStore.clearAll();
+  globalLocalStore.clearAll();
 }
 
 export function resetOpenSearchToMock() {
-  globalStore.resetToMock();
+  globalLocalStore.resetToMock();
 }
 
 export function isOpenSearchLive(): boolean {
-  return globalStore.isLiveMode();
+  return globalLocalStore.isLiveMode();
 }

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
     "validate:data": "tsx scripts/validate-mock-data.ts",
     "test": "tsx --test tests/**/*.test.ts"
   },

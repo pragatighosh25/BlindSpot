@@ -2,100 +2,124 @@
 
 @layer base {
   :root {
-    --font-inter: "Inter", sans-serif;
-    --font-jetbrains-mono: "JetBrains Mono", monospace;
+    --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: var(--font-geist-mono), monospace;
 
     /* BlindSpot Exact Color Tokens */
     --color-text: #FAFAF8;
     --color-primary: #1B1BFF;
     --color-accent: #00FF9C;
-    --color-surface: #1A1A1A;
-    --color-border: #2C2C2C;
-    --color-bg-deep: #0D0D0D;
-    --color-surface-hover: #222222;
+    --color-surface: #141414;
+    --color-surface-card: #111111;
+    --color-border: #262626;
+    --color-bg-deep: #0A0A0A;
+    --color-surface-hover: #1A1A1A;
   }
 
   body {
     background-color: var(--color-bg-deep);
     color: var(--color-text);
-    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-sans);
     min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6, .font-headline {
-    font-family: var(--font-jetbrains-mono), monospace;
+    font-family: var(--font-mono);
   }
 
   code, pre, .font-mono {
-    font-family: var(--font-jetbrains-mono), monospace;
+    font-family: var(--font-mono);
   }
 }
 
-/* Surface & Card Utilities */
+/* WeMakeDevs-style Dot Matrix Grid Background */
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-dot-grid-subtle {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* WeMakeDevs Card & Surface Panels */
 .surface-panel {
-  background-color: #1A1A1A;
-  border: 1px solid #2C2C2C;
+  background-color: #111111;
+  border: 1px solid #262626;
 }
 
 .surface-panel-hover {
-  background-color: #1A1A1A;
-  border: 1px solid #2C2C2C;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: #111111;
+  border: 1px solid #262626;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .surface-panel-hover:hover {
-  background-color: #222222;
-  border-color: #3D3D3D;
+  background-color: #171717;
+  border-color: #383838;
   transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.7);
 }
 
 /* Glass Surface with exact theme tint */
 .glass-surface {
-  background: rgba(26, 26, 26, 0.85);
+  background: rgba(17, 17, 17, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #2C2C2C;
+  border: 1px solid #262626;
 }
 
 /* Glow effects */
 .glow-primary {
-  box-shadow: 0 0 24px rgba(27, 27, 255, 0.35);
+  box-shadow: 0 0 28px rgba(27, 27, 255, 0.35);
 }
 
 .glow-accent {
-  box-shadow: 0 0 24px rgba(0, 255, 156, 0.3);
+  box-shadow: 0 0 28px rgba(0, 255, 156, 0.3);
 }
 
-.glow-subtle {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+/* WeMakeDevs Pill Badges & Buttons */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #262626;
+  background-color: #141414;
 }
 
-/* Buttons */
 .btn-primary {
   background-color: #1B1BFF;
   color: #FAFAF8;
-  font-family: var(--font-jetbrains-mono), monospace;
+  font-family: var(--font-mono);
   font-weight: 600;
-  transition: all 0.15s ease-in-out;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-primary:hover {
   background-color: #3434ff;
-  box-shadow: 0 0 20px rgba(27, 27, 255, 0.5);
+  box-shadow: 0 0 24px rgba(27, 27, 255, 0.5);
   transform: translateY(-1px);
 }
 
 .btn-accent {
   background-color: #00FF9C;
-  color: #0D0D0D;
-  font-family: var(--font-jetbrains-mono), monospace;
+  color: #0A0A0A;
+  font-family: var(--font-mono);
   font-weight: 700;
-  transition: all 0.15s ease-in-out;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-accent:hover {
   background-color: #26ffaa;
-  box-shadow: 0 0 20px rgba(0, 255, 156, 0.5);
+  box-shadow: 0 0 24px rgba(0, 255, 156, 0.5);
   transform: translateY(-1px);
 }
 
@@ -106,14 +130,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0D0D0D;
+  background: #0A0A0A;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2C2C2C;
+  background: #262626;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3D3D3D;
+  background: #383838;
 }

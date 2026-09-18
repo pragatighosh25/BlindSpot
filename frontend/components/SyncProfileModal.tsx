@@ -11,6 +11,7 @@ interface SyncProfileModalProps {
     leetcodeUsername?: string;
     codeforcesHandle?: string;
     isLive?: boolean;
+    userId?: string;
   };
 }
 
@@ -20,19 +21,53 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
   onSyncComplete,
   currentProfile,
 }) => {
-  const [leetcodeUsername, setLeetcodeUsername] = useState(currentProfile?.leetcodeUsername || "pragatighosh25");
-  const [codeforcesHandle, setCodeforcesHandle] = useState(currentProfile?.codeforcesHandle || "pragatighosh");
+  const [leetcodeUsername, setLeetcodeUsername] = useState(currentProfile?.leetcodeUsername || "");
+  const [codeforcesHandle, setCodeforcesHandle] = useState(currentProfile?.codeforcesHandle || "");
   const [loading, setLoading] = useState(false);
   const [stepText, setStepText] = useState("");
   const [resultMsg, setResultMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
+  // Verification states
+  const [lcVerified, setLcVerified] = useState(false);
+  const [cfVerified, setCfVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState<"leetcode" | "codeforces" | null>(null);
+
   if (!isOpen) return null;
+
+  const handleVerify = async (platform: "leetcode" | "codeforces") => {
+    const handle = platform === "leetcode" ? leetcodeUsername : codeforcesHandle;
+    if (!handle.trim()) return;
+
+    setIsVerifying(platform);
+    setResultMsg(null);
+    try {
+      const res = await fetch("/api/verify-handle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform, handle: handle.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (platform === "leetcode") setLcVerified(true);
+        if (platform === "codeforces") setCfVerified(true);
+      } else {
+        setResultMsg({
+          text: data.result?.error || data.error || `${platform} handle not found.`,
+          isError: true,
+        });
+      }
+    } catch (e) {
+      setResultMsg({ text: (e as Error).message, isError: true });
+    } finally {
+      setIsVerifying(null);
+    }
+  };
 
   const handleSync = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leetcodeUsername.trim() && !codeforcesHandle.trim()) {
+    if (!leetcodeUsername.trim() || !codeforcesHandle.trim()) {
       setResultMsg({
-        text: "Please enter at least a LeetCode username or Codeforces handle.",
+        text: "Please enter both your LeetCode username and Codeforces handle.",
         isError: true,
       });
       return;
@@ -40,20 +75,20 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
 
     setLoading(true);
     setResultMsg(null);
-    setStepText("Connecting to LeetCode GraphQL & Codeforces API...");
+    setStepText("Verifying profiles and connecting to platform APIs...");
 
     try {
-      setTimeout(() => {
-        if (loading) setStepText("Fetching recent submissions & problem tags...");
-      }, 1200);
+      const cleanLc = leetcodeUsername.trim();
+      const cleanCf = codeforcesHandle.trim();
+      const userId = currentProfile?.userId || cleanLc;
 
       const res = await fetch("/api/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          leetcodeUsername: leetcodeUsername.trim(),
-          codeforcesHandle: codeforcesHandle.trim(),
-          userId: leetcodeUsername.trim() || codeforcesHandle.trim() || "pragatighosh25",
+          leetcodeUsername: cleanLc,
+          codeforcesHandle: cleanCf,
+          userId,
           clearMock: true,
         }),
       });
@@ -88,7 +123,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
       setLeetcodeUsername("pragatighosh25");
       setCodeforcesHandle("pragatighosh");
       setResultMsg({
-        text: "Restored 37 canonical mock submissions across 7 algorithmic topics.",
+        text: "Restored 37 canonical demo submissions across 7 algorithmic topics.",
         isError: false,
       });
       onSyncComplete();
@@ -110,10 +145,10 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold font-headline text-[#FAFAF8]">
-                Connect Real Accounts
+                Connect & Verify Profiles
               </h2>
               <p className="text-xs font-mono text-[#FAFAF8]/50">
-                Fetch live LeetCode & Codeforces submissions
+                Validate and fetch real LeetCode & Codeforces submissions
               </p>
             </div>
           </div>
@@ -128,37 +163,73 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSync} className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider mb-1.5">
-              LeetCode Username
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. pragatighosh25, neetcode, tourist"
-              value={leetcodeUsername}
-              onChange={(e) => setLeetcodeUsername(e.target.value)}
-              disabled={loading}
-              className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
-            />
-            <p className="text-[11px] font-mono text-[#FAFAF8]/40 mt-1">
-              Fetches submissions via LeetCode GraphQL & alfa-leetcode-api.
-            </p>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider">
+                LeetCode Username
+              </label>
+              {lcVerified && (
+                <span className="text-[10px] font-mono text-[#00FF9C] flex items-center gap-1">
+                  <Check size={10} /> Verified
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                required
+                placeholder="e.g. pragatighosh25, neetcode"
+                value={leetcodeUsername}
+                onChange={(e) => {
+                  setLeetcodeUsername(e.target.value);
+                  setLcVerified(false);
+                }}
+                disabled={loading}
+                className="flex-1 px-3.5 py-2.5 text-xs font-mono bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleVerify("leetcode")}
+                disabled={isVerifying === "leetcode" || !leetcodeUsername.trim()}
+                className="px-3 py-2 text-xs font-mono font-semibold rounded-xl bg-[#1B1BFF]/20 text-[#1B1BFF] hover:bg-[#1B1BFF] hover:text-[#FAFAF8] border border-[#1B1BFF]/40 transition-colors"
+              >
+                {isVerifying === "leetcode" ? "Checking..." : "Verify"}
+              </button>
+            </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider mb-1.5">
-              Codeforces Handle
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. pragatighosh, tourist, Benq"
-              value={codeforcesHandle}
-              onChange={(e) => setCodeforcesHandle(e.target.value)}
-              disabled={loading}
-              className="w-full px-3.5 py-2.5 text-xs font-mono bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
-            />
-            <p className="text-[11px] font-mono text-[#FAFAF8]/40 mt-1">
-              Fetches submission history via Codeforces official user.status API.
-            </p>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-mono font-semibold text-[#FAFAF8]/70 uppercase tracking-wider">
+                Codeforces Handle
+              </label>
+              {cfVerified && (
+                <span className="text-[10px] font-mono text-[#00FF9C] flex items-center gap-1">
+                  <Check size={10} /> Verified
+                </span>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                required
+                placeholder="e.g. pragatighosh, tourist, Benq"
+                value={codeforcesHandle}
+                onChange={(e) => {
+                  setCodeforcesHandle(e.target.value);
+                  setCfVerified(false);
+                }}
+                disabled={loading}
+                className="flex-1 px-3.5 py-2.5 text-xs font-mono bg-[#0D0D0D] border border-[#2C2C2C] rounded-xl text-[#FAFAF8] placeholder-[#FAFAF8]/40 focus:outline-none focus:border-[#1B1BFF] transition-colors"
+              />
+              <button
+                type="button"
+                onClick={() => handleVerify("codeforces")}
+                disabled={isVerifying === "codeforces" || !codeforcesHandle.trim()}
+                className="px-3 py-2 text-xs font-mono font-semibold rounded-xl bg-[#1B1BFF]/20 text-[#1B1BFF] hover:bg-[#1B1BFF] hover:text-[#FAFAF8] border border-[#1B1BFF]/40 transition-colors"
+              >
+                {isVerifying === "codeforces" ? "Checking..." : "Verify"}
+              </button>
+            </div>
           </div>
 
           {stepText && (
@@ -193,7 +264,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono text-[#FAFAF8]/60 hover:text-[#FAFAF8] hover:bg-[#2C2C2C] rounded-xl transition-colors"
             >
               <ArrowCycle size={12} />
-              <span>Reset to Mock</span>
+              <span>Reset to Demo</span>
             </button>
 
             <div className="flex gap-2">
@@ -212,7 +283,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2 text-xs font-headline font-bold rounded-xl bg-[#00FF9C] text-[#0D0D0D] hover:bg-[#26ffaa] shadow-md shadow-[#00FF9C]/20 transition-all disabled:opacity-50"
               >
                 <Sparkles size={14} />
-                <span>{loading ? "Fetching & Analyzing..." : "Fetch Live & Analyze"}</span>
+                <span>{loading ? "Verifying & Syncing..." : "Verify & Sync Real Data"}</span>
               </button>
             </div>
           </div>

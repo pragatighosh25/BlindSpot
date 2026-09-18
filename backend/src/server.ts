@@ -30,6 +30,11 @@ import {
   getScheduleFromDynamo,
   recordAnalysisRun,
 } from "../services/storage/dynamodb";
+import {
+  verifyLeetCodeHandle,
+  verifyCodeforcesHandle,
+  generateVerificationToken,
+} from "../services/ingestion/verifier";
 import { DEFAULT_USER_CONFIG } from "../services/ingestion/config";
 
 const app = express();
@@ -158,6 +163,231 @@ app.get("/api/sync-status", (req: Request, res: Response) => {
     isLive: isOpenSearchLive(),
     profile: currentProfile,
   });
+});
+
+// GET /api/auth/token (Generate verification token for ownership proof)
+app.get("/api/auth/token", (req: Request, res: Response) => {
+  const identifier = (req.query.identifier as string) || "user_" + Date.now();
+  const token = generateVerificationToken(identifier);
+  res.json({ success: true, token });
+});
+
+// POST /api/verify-handle (Live probe of LeetCode or Codeforces account)
+app.post("/api/verify-handle", async (req: Request, res: Response) => {
+  try {
+    const { platform, handle, token } = req.body;
+    if (!platform || !handle) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields: platform and handle.",
+      });
+    }
+
+    if (platform === "leetcode") {
+      const result = await verifyLeetCodeHandle(handle, token);
+      return res.json({ success: result.exists, result });
+    } else if (platform === "codeforces") {
+      const result = await verifyCodeforcesHandle(handle, token);
+      return res.json({ success: result.exists, result });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: `Unsupported platform '${platform}'. Supported platforms: leetcode, codeforces.`,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/auth/register (Dynamic user registration with verified handles)
+app.post("/api/auth/register", async (req: Request, res: Response) => {
+  try {
+    const {
+      email,
+      password,
+      leetcodeUsername,
+      codeforcesHandle,
+      verificationToken,
+    } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Email and password are required.",
+      });
+    }
+
+    if (!leetcodeUsername || !leetcodeUsername.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "LeetCode username is required.",
+      });
+    }
+
+    if (!codeforcesHandle || !codeforcesHandle.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "Codeforces handle is required.",
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanLc = leetcodeUsername.trim();
+    const cleanCf = codeforcesHandle.trim();
+    const userId = cleanEmail.replace(/[^a-z0-9]/gi, "_");
+
+    console.log(`[Auth Register] Verifying handles for ${cleanEmail}: LC=@${cleanLc}, CF=@${cleanCf}`);
+
+    // Verify both accounts exist on live platforms
+    const [lcResult, cfResult] = await Promise.all([
+      verifyLeetCodeHandle(cleanLc, verificationToken),
+      verifyCodeforcesHandle(cleanCf, verificationToken),
+    ]);
+
+    if (!lcResult.exists) {
+      return res.status(400).json({
+        success: false,
+        error: `LeetCode validation failed: No account exists with username @${cleanLc}.`,
+        details: lcResult,
+      });
+    }
+
+    if (!cfResult.exists) {
+      return res.status(400).json({
+        success: false,
+        error: `Codeforces validation failed: No account exists with handle @${cleanCf}.`,
+        details: cfResult,
+      });
+    }
+
+    // Save profile to DynamoDB
+    const savedProfile = await saveUserProfile({
+      userId,
+      email: cleanEmail,
+      passwordHash: password, // In production this would be bcrypt-hashed
+      leetcodeUsername: cleanLc,
+      codeforcesHandle: cleanCf,
+      isVerified: true,
+      leetcodeVerified: lcResult.verifiedOwnership,
+      codeforcesVerified: cfResult.verifiedOwnership,
+      lastSyncAt: Date.now(),
+    });
+
+    // Update session
+    currentProfile = {
+      userId,
+      leetcodeUsername: cleanLc,
+      codeforcesHandle: cleanCf,
+      isLive: true,
+    };
+
+    // Auto-ingest live submissions for this specific user
+    try {
+      const [lcSubs, cfSubs] = await Promise.all([
+        fetchLiveLeetCodeSubmissions(cleanLc, 50, userId),
+        fetchLiveCodeforcesSubmissions(cleanCf, 50, userId),
+      ]);
+
+      if (lcSubs.length > 0) await saveRawPayload(userId, "leetcode", lcSubs);
+      if (cfSubs.length > 0) await saveRawPayload(userId, "codeforces", cfSubs);
+
+      for (const sub of [...lcSubs, ...cfSubs]) {
+        await saveSubmission(sub);
+      }
+
+      console.log(`[Auth Register] Synced ${lcSubs.length + cfSubs.length} submissions for ${userId}`);
+
+      // Run AI Agent analysis
+      const analysis = await getAnalysisForUser(userId, true);
+      if (analysis.weak_topics && analysis.weak_topics.length > 0) {
+        await saveWeaknesses(userId, analysis.weak_topics);
+      }
+    } catch (ingestErr) {
+      console.warn(`[Auth Register Ingest Notice]:`, (ingestErr as Error).message);
+    }
+
+    res.json({
+      success: true,
+      user: {
+        userId,
+        email: cleanEmail,
+        leetcodeUsername: cleanLc,
+        codeforcesHandle: cleanCf,
+        leetcodeProfile: lcResult.profile,
+        codeforcesProfile: cfResult.profile,
+        isVerified: true,
+      },
+      message: `Account created and verified successfully for @${cleanLc} and @${cleanCf}!`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/auth/login (Login existing user)
+app.post("/api/auth/login", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, error: "Email and password are required." });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const userId = cleanEmail.replace(/[^a-z0-9]/gi, "_");
+
+    const profile = await getUserProfile(userId);
+    if (!profile) {
+      // Check if this is the default user
+      if (email === "pragatighosh25" || email === "demo@blindspot.ai") {
+        currentProfile = {
+          userId: DEFAULT_USER_CONFIG.userId,
+          leetcodeUsername: DEFAULT_USER_CONFIG.leetcodeUsername,
+          codeforcesHandle: DEFAULT_USER_CONFIG.codeforcesHandle,
+          isLive: true,
+        };
+        return res.json({
+          success: true,
+          user: {
+            userId: DEFAULT_USER_CONFIG.userId,
+            email: "demo@blindspot.ai",
+            leetcodeUsername: DEFAULT_USER_CONFIG.leetcodeUsername,
+            codeforcesHandle: DEFAULT_USER_CONFIG.codeforcesHandle,
+            isDemo: true,
+          },
+        });
+      }
+      return res.status(404).json({
+        success: false,
+        error: `No account found for '${email}'. Please sign up and verify your LeetCode and Codeforces handles.`,
+      });
+    }
+
+    // In production check bcrypt password; for hackathon check exact match
+    if (profile.passwordHash && profile.passwordHash !== password) {
+      return res.status(401).json({ success: false, error: "Incorrect password." });
+    }
+
+    currentProfile = {
+      userId: profile.userId,
+      leetcodeUsername: profile.leetcodeUsername || DEFAULT_USER_CONFIG.leetcodeUsername,
+      codeforcesHandle: profile.codeforcesHandle || DEFAULT_USER_CONFIG.codeforcesHandle,
+      isLive: true,
+    };
+
+    res.json({
+      success: true,
+      user: {
+        userId: profile.userId,
+        email: profile.email || cleanEmail,
+        leetcodeUsername: profile.leetcodeUsername,
+        codeforcesHandle: profile.codeforcesHandle,
+        isVerified: profile.isVerified,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
 });
 
 // POST /api/sync (Sync any LeetCode & Codeforces User Profiles)

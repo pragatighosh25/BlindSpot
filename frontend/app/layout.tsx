@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const geistSans = Geist({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist-sans",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -26,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} dark`}>
-      <body className="antialiased bg-[#0D0D0D] text-[#FAFAF8] min-h-screen font-sans selection:bg-[#1B1BFF] selection:text-[#FAFAF8]">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`}>
+      <body className="antialiased bg-[#0A0A0A] text-[#FAFAF8] min-h-screen font-sans selection:bg-[#1B1BFF] selection:text-[#FAFAF8]">
         {children}
       </body>
     </html>

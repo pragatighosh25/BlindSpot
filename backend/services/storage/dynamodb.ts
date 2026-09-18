@@ -12,8 +12,13 @@ import { ScheduledReviewItem } from "@/scheduler/spaced-repetition";
 
 export interface UserProfileRecord {
   userId: string;
+  email?: string;
+  passwordHash?: string;
   leetcodeUsername?: string;
   codeforcesHandle?: string;
+  isVerified?: boolean;
+  leetcodeVerified?: boolean;
+  codeforcesVerified?: boolean;
   createdAt: number;
   updatedAt: number;
   lastSyncAt?: number;
@@ -108,8 +113,13 @@ const localStore = new LocalDynamoDBStore();
 // 1. User Profile Operations
 export async function saveUserProfile(profile: {
   userId: string;
+  email?: string;
+  passwordHash?: string;
   leetcodeUsername?: string;
   codeforcesHandle?: string;
+  isVerified?: boolean;
+  leetcodeVerified?: boolean;
+  codeforcesVerified?: boolean;
   lastSyncAt?: number;
 }): Promise<UserProfileRecord> {
   const now = Date.now();
@@ -117,8 +127,13 @@ export async function saveUserProfile(profile: {
 
   const record: UserProfileRecord = {
     userId: profile.userId,
+    email: profile.email || existing?.email,
+    passwordHash: profile.passwordHash || existing?.passwordHash,
     leetcodeUsername: profile.leetcodeUsername || existing?.leetcodeUsername,
     codeforcesHandle: profile.codeforcesHandle || existing?.codeforcesHandle,
+    isVerified: profile.isVerified !== undefined ? profile.isVerified : existing?.isVerified ?? true,
+    leetcodeVerified: profile.leetcodeVerified !== undefined ? profile.leetcodeVerified : existing?.leetcodeVerified ?? true,
+    codeforcesVerified: profile.codeforcesVerified !== undefined ? profile.codeforcesVerified : existing?.codeforcesVerified ?? true,
     createdAt: existing?.createdAt || now,
     updatedAt: now,
     lastSyncAt: profile.lastSyncAt || now,
@@ -160,8 +175,13 @@ export async function getUserProfile(userId: string): Promise<UserProfileRecord 
       if (res.Item) {
         return {
           userId: res.Item.userId,
+          email: res.Item.email,
+          passwordHash: res.Item.passwordHash,
           leetcodeUsername: res.Item.leetcodeUsername,
           codeforcesHandle: res.Item.codeforcesHandle,
+          isVerified: res.Item.isVerified,
+          leetcodeVerified: res.Item.leetcodeVerified,
+          codeforcesVerified: res.Item.codeforcesVerified,
           createdAt: res.Item.createdAt,
           updatedAt: res.Item.updatedAt,
           lastSyncAt: res.Item.lastSyncAt,

@@ -254,14 +254,21 @@ export default function App() {
   };
 
   // Auth Success Handler
-  const handleAuthSuccess = (handles: {
+  const handleAuthSuccess = async (handles: {
     leetcode: string;
     codeforces: string;
     userId: string;
+    email?: string;
     isDemo: boolean;
   }) => {
     setActiveProfile(handles);
     setCurrentView("dashboard");
+    setIsSyncing(true);
+    try {
+      await Promise.all([loadSubmissions(), loadAnalysis(false), loadSchedule()]);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Open Auth Modal helper

@@ -1,0 +1,712 @@
+[
+  {
+    "submission_id": "cf_388985616",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "977A",
+      "title": "Wrong Subtraction",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/977/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "timestamp": 1788171099,
+      "code": "// Codeforces 977A - Wrong Subtraction\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_388985384",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "791A",
+      "title": "Bear and Big Brother",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/791/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "memory_mb": 0.1,
+      "timestamp": 1788170889,
+      "code": "// Codeforces 791A - Bear and Big Brother\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 100KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_387044427",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "59A",
+      "title": "Word",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/59/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 92,
+      "memory_mb": 0.1,
+      "timestamp": 1786719014,
+      "code": "// Codeforces 59A - Word\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 92ms\n// Memory: 100KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_387043156",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "546A",
+      "title": "Soldier and Bananas",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Implementation",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/546/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "timestamp": 1786718413,
+      "code": "// Codeforces 546A - Soldier and Bananas\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_387042705",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "546A",
+      "title": "Soldier and Bananas",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Implementation",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/546/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "WA",
+      "runtime_ms": 31,
+      "timestamp": 1786718213,
+      "code": "// Codeforces 546A - Soldier and Bananas\n// Language: C++20 (GCC 13-64)\n// Verdict: WRONG_ANSWER\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_385980127",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "266A",
+      "title": "Stones on the Table",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/266/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 62,
+      "memory_mb": 0.1,
+      "timestamp": 1786038536,
+      "code": "// Codeforces 266A - Stones on the Table\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 62ms\n// Memory: 100KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_385978450",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "4A",
+      "title": "Watermelon",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/4/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "WA",
+      "runtime_ms": 62,
+      "timestamp": 1786037795,
+      "code": "// Codeforces 4A - Watermelon\n// Language: C++20 (GCC 13-64)\n// Verdict: WRONG_ANSWER\n// Time: 62ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_381985560",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "339A",
+      "title": "Helpful Maths",
+      "difficulty": "800",
+      "topic_tags": [
+        "Greedy",
+        "Implementation",
+        "Sortings",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/339/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 92,
+      "timestamp": 1783691804,
+      "code": "// Codeforces 339A - Helpful Maths\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 92ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_381882089",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "112A",
+      "title": "Petya and Strings",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/112/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 92,
+      "timestamp": 1783615894,
+      "code": "// Codeforces 112A - Petya and Strings\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 92ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_381881974",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "112A",
+      "title": "Petya and Strings",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/112/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "WA",
+      "runtime_ms": 92,
+      "timestamp": 1783615826,
+      "code": "// Codeforces 112A - Petya and Strings\n// Language: C++20 (GCC 13-64)\n// Verdict: WRONG_ANSWER\n// Time: 92ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_380326169",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2240A",
+      "title": "Another Popcount Problem",
+      "difficulty": "800",
+      "topic_tags": [
+        "Greedy"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2240/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "timestamp": 1782571520,
+      "code": "// Codeforces 2240A - Another Popcount Problem\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379619460",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "263A",
+      "title": "Beautiful Matrix",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/263/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 62,
+      "memory_mb": 0.1,
+      "timestamp": 1781972118,
+      "code": "// Codeforces 263A - Beautiful Matrix\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 62ms\n// Memory: 100KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379618802",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "50A",
+      "title": "Domino piling",
+      "difficulty": "800",
+      "topic_tags": [
+        "Greedy",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/50/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 92,
+      "timestamp": 1781971686,
+      "code": "// Codeforces 50A - Domino piling\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 92ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379368150",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2237A",
+      "title": "Destroying Towers",
+      "difficulty": "800",
+      "topic_tags": [
+        "Games",
+        "Greedy",
+        "Schedules"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2237/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "timestamp": 1781793907,
+      "code": "// Codeforces 2237A - Destroying Towers\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379258030",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "282A",
+      "title": "Bit++",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/282/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "timestamp": 1781708640,
+      "code": "// Codeforces 282A - Bit++\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379257005",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "231A",
+      "title": "Team",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Greedy"
+      ],
+      "url": "https://codeforces.com/problemset/problem/231/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 62,
+      "timestamp": 1781708070,
+      "code": "// Codeforces 231A - Team\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 62ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379158805",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "617A",
+      "title": "Elephant",
+      "difficulty": "800",
+      "topic_tags": [
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/617/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "timestamp": 1781628797,
+      "code": "// Codeforces 617A - Elephant\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_379157517",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "236A",
+      "title": "Boy or Girl",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Implementation",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/236/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 92,
+      "memory_mb": 0.1,
+      "timestamp": 1781628190,
+      "code": "// Codeforces 236A - Boy or Girl\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 92ms\n// Memory: 100KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_378531913",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "71A",
+      "title": "Way Too Long Words",
+      "difficulty": "800",
+      "topic_tags": [
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/71/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "timestamp": 1781365563,
+      "code": "// Codeforces 71A - Way Too Long Words\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_378491737",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2218B",
+      "title": "The 67th 6-7 Integer Problem",
+      "difficulty": "800",
+      "topic_tags": [
+        "Greedy",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2218/B"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 62,
+      "timestamp": 1781342118,
+      "code": "// Codeforces 2218B - The 67th 6-7 Integer Problem\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 62ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_378490707",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2218A",
+      "title": "The 67th Integer Problem",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Games",
+        "Implementation",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2218/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "timestamp": 1781341613,
+      "code": "// Codeforces 2218A - The 67th Integer Problem\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_362378355",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "4A",
+      "title": "Watermelon",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/4/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 92,
+      "memory_mb": 3.91,
+      "timestamp": 1770803510,
+      "code": "// Codeforces 4A - Watermelon\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 92ms\n// Memory: 4000KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_358520417",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2185C",
+      "title": "Shifted MEX",
+      "difficulty": "900",
+      "topic_tags": [
+        "Implementation",
+        "Sortings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2185/C"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "timestamp": 1768748252,
+      "code": "// Codeforces 2185C - Shifted MEX\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_358507450",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2185B",
+      "title": "Prefix Max",
+      "difficulty": "800",
+      "topic_tags": [
+        "Greedy"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2185/B"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 46,
+      "timestamp": 1768747785,
+      "code": "// Codeforces 2185B - Prefix Max\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_358484606",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2185A",
+      "title": "Perfect Root",
+      "difficulty": "800",
+      "topic_tags": [
+        "Constructive Algorithms",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2185/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "memory_mb": 0.1,
+      "timestamp": 1768747229,
+      "code": "// Codeforces 2185A - Perfect Root\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 100KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_355337424",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2178A",
+      "title": "Yes or Yes",
+      "difficulty": "800",
+      "topic_tags": [
+        "Greedy",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2178/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "timestamp": 1766847304,
+      "code": "// Codeforces 2178A - Yes or Yes\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_354730002",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2179A",
+      "title": "Blackslex and Password",
+      "difficulty": "800",
+      "topic_tags": [
+        "Math",
+        "Strings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2179/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 31,
+      "timestamp": 1766502122,
+      "code": "// Codeforces 2179A - Blackslex and Password\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 31ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_347702662",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2164A",
+      "title": "Sequence Game",
+      "difficulty": "800",
+      "topic_tags": [
+        "Brute Force",
+        "Sortings"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2164/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 124,
+      "timestamp": 1762440590,
+      "code": "// Codeforces 2164A - Sequence Game\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 124ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_342086953",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2155A",
+      "title": "El fucho",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2155/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "AC",
+      "runtime_ms": 62,
+      "timestamp": 1759685984,
+      "code": "// Codeforces 2155A - El fucho\n// Language: C++20 (GCC 13-64)\n// Verdict: OK\n// Time: 62ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_342082158",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "2155A",
+      "title": "El fucho",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation",
+        "Math"
+      ],
+      "url": "https://codeforces.com/problemset/problem/2155/A"
+    },
+    "submission": {
+      "language": "C++20 (GCC 13-64)",
+      "verdict": "OTHER",
+      "runtime_ms": 46,
+      "timestamp": 1759685495,
+      "code": "// Codeforces 2155A - El fucho\n// Language: C++20 (GCC 13-64)\n// Verdict: SKIPPED\n// Time: 46ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_247354135",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1926C",
+      "title": "Vlad and a Sum of Sum of Digits",
+      "difficulty": "1200",
+      "topic_tags": [
+        "Dp",
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/1926/C"
+    },
+    "submission": {
+      "language": "PyPy 3-64",
+      "verdict": "TLE",
+      "runtime_ms": 500,
+      "memory_mb": 4.2,
+      "timestamp": 1708360344,
+      "code": "// Codeforces 1926C - Vlad and a Sum of Sum of Digits\n// Language: PyPy 3-64\n// Verdict: TIME_LIMIT_EXCEEDED\n// Time: 500ms\n// Memory: 4300KB\n// Handle: @pragatighosh"
+    }
+  },
+  {
+    "submission_id": "cf_247258416",
+    "user_id": "pragatighosh25",
+    "platform": "codeforces",
+    "problem": {
+      "id": "1926A",
+      "title": "Vlad and the Best of Five",
+      "difficulty": "800",
+      "topic_tags": [
+        "Implementation"
+      ],
+      "url": "https://codeforces.com/problemset/problem/1926/A"
+    },
+    "submission": {
+      "language": "PyPy 3-64",
+      "verdict": "AC",
+      "runtime_ms": 78,
+      "timestamp": 1708354312,
+      "code": "// Codeforces 1926A - Vlad and the Best of Five\n// Language: PyPy 3-64\n// Verdict: OK\n// Time: 78ms\n// Memory: 0KB\n// Handle: @pragatighosh"
+    }
+  }
+]

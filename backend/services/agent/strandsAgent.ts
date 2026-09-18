@@ -18,6 +18,7 @@ import {
   searchPastMistakes,
   saveAnalysis,
 } from "./tools";
+import { saveSubmission } from "@/services/opensearch";
 
 /**
  * Curated pedagogical problem bank addressing algorithmic failure modes
@@ -251,6 +252,10 @@ export async function runStrandsUserAnalysis(userId = "default_user"): Promise<A
   for (const sub of prioritizedFailures) {
     const diag = await analyzeSingleSubmissionWithStrands(sub, userId);
     diagnoses.push({ submission: sub, diagnosis: diag });
+    // Persist rich diagnosis directly to OpenSearch submission document
+    try {
+      await saveSubmission(sub, diag);
+    } catch {}
   }
 
   // Step 4: Group diagnoses by topic and identify recurring patterns vs single mistakes

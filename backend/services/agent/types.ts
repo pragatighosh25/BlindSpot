@@ -37,6 +37,25 @@ export const SubmissionEvidenceSchema = z.object({
 export type SubmissionEvidence = z.infer<typeof SubmissionEvidenceSchema>;
 
 /**
+ * Focused code comparison between submitted bug and suggested fix
+ */
+export const CodeComparisonSchema = z.object({
+  original_code: z.string(),
+  corrected_code: z.string(),
+  explanation: z.string().optional(),
+});
+export type CodeComparison = z.infer<typeof CodeComparisonSchema>;
+
+/**
+ * Approach comparison bullets contrasting user's approach with the correct approach
+ */
+export const ApproachComparisonSchema = z.object({
+  your_approach: z.array(z.string()).default([]),
+  correct_approach: z.array(z.string()).default([]),
+});
+export type ApproachComparison = z.infer<typeof ApproachComparisonSchema>;
+
+/**
  * Single submission deep algorithmic diagnosis result returned by analyzeSubmission()
  */
 export const SubmissionDiagnosisSchema = z.object({
@@ -54,6 +73,14 @@ export const SubmissionDiagnosisSchema = z.object({
   confidence: z.number().min(0).max(1),
   is_failure: z.boolean(),
   evidence: SubmissionEvidenceSchema.optional(),
+  // Enhanced human code review fields
+  what_went_wrong: z.string().optional(),
+  where_it_happens: z.string().optional(),
+  why_it_fails_detail: z.string().optional(),
+  correct_reasoning: z.string().optional(),
+  approach_comparison: ApproachComparisonSchema.optional(),
+  code_comparison: CodeComparisonSchema.optional(),
+  key_takeaway: z.string().optional(),
 });
 
 export type SubmissionDiagnosis = z.infer<typeof SubmissionDiagnosisSchema>;

@@ -32,6 +32,7 @@ Globals:
         S3_BUCKET: !Ref RawSubmissionsBucket
         OPENSEARCH_URL: !Ref OpenSearchEndpoint
         AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+        OPENAI_MODEL: 'gpt-4o-mini'
 
 Resources:
   ##############################################################################

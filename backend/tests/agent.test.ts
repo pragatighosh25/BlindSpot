@@ -389,3 +389,41 @@ test("Test 11 - Persistence: Saves and verifies analysis in DynamoDB", async () 
   assert.ok(savedWeaknesses[0].failure_mode);
 });
 
+// -------------------------------------------------------------
+// Test 12: OpenAI Response Extraction & Schema Validation
+// -------------------------------------------------------------
+test("Test 12 - OpenAI: Correctly extracts and parses OpenAI completion response structure", async () => {
+  const { extractJsonFromResponse } = await import("../services/agent/llm.js");
+
+  // Simulated raw output from OpenAI chat.completions (choices[0].message.content)
+  const simulatedOpenAiText = `
+  \`\`\`json
+  {
+    "submission_id": "test_openai_01",
+    "topic": "Binary Search",
+    "verdict": "WA",
+    "failure_pattern": "boundary_condition_error",
+    "failure_mode": "Strict Inequality Off-by-One",
+    "root_cause": "The while loop uses left < right instead of left <= right.",
+    "why_it_fails": "Fails when target is located at the rightmost index.",
+    "correct_concept": "Binary search on closed interval [left, right] requires left <= right.",
+    "suggested_fix": "Change while (left < right) to while (left <= right).",
+    "code_location": "line 4 while loop",
+    "explanation": "Off-by-one boundary failure.",
+    "confidence": 0.95,
+    "is_failure": true
+  }
+  \`\`\`
+  `;
+
+  const parsed = extractJsonFromResponse(simulatedOpenAiText);
+  const validated = SubmissionDiagnosisSchema.safeParse(parsed);
+
+  assert.equal(validated.success, true);
+  if (validated.success) {
+    assert.equal(validated.data.failure_pattern, "boundary_condition_error");
+    assert.equal(validated.data.confidence, 0.95);
+    assert.equal(validated.data.topic, "Binary Search");
+  }
+});
+

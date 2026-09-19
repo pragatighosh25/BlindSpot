@@ -379,59 +379,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           />
         </div>
 
-        {/* 01 / Scroll-Driven Editorial Diagnostic Process */}
-        <DiagnosticScrollSection onLaunchDemo={onLaunchDemo} />
-
-        {/* 02 / Capabilities Stamp Board (WeMakeDevs Stamp Style with Hover Tilts) */}
-        <section id="stamps" className="border-b border-white/10 px-6 py-14 md:py-20 relative">
-          <div className="crosshair-corner -top-[4px] -left-[4px]" />
-          <div className="crosshair-corner -top-[4px] -right-[4px]" />
-
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
-            <div>
-              <div className="font-mono text-xs uppercase tracking-widest text-[#E4007C] font-semibold">
-                02 / CAPABILITY MATRIX
-              </div>
-              <h2 className="mt-2 text-3xl sm:text-4xl font-bold font-mono text-white tracking-tight">
-                Stamped for High-Performance Coding.
-              </h2>
-            </div>
-            <p className="text-xs font-mono text-white/50 md:text-right max-w-xs">
-              Every engine module validated across 37 real LeetCode & Codeforces submissions.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {stamps.map((stamp, i) => (
-              <div
-                key={i}
-                className={`stamp-badge ${stamp.isPink ? "stamp-badge-pink" : "hover:border-[#E4007C]"}`}
-                style={{ transform: `rotate(${stamp.rotate})` }}
-              >
-                <div className="mb-2 text-[#E4007C]">{stamp.icon}</div>
-                <div className="font-mono text-xs font-bold text-white mb-0.5">{stamp.title}</div>
-                <div className="font-mono text-[9px] uppercase tracking-wider text-white/50 mb-2">{stamp.sub}</div>
-                <p className="text-[10px] text-white/60 font-sans leading-tight">{stamp.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 03 / Method Comparison (Notebook Split Screen) */}
+        {/* 01 / Method Comparison (Notebook Split Screen) */}
         <section id="comparison" className="border-b border-white/10 px-6 py-14 md:py-20 relative">
           <div className="crosshair-corner -top-[4px] -left-[4px]" />
           <div className="crosshair-corner -top-[4px] -right-[4px]" />
 
           <div className="max-w-2xl mx-auto text-center mb-12">
             <div className="font-mono text-xs uppercase tracking-widest text-[#E4007C] font-semibold">
-              03 / THE GROWTH METHOD
+              01 / THE GROWTH METHOD
             </div>
             <h2 className="mt-2 text-3xl sm:text-4xl font-bold font-mono text-white tracking-tight">
               Targeted Intervals vs Random Grinding.
             </h2>
-            <p className="mt-3 text-sm text-white/60 font-sans">
-              Why random grinding wastes hundreds of hours while spaced diagnostic repetition locks in invariants.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
@@ -481,15 +440,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </section>
 
+        {/* 01 / Scroll-Driven Editorial Diagnostic Process */}
+        <DiagnosticScrollSection onLaunchDemo={onLaunchDemo} />
+
+        
+
+        
+
         {/* 04 / Final Launch CTA */}
         <section className="px-6 py-16 md:py-24 text-center relative">
           <div className="crosshair-corner -top-[4px] -left-[4px]" />
           <div className="crosshair-corner -top-[4px] -right-[4px]" />
 
           <div className="max-w-3xl mx-auto space-y-6">
-            <span className="badge-pill-accent">
-              READY TO ELIMINATE BLIND SPOTS?
-            </span>
+            
             <h2 className="text-3xl sm:text-5xl font-black font-mono text-white tracking-tight">
               Start Your Algorithmic Evolution.
             </h2>

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BlindSpot — AI Competitive-Programming Coach",
+  title: "BlindSpot",
   description:
     "Analyze LeetCode & Codeforces submissions, detect recurring algorithmic failure patterns, and eliminate blind spots with targeted spaced repetition.",
 };

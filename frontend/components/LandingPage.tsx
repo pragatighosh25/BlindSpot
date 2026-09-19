@@ -636,66 +636,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* Comprehensive Modern Footer */}
         <footer className="border-t border-white/10 bg-[#080808] text-xs font-sans text-white/60">
           <div className="max-w-6xl mx-auto px-6 py-14">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-              {/* Brand Col (2 spans) */}
-              <div className="lg:col-span-2 space-y-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#E4007C] to-[#990053] flex items-center justify-center text-white font-mono font-black text-sm shadow-[0_0_16px_rgba(228,0,124,0.4)]">
-                    BS
-                  </div>
-                  <span className="font-mono font-bold text-lg text-white tracking-wider">
-                    Blind<span className="text-[#E4007C]">Spot</span>
-                  </span>
-                </div>
-                <p className="text-xs text-white/60 font-sans leading-relaxed max-w-sm">
-                  Autonomous AI diagnostics and memory-retention spaced repetition for competitive programmers. Turning repeated failure patterns into permanent algorithmic mastery.
-                </p>
-                <div className="flex items-center gap-2 pt-2">
-                  <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#00FF9C]/10 border border-[#00FF9C]/20 text-[#00FF9C] text-[11px] font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00FF9C] animate-pulse" />
-                    <span>All Systems Operational</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Product Col */}
-              <div className="space-y-3 font-mono text-xs">
-                <h4 className="text-white font-bold tracking-wider uppercase text-[11px]">Product</h4>
-                <ul className="space-y-2 text-white/60 font-sans text-xs">
-                  <li><a href="#pipeline" className="hover:text-white transition-colors">Diagnostic Ledger</a></li>
-                  <li><a href="#demo" className="hover:text-white transition-colors">Failure Modes</a></li>
-                  <li><a href="#pipeline" className="hover:text-white transition-colors">Spaced Repetition</a></li>
-                  <li><button onClick={onLaunchDemo} className="hover:text-white transition-colors text-left">Live Workspace</button></li>
-                  <li><button onClick={() => onOpenAuth("signup")} className="hover:text-white transition-colors text-left">Connect Accounts</button></li>
-                </ul>
-              </div>
-
-              {/* Platforms Col */}
-              <div className="space-y-3 font-mono text-xs">
-                <h4 className="text-white font-bold tracking-wider uppercase text-[11px]">Platforms</h4>
-                <ul className="space-y-2 text-white/60 font-sans text-xs">
-                  <li><span className="hover:text-white transition-colors">LeetCode API</span></li>
-                  <li><span className="hover:text-white transition-colors">Codeforces API</span></li>
-                  <li><span className="hover:text-white transition-colors">OpenSearch Engine</span></li>
-                  <li><span className="hover:text-white transition-colors">DynamoDB Storage</span></li>
-                  <li><span className="hover:text-white transition-colors">Strands LLM Agent</span></li>
-                </ul>
-              </div>
-
-              {/* Resources Col */}
-              <div className="space-y-3 font-mono text-xs">
-                <h4 className="text-white font-bold tracking-wider uppercase text-[11px]">Resources</h4>
-                <ul className="space-y-2 text-white/60 font-sans text-xs">
-                  <li><span className="hover:text-white transition-colors">SM-2 Algorithm Guide</span></li>
-                  <li><span className="hover:text-white transition-colors">Algorithmic Invariants</span></li>
-                  <li><span className="hover:text-white transition-colors">Privacy &amp; Terms</span></li>
-                  <li><span className="hover:text-white transition-colors">System Status</span></li>
-                </ul>
-              </div>
-            </div>
+            
 
             {/* Bottom Bar */}
-            <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/40">
+            <div className="mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/40">
               <div>
                 &copy; {new Date().getFullYear()} BlindSpot. All rights reserved. Built for competitive programmers.
               </div>

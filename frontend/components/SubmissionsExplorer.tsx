@@ -103,7 +103,7 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
               {submissions.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="text-center py-8 text-white/40 italic font-sans">
-                    No matching submissions found in OpenSearch.
+                    No matching submissions found.
                   </td>
                 </tr>
               ) : (

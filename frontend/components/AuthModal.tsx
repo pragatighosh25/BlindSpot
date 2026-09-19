@@ -259,10 +259,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Modal Title */}
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#00FF9C] animate-pulse" />
-            <span className="badge-pill-accent">
-              BLINDSPOT DYNAMIC ACCESS
-            </span>
           </div>
           <h2 className="text-2xl font-bold font-mono text-white tracking-tight">
             {tab === "demo"
@@ -271,13 +267,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ? "Welcome Back"
               : "Verify & Connect Handles"}
           </h2>
-          <p className="text-xs text-white/60 mt-1">
-            {tab === "demo"
-              ? "Explore verified diagnostics with pre-configured developer profiles."
-              : tab === "login"
-              ? "Access your personalized spaced repetition practice queue."
-              : "Connect and verify your LeetCode and Codeforces accounts."}
-          </p>
         </div>
 
         {/* Tab Navigation */}
@@ -357,10 +346,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <span className="font-bold text-white">@pragatighosh</span>
                 </div>
               </div>
-
-              <div className="text-[11px] text-white/60 leading-relaxed font-sans pt-1">
-                Loads real submissions, OpenSearch indices, Strands AI reasoning diagnoses, and spaced repetition practice without manual handle setup.
-              </div>
             </div>
 
             <button
@@ -368,8 +353,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               disabled={isLoading}
               className="w-full btn-weevolve-primary py-3 px-4 flex items-center justify-center gap-2 text-xs"
             >
-              <Sparkles size={15} />
-              {isLoading ? "Launching Demo Workspace..." : "Launch Demo Account Now"}
+              
+              {isLoading ? "Launching Workspace..." : "Launch Demo"}
               
             </button>
           </div>

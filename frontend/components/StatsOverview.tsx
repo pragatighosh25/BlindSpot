@@ -34,7 +34,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
             {totalSubmissions}
           </div>
           <div className="flex items-center gap-1.5 text-xs font-mono text-white/50 pt-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00FF9C]" />
+            
             <span>LeetCode + Codeforces Live</span>
           </div>
         </div>

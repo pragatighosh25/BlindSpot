@@ -452,3 +452,29 @@ test("Test 12 - Gemini: Correctly extracts and parses Gemini completion response
   }
 });
 
+// -------------------------------------------------------------
+// Test 13: LLM Provider Telemetry & Secret Sanitization
+// -------------------------------------------------------------
+test("Test 13 - Telemetry: Verifies provider telemetry tracking and key sanitization", async () => {
+  const { getLLMTelemetry, recordLLMTelemetry, sanitizeErrorMessage } = await import("../services/agent/llm.js");
+
+  // Verify telemetry retrieval
+  const telemetry = getLLMTelemetry();
+  assert.equal(telemetry.provider, "Gemini");
+  assert.ok(telemetry.model);
+  assert.ok(["GEMINI", "FALLBACK"].includes(telemetry.source));
+
+  // Verify telemetry recording
+  recordLLMTelemetry({ source: "FALLBACK", lastError: "Test error notice" });
+  const updatedTelemetry = getLLMTelemetry();
+  assert.equal(updatedTelemetry.source, "FALLBACK");
+  assert.equal(updatedTelemetry.lastError, "Test error notice");
+
+  // Verify secret sanitization prevents leakage
+  const rawLeakMessage = "Google API call failed with key AIzaSyA12345678901234567890123456789012 and token xyz";
+  const sanitized = sanitizeErrorMessage(rawLeakMessage);
+  assert.equal(sanitized.includes("AIzaSyA12345678901234567890123456789012"), false);
+  assert.ok(sanitized.includes("[REDACTED_API_KEY]"));
+});
+
+

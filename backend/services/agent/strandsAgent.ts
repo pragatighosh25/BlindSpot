@@ -12,7 +12,7 @@ import {
 } from "./types";
 import { diagnoseSubmissionPattern } from "./agent";
 import { SYSTEM_PROMPT, buildSingleSubmissionPrompt } from "./prompts";
-import { invokeLLM, extractJsonFromResponse } from "./llm";
+import { invokeLLM, extractJsonFromResponse, recordLLMTelemetry, sanitizeErrorMessage } from "./llm";
 import {
   getUserSubmissions,
   getFailedSubmissions,
@@ -78,16 +78,37 @@ Return ONLY a valid JSON array of objects matching this exact structure:
           }
         }
         if (validated.length > 0) {
+          console.log(`[LLM] Analysis source: GEMINI`);
           console.log(`[Strands Agent] Generated ${validated.length} dynamic targeted recommendations via Gemini.`);
+          recordLLMTelemetry({
+            source: "GEMINI",
+          });
           return validated;
+        } else {
+          const errorMsg = "Schema validation failed for recommendations response";
+          console.log(`[LLM] Gemini request failed: ${errorMsg}`);
+          recordLLMTelemetry({
+            source: "FALLBACK",
+            lastError: errorMsg,
+          });
         }
       }
     }
   } catch (err) {
-    console.warn(`[Strands Agent LLM recommendation notice]: ${(err as Error).message}`);
+    const safeError = sanitizeErrorMessage((err as Error).message || "Unknown error during recommendation parsing");
+    console.log(`[LLM] Gemini request failed: ${safeError}`);
+    recordLLMTelemetry({
+      source: "FALLBACK",
+      lastError: safeError,
+    });
   }
 
   // Dynamic fallback: Generate tailored practice recommendations dynamically derived from the diagnosed weak topics
+  console.log(`[LLM] Falling back to deterministic analysis`);
+  console.log(`[LLM] Analysis source: FALLBACK`);
+  recordLLMTelemetry({
+    source: "FALLBACK",
+  });
   const dynamicFallback: RecommendedProblem[] = [];
   const seenIds = new Set<string>();
 
@@ -223,14 +244,35 @@ export async function analyzeSingleSubmissionWithStrands(
       const parsedJson = extractJsonFromResponse<SubmissionDiagnosis>(rawLlmResponse);
       const validated = SubmissionDiagnosisSchema.safeParse(parsedJson);
       if (validated.success) {
+        console.log(`[LLM] Analysis source: GEMINI`);
+        recordLLMTelemetry({
+          source: "GEMINI",
+        });
         return validated.data;
+      } else {
+        const errorMsg = "Schema validation failed for model response";
+        console.log(`[LLM] Gemini request failed: ${errorMsg}`);
+        recordLLMTelemetry({
+          source: "FALLBACK",
+          lastError: errorMsg,
+        });
       }
     }
   } catch (err) {
-    console.warn(`[Strands LLM diagnosis note]: ${(err as Error).message}. Using expert rule engine.`);
+    const safeError = sanitizeErrorMessage((err as Error).message || "Unknown error during diagnosis parsing");
+    console.log(`[LLM] Gemini request failed: ${safeError}`);
+    recordLLMTelemetry({
+      source: "FALLBACK",
+      lastError: safeError,
+    });
   }
 
   // Deterministic expert engine fallback
+  console.log(`[LLM] Falling back to deterministic analysis`);
+  console.log(`[LLM] Analysis source: FALLBACK`);
+  recordLLMTelemetry({
+    source: "FALLBACK",
+  });
   return diagnoseSubmissionPattern(submission);
 }
 

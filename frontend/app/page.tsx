@@ -329,37 +329,6 @@ export default function App() {
                   isLive={isLiveMode}
                 />
 
-                {/* Strands AI Agent Reasoning Banner */}
-                {analysis?.summary && (
-                  <div className="card-candle-glow p-5 border-[#E4007C]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-                    <div className="flex items-start gap-3.5">
-                      
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                            Strands AI Agent Reasoning Summary
-                          </h4>
-                          {analysis.analyzed_at && (
-                            <span className="text-[10px] font-mono text-white/40">
-                              &bull; Updated {new Date(analysis.analyzed_at).toLocaleTimeString()}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs font-sans text-white/80 mt-1 leading-relaxed">
-                          {analysis.summary}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleRunAnalysis}
-                      disabled={isAnalyzing}
-                      className="shrink-0 btn-weevolve-secondary text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      {isAnalyzing ? "Running Strands..." : "Run Fresh Analysis"}
-                    </button>
-                  </div>
-                )}
-
                 {/* Mined Algorithmic Blind Spots */}
                 {analysis && (
                   <WeaknessSection

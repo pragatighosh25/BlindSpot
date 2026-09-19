@@ -1,0 +1,442 @@
+[
+  {
+    "submission_id": "lc_pragatighosh25_1789577443_0",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "20",
+      "title": "Valid Parentheses",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "String",
+        "Stack",
+        "Bracket Sequences"
+      ],
+      "url": "https://leetcode.com/problems/valid-parentheses/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789577443,
+      "code": "// LeetCode Problem: Valid Parentheses\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789479000_1",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "118",
+      "title": "Pascal's Triangle",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Array",
+        "Dynamic Programming"
+      ],
+      "url": "https://leetcode.com/problems/pascals-triangle/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789479000,
+      "code": "// LeetCode Problem: Pascal's Triangle\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789478028_2",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1137",
+      "title": "N-th Tribonacci Number",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Math",
+        "Dynamic Programming",
+        "Memoization"
+      ],
+      "url": "https://leetcode.com/problems/n-th-tribonacci-number/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789478028,
+      "code": "// LeetCode Problem: N-th Tribonacci Number\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789477942_3",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1137",
+      "title": "N-th Tribonacci Number",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Math",
+        "Dynamic Programming",
+        "Memoization"
+      ],
+      "url": "https://leetcode.com/problems/n-th-tribonacci-number/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "RE",
+      "timestamp": 1789477942,
+      "code": "// LeetCode Problem: N-th Tribonacci Number\n// Language: cpp\n// Verdict: Runtime Error\n// User: @pragatighosh25",
+      "error_message": "Verdict: Runtime Error"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789477683_4",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "746",
+      "title": "Min Cost Climbing Stairs",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Array",
+        "Dynamic Programming"
+      ],
+      "url": "https://leetcode.com/problems/min-cost-climbing-stairs/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789477683,
+      "code": "// LeetCode Problem: Min Cost Climbing Stairs\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789405300_5",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "13",
+      "title": "Roman to Integer",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Hash Table",
+        "Math",
+        "String"
+      ],
+      "url": "https://leetcode.com/problems/roman-to-integer/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789405300,
+      "code": "// LeetCode Problem: Roman to Integer\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789321217_6",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "404",
+      "title": "Sum of Left Leaves",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Tree",
+        "Depth-First Search",
+        "Breadth-First Search",
+        "Binary Tree"
+      ],
+      "url": "https://leetcode.com/problems/sum-of-left-leaves/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789321217,
+      "code": "// LeetCode Problem: Sum of Left Leaves\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789321072_7",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "404",
+      "title": "Sum of Left Leaves",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Tree",
+        "Depth-First Search",
+        "Breadth-First Search",
+        "Binary Tree"
+      ],
+      "url": "https://leetcode.com/problems/sum-of-left-leaves/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "timestamp": 1789321072,
+      "code": "// LeetCode Problem: Sum of Left Leaves\n// Language: cpp\n// Verdict: Wrong Answer\n// User: @pragatighosh25",
+      "error_message": "Verdict: Wrong Answer"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789320417_8",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1971",
+      "title": "Find if Path Exists in Graph",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Depth-First Search",
+        "Breadth-First Search",
+        "Union-Find",
+        "Graph Theory"
+      ],
+      "url": "https://leetcode.com/problems/find-if-path-exists-in-graph/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789320417,
+      "code": "// LeetCode Problem: Find if Path Exists in Graph\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789320308_9",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1971",
+      "title": "Find if Path Exists in Graph",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Depth-First Search",
+        "Breadth-First Search",
+        "Union-Find",
+        "Graph Theory"
+      ],
+      "url": "https://leetcode.com/problems/find-if-path-exists-in-graph/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "timestamp": 1789320308,
+      "code": "// LeetCode Problem: Find if Path Exists in Graph\n// Language: cpp\n// Verdict: Wrong Answer\n// User: @pragatighosh25",
+      "error_message": "Verdict: Wrong Answer"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789319638_10",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "463",
+      "title": "Island Perimeter",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Array",
+        "Depth-First Search",
+        "Breadth-First Search",
+        "Matrix"
+      ],
+      "url": "https://leetcode.com/problems/island-perimeter/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789319638,
+      "code": "// LeetCode Problem: Island Perimeter\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789319362_11",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "463",
+      "title": "Island Perimeter",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Array",
+        "Depth-First Search",
+        "Breadth-First Search",
+        "Matrix"
+      ],
+      "url": "https://leetcode.com/problems/island-perimeter/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "timestamp": 1789319362,
+      "code": "// LeetCode Problem: Island Perimeter\n// Language: cpp\n// Verdict: Wrong Answer\n// User: @pragatighosh25",
+      "error_message": "Verdict: Wrong Answer"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789224245_12",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "4050",
+      "title": "Minimum Days to Score Exactly N Points",
+      "difficulty": "Medium",
+      "topic_tags": [
+        "Math",
+        "Dynamic Programming"
+      ],
+      "url": "https://leetcode.com/problems/minimum-days-to-score-exactly-n-points/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789224245,
+      "code": "// LeetCode Problem: Minimum Days to Score Exactly N Points\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789223834_13",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "4049",
+      "title": "Count Values With Equally Spaced Occurrences II",
+      "difficulty": "Medium",
+      "topic_tags": [
+        "Array",
+        "Hash Table"
+      ],
+      "url": "https://leetcode.com/problems/count-values-with-equally-spaced-occurrences-ii/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789223834,
+      "code": "// LeetCode Problem: Count Values With Equally Spaced Occurrences II\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789223661_14",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "4048",
+      "title": "Count Values With Equally Spaced Occurrences I",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Array",
+        "Hash Table"
+      ],
+      "url": "https://leetcode.com/problems/count-values-with-equally-spaced-occurrences-i/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789223661,
+      "code": "// LeetCode Problem: Count Values With Equally Spaced Occurrences I\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789148520_15",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "345",
+      "title": "Reverse Vowels of a String",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Two Pointers",
+        "String"
+      ],
+      "url": "https://leetcode.com/problems/reverse-vowels-of-a-string/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789148520,
+      "code": "// LeetCode Problem: Reverse Vowels of a String\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789148373_16",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "345",
+      "title": "Reverse Vowels of a String",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Two Pointers",
+        "String"
+      ],
+      "url": "https://leetcode.com/problems/reverse-vowels-of-a-string/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "WA",
+      "timestamp": 1789148373,
+      "code": "// LeetCode Problem: Reverse Vowels of a String\n// Language: cpp\n// Verdict: Wrong Answer\n// User: @pragatighosh25",
+      "error_message": "Verdict: Wrong Answer"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789147742_17",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1209",
+      "title": "Remove All Adjacent Duplicates in String II",
+      "difficulty": "Medium",
+      "topic_tags": [
+        "String",
+        "Stack"
+      ],
+      "url": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789147742,
+      "code": "// LeetCode Problem: Remove All Adjacent Duplicates in String II\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1789147005_18",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "1047",
+      "title": "Remove All Adjacent Duplicates In String",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "String",
+        "Stack"
+      ],
+      "url": "https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string/"
+    },
+    "submission": {
+      "language": "cpp",
+      "verdict": "AC",
+      "timestamp": 1789147005,
+      "code": "// LeetCode Problem: Remove All Adjacent Duplicates In String\n// Language: cpp\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  },
+  {
+    "submission_id": "lc_pragatighosh25_1788978248_19",
+    "user_id": "pragatighosh25",
+    "platform": "leetcode",
+    "problem": {
+      "id": "175",
+      "title": "Combine Two Tables",
+      "difficulty": "Easy",
+      "topic_tags": [
+        "Database"
+      ],
+      "url": "https://leetcode.com/problems/combine-two-tables/"
+    },
+    "submission": {
+      "language": "mysql",
+      "verdict": "AC",
+      "timestamp": 1788978248,
+      "code": "// LeetCode Problem: Combine Two Tables\n// Language: mysql\n// Verdict: Accepted\n// User: @pragatighosh25"
+    }
+  }
+]

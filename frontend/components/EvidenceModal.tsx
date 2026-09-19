@@ -14,6 +14,8 @@ import {
   Target,
   AlertTriangle,
   Info,
+  Ban,
+  CheckCircle2,
 } from "lucide-react";
 
 interface EvidenceModalProps {
@@ -112,6 +114,9 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
 
   const yourApproachBullets = analysis?.approach_comparison?.your_approach || [];
   const correctApproachBullets = analysis?.approach_comparison?.correct_approach || [];
+
+  const confidenceVal = analysis?.confidence ?? weakness.confidence;
+  const confidenceDisplay = confidenceVal !== undefined ? `${Math.round(confidenceVal > 1 ? confidenceVal : confidenceVal * 100)}%` : null;
 
   const runtimeDisplay = selectedSub?.submission?.runtime_ms !== undefined
     ? `${selectedSub.submission.runtime_ms} ms / ${selectedSub.submission.memory_mb !== undefined ? selectedSub.submission.memory_mb + " MB" : "N/A"}`
@@ -286,108 +291,102 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                   </div>
                 </div>
                 {/* 3. AI ANALYSIS (STRANDS AGENT) */}
-                <div className="p-4 sm:p-5 bg-[#141414] rounded-2xl border border-[#E4007C]/30 space-y-4">
-                  <div className="flex items-center justify-between pb-2.5">
-                    <div className="flex items-center gap-2">
-                      
+                <div className="p-4 sm:p-5 bg-[#141414] rounded-2xl border border-white/10 space-y-4">
+                  {/* Section: What went wrong / Root Cause Diagnosis */}
+                  {whatWentWrong && (
+                    <div className="bg-[#0A0A0A] p-4 rounded-xl border border-white/10">
+                      <div className="text-xs font-mono font-semibold text-rose-400 mb-1.5 uppercase tracking-wider">
+                        Root Cause Diagnosis
+                      </div>
+                      <p className="text-xs sm:text-sm font-sans text-white/90 leading-relaxed">
+                        {whatWentWrong}
+                      </p>
                     </div>
-                  </div>
+                  )}
 
-                  {/* Section: What went wrong? */}
-                  <div>
-                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#E4007C] mb-2">
-                      <span>Root Cause Diagnosis</span>
-                    </div>
-                    <p className="text-sm font-sans text-white/90 leading-relaxed bg-[#0A0A0A] p-3.5 rounded-xl border border-white/10">
-                      {whatWentWrong || "No root cause diagnosis recorded for this submission yet."}
-                    </p>
-                  </div>
+                  {/* Two-column Analysis Structure */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                    {/* Left Column: ISSUE ANALYSIS */}
+                    <div className="bg-[#0A0A0A] p-4 sm:p-5 rounded-2xl border border-white/10 flex flex-col justify-between h-full space-y-4">
+                      <div className="space-y-4">
+                        <div className="text-xs font-mono font-semibold text-rose-400 uppercase tracking-wider">
+                          ISSUE ANALYSIS
+                        </div>
 
-                  {/* Section: Why it fails & Correct Concept */}
-                  {(whyItFails || correctConcept) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      {whyItFails && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-1.5">
-                          <div className="text-xs font-mono font-bold text-rose-400">
-                            Why It Violates Constraints
-                          </div>
+                        {whyItFails && (
                           <p className="text-xs text-white/80 font-sans leading-relaxed">
                             {whyItFails}
                           </p>
-                        </div>
-                      )}
+                        )}
 
-                      {correctConcept && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-1.5">
-                          <div className="text-xs font-mono font-bold text-[#00FF9C]">
-                            Algorithmic Invariant / Fix Strategy
+                        {yourApproachBullets.length > 0 && (
+                          <div className="space-y-2 pt-1">
+                            <div className="text-xs font-mono font-medium text-rose-300/90">
+                              Your approach:
+                            </div>
+                            <ul className="space-y-1.5 text-xs font-sans text-white/85 leading-relaxed">
+                              {yourApproachBullets.map((bullet, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="text-rose-400/70 shrink-0 mt-0.5">•</span>
+                                  <span>{bullet}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right Column: CORRECT APPROACH */}
+                    <div className="bg-[#0A0A0A] p-4 sm:p-5 rounded-2xl border border-white/10 flex flex-col justify-between h-full space-y-4">
+                      <div className="space-y-4">
+                        <div className="text-xs font-mono font-semibold text-emerald-400 uppercase tracking-wider">
+                          CORRECT APPROACH
+                        </div>
+
+                        {correctConcept && (
                           <p className="text-xs text-white/80 font-sans leading-relaxed">
                             {correctConcept}
                           </p>
-                          {suggestedFix && (
-                            <p className="text-xs text-white/60 font-mono pt-1">
-                              Fix: {suggestedFix}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
 
-                  {/* Section: Approach Comparison (if provided by agent) */}
-                  {(yourApproachBullets.length > 0 || correctApproachBullets.length > 0) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
-                      {yourApproachBullets.length > 0 && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-2">
-                          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#E4007C]">
-                            
-                            <span>Your approach (inferred)</span>
+                        {suggestedFix && (
+                          <div className="bg-[#070707] p-3 rounded-lg border border-white/5 font-mono text-xs text-white/85 overflow-x-auto whitespace-pre-wrap leading-relaxed">
+                            {suggestedFix}
                           </div>
-                          <ul className="space-y-1.5 text-xs font-sans text-white/85 leading-relaxed">
-                            {yourApproachBullets.map((bullet, idx) => (
-                              <li key={idx} className="flex items-start gap-2">
-                                <span className="text-rose-400 shrink-0 mt-0.5">•</span>
-                                <span>{bullet}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                        )}
 
-                      {correctApproachBullets.length > 0 && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-2">
-                          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#00FF9C]">
-                            
-                            <span>Correct approach</span>
+                        {correctApproachBullets.length > 0 && (
+                          <div className="space-y-2 pt-1">
+                            <div className="text-xs font-mono font-medium text-emerald-300/90">
+                              Why this works:
+                            </div>
+                            <ul className="space-y-1.5 text-xs font-sans text-white/85 leading-relaxed">
+                              {correctApproachBullets.map((bullet, idx) => (
+                                <li key={idx} className="flex items-start gap-2">
+                                  <span className="text-emerald-400/70 shrink-0 mt-0.5">•</span>
+                                  <span>{bullet}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <ul className="space-y-1.5 text-xs font-sans text-white/85 leading-relaxed">
-                            {correctApproachBullets.map((bullet, idx) => (
-                              <li key={idx} className="flex items-start gap-2">
-                                <span className="text-[#00FF9C] shrink-0 mt-0.5">•</span>
-                                <span>{bullet}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* 4. KEY TAKEAWAY (if available) */}
-                {keyTakeaway && (
-                  <div className="p-4 border border-[#00FF9C]/40 rounded-2xl flex items-start gap-3 shadow-lg shadow-[#00FF9C]/5">
-                    <div>
-                      <span className="text-xs font-mono font-bold text-[#00FF9C] uppercase tracking-wider block">
+                  {/* Key Takeaway: Separate row below Issue Analysis and Correct Approach */}
+                  {keyTakeaway && (
+                    <div className="bg-[#0A0A0A] p-4 rounded-xl border border-white/10">
+                      <div className="text-xs font-mono font-semibold text-emerald-400 mb-1.5 uppercase tracking-wider">
                         Key Takeaway
-                      </span>
-                      <p className="text-sm font-sans text-white/95 leading-relaxed mt-0.5 font-medium">
+                      </div>
+                      <p className="text-xs sm:text-sm font-sans text-white/90 leading-relaxed">
                         {keyTakeaway}
                       </p>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-xs font-mono text-white/40 h-full p-12 text-center">

@@ -3,10 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Cross,
-  LockOn,
-  ArrowRight,
-  ArrowLeft,
-  Sparkles,
   Check,
   CircleAlert,
   ArrowCycle,
@@ -50,6 +46,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Verification token for profile bio badge
+  const [verificationToken, setVerificationToken] = useState("");
+  const [copiedToken, setCopiedToken] = useState(false);
+
   // Platform Handles & Verification states
   const [leetcodeHandle, setLeetcodeHandle] = useState("");
   const [codeforcesHandle, setCodeforcesHandle] = useState("");
@@ -69,9 +69,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     error?: string;
     profile?: any;
   }>({ verifying: false, verified: false, failed: false });
-
-  // Verification token for optional profile bio badge
-  const [verificationToken, setVerificationToken] = useState("");
 
   // Loading & Global Error states
   const [isLoading, setIsLoading] = useState(false);
@@ -114,6 +111,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Email format validator
   const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
   const isPasswordValid = password.length >= 8;
+
+  const copyToken = () => {
+    if (!verificationToken) return;
+    navigator.clipboard.writeText(verificationToken);
+    setCopiedToken(true);
+    setTimeout(() => setCopiedToken(false), 2000);
+  };
 
   // 1-Click Instant Demo
   const handleLaunchDemo = () => {
@@ -270,7 +274,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Step 3: Probe LeetCode account existence
+  // Step 3: Probe LeetCode account existence & bio verification
   const handleVerifyLeetCode = async () => {
     if (!leetcodeHandle.trim()) {
       setLcStatus({
@@ -296,12 +300,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }),
       });
       const data = await res.json();
+
       if (!data.exists) {
         setLcStatus({
           verifying: false,
           verified: false,
           failed: true,
-          error: `LeetCode ID '${leetcodeHandle.trim()}' could not be found.`,
+          error: `LeetCode account @${leetcodeHandle.trim()} could not be found.`,
+        });
+      } else if (!data.verifiedOwnership) {
+        setLcStatus({
+          verifying: false,
+          verified: false,
+          failed: true,
+          error: data.message || `Account found, but verification code was not found in your bio. Please paste '${verificationToken}' in your LeetCode profile bio/summary and try again.`,
         });
       } else {
         setLcStatus({
@@ -321,7 +333,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // Step 4: Probe Codeforces account existence
+  // Step 4: Probe Codeforces account existence & profile verification
   const handleVerifyCodeforces = async () => {
     if (!codeforcesHandle.trim()) {
       setCfStatus({
@@ -347,12 +359,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }),
       });
       const data = await res.json();
+
       if (!data.exists) {
         setCfStatus({
           verifying: false,
           verified: false,
           failed: true,
-          error: `Codeforces ID '${codeforcesHandle.trim()}' could not be found.`,
+          error: `Codeforces ID @${codeforcesHandle.trim()} could not be found.`,
+        });
+      } else if (!data.verifiedOwnership) {
+        setCfStatus({
+          verifying: false,
+          verified: false,
+          failed: true,
+          error: data.message || `Account found, but verification code was not found in your profile info. Please add '${verificationToken}' to your First Name or Organization on codeforces.com and try again.`,
         });
       } else {
         setCfStatus({
@@ -382,7 +402,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     if (!hasVerifiedLeetCode && !hasVerifiedCodeforces) {
       setFormError(
-        "We couldn't verify either account. Please check your LeetCode and Codeforces IDs."
+        "We couldn't verify either account. Please ensure your verification code is in your bio/profile and verify your LeetCode or Codeforces ID."
       );
       return;
     }
@@ -463,12 +483,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Modal Header */}
         <div className="mb-5">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#E4007C] animate-pulse" />
-            <span className="text-[10px] font-mono tracking-widest uppercase text-white/60">
-              BlindSpot &bull; Access Studio
-            </span>
-          </div>
           <h2 className="text-2xl font-bold font-mono text-white tracking-tight">
             {tab === "demo"
               ? "Instant Demo Workspace"
@@ -476,13 +490,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               ? "Welcome Back"
               : "Create Your Account"}
           </h2>
-          <p className="text-xs text-white/50 font-mono mt-1">
-            {tab === "demo"
-              ? "Explore full AI diagnostic reports with pre-verified profiles."
-              : tab === "login"
-              ? "Enter your credentials to access your algorithmic practice graph."
-              : "Connect your competitive coding handles for automated error clustering."}
-          </p>
         </div>
 
         {/* Mode Selector Tabs */}
@@ -658,10 +665,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <span>Verifying Email &amp; Sending Code...</span>
                     </>
                   ) : (
-                    <>
-                      <span>Continue to Verification</span>
-                      <ArrowRight size={14} />
-                    </>
+                    <span>Continue to Verification</span>
                   )}
                 </button>
               </form>
@@ -672,7 +676,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <form onSubmit={handleStep2VerifyEmail} className="space-y-4 animate-in fade-in duration-150">
                 <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 space-y-3 font-mono text-xs">
                   <div className="flex items-center gap-2 text-white/90">
-                    <span className="text-base">✉️</span>
                     <span className="font-semibold">We sent a verification code to your email.</span>
                   </div>
                   <p className="text-white/50 text-[11px]">
@@ -718,7 +721,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     }}
                     className="py-3 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5"
                   >
-                    <ArrowLeft size={14} />
                     <span>Back</span>
                   </button>
 
@@ -733,23 +735,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         <span>Verifying...</span>
                       </>
                     ) : (
-                      <>
-                        <span>Verify Email</span>
-                        <ArrowRight size={14} />
-                      </>
+                      <span>Verify Email</span>
                     )}
                   </button>
                 </div>
               </form>
             )}
 
-            {/* STEP 3: CONNECT LEETCODE */}
+            {/* STEP 3: CONNECT LEETCODE (Bio Proof Verification) */}
             {signupStep === 3 && (
               <div className="space-y-4 animate-in fade-in duration-150">
                 <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 space-y-3 font-mono text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white flex items-center gap-2">
-                      <span className="text-[#FFA116] font-bold">LC</span> Connect LeetCode Account
+                    <span className="font-semibold text-white">
+                      Connect LeetCode Account
                     </span>
                     {lcStatus.verified && (
                       <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/20 font-bold">
@@ -758,41 +757,64 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     )}
                   </div>
 
-                  <p className="text-[11px] text-white/50">
-                    Enter your public LeetCode username to verify account existence and ingest submission telemetry.
-                  </p>
+                  {/* Bio Proof Instruction Box */}
+                  <div className="p-3 bg-[#141414] border border-white/10 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-white/70">1. Copy Verification Code:</span>
+                      <button
+                        type="button"
+                        onClick={copyToken}
+                        className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#00FF9C] font-mono transition-colors"
+                      >
+                        {copiedToken ? "✓ Copied!" : "Copy Code"}
+                      </button>
+                    </div>
+                    <div className="px-3 py-1.5 bg-black/60 rounded-lg border border-white/10 font-mono text-xs text-[#E4007C] select-all font-bold">
+                      {verificationToken}
+                    </div>
+                    <p className="text-[10px] text-white/50 leading-relaxed">
+                      2. Paste this code into your <strong>LeetCode profile summary/bio</strong> at <span className="text-white/80">leetcode.com/profile</span>, then enter your username below and click Verify.
+                    </p>
+                  </div>
 
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={leetcodeHandle}
-                      onChange={(e) => {
-                        setLeetcodeHandle(e.target.value);
-                        setLcStatus({ verifying: false, verified: false, failed: false });
-                      }}
-                      placeholder="e.g. tourist, pragatighosh25"
-                      className="flex-1 px-3.5 py-2 bg-[#141414] border border-white/15 rounded-xl text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#FFA116] transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleVerifyLeetCode}
-                      disabled={lcStatus.verifying || !leetcodeHandle.trim()}
-                      className="px-3.5 py-2 bg-[#FFA116] hover:bg-[#e08d10] disabled:opacity-50 text-black font-bold font-mono text-xs rounded-xl transition-colors flex items-center gap-1.5"
-                    >
-                      {lcStatus.verifying ? (
-                        <ArrowCycle size={12} className="animate-spin" />
-                      ) : (
-                        <Check size={12} />
-                      )}
-                      <span>Verify ID</span>
-                    </button>
+                  <div>
+                    <label className="block text-xs font-mono text-white/70 mb-1">
+                      LeetCode Username
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={leetcodeHandle}
+                        onChange={(e) => {
+                          setLeetcodeHandle(e.target.value);
+                          setLcStatus({ verifying: false, verified: false, failed: false });
+                        }}
+                        placeholder="e.g. tourist, pragatighosh25"
+                        className="flex-1 px-3.5 py-2.5 bg-[#141414] border border-white/15 rounded-xl text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#E4007C] transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleVerifyLeetCode}
+                        disabled={lcStatus.verifying || !leetcodeHandle.trim()}
+                        className="px-4 py-2.5 bg-[#E4007C] hover:bg-[#c20069] disabled:opacity-50 text-white font-bold font-mono text-xs rounded-xl shadow transition-colors flex items-center gap-1.5"
+                      >
+                        {lcStatus.verifying ? (
+                          <>
+                            <ArrowCycle size={12} className="animate-spin" />
+                            <span>Checking...</span>
+                          </>
+                        ) : (
+                          <span>Verify ID</span>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   {/* LeetCode Probe Result Feedback */}
                   {lcStatus.verified && (
                     <div className="p-3 rounded-xl bg-[#00FF9C]/10 border border-[#00FF9C]/30 text-[#00FF9C] text-[11px] space-y-1">
                       <div className="font-bold flex items-center gap-1">
-                        <Check size={12} strokeWidth={3} /> LeetCode account found &amp; verified!
+                        <Check size={12} strokeWidth={3} /> LeetCode profile ownership verified from bio!
                       </div>
                       <div className="text-white/70 text-[10px]">
                         ID: @{leetcodeHandle.trim()} &bull; Submissions ready for sync
@@ -803,10 +825,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   {lcStatus.failed && (
                     <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 text-[11px] space-y-1">
                       <div className="font-bold flex items-center gap-1 text-amber-400">
-                        <CircleAlert size={12} /> {lcStatus.error || "LeetCode ID could not be found."}
-                      </div>
-                      <div className="text-white/60 text-[10px]">
-                        You can check the ID, or continue to Codeforces (only 1 valid platform account is required).
+                        <CircleAlert size={12} /> {lcStatus.error || "LeetCode verification failed."}
                       </div>
                     </div>
                   )}
@@ -822,7 +841,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     }}
                     className="py-3 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5"
                   >
-                    <ArrowLeft size={14} />
                     <span>Back</span>
                   </button>
 
@@ -835,19 +853,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="flex-1 py-3 px-4 bg-[#E4007C] hover:bg-[#c20069] font-mono text-xs font-bold text-white rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
                   >
                     <span>Continue to Codeforces</span>
-                    <ArrowRight size={14} />
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 4: CONNECT CODEFORCES */}
+            {/* STEP 4: CONNECT CODEFORCES (Profile Verification) */}
             {signupStep === 4 && (
               <div className="space-y-4 animate-in fade-in duration-150">
                 <div className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 space-y-3 font-mono text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-white flex items-center gap-2">
-                      <span className="text-[#318CE7] font-bold">CF</span> Connect Codeforces Account
+                    <span className="font-semibold text-white">
+                      Connect Codeforces Account
                     </span>
                     {cfStatus.verified && (
                       <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/20 font-bold">
@@ -856,41 +873,64 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     )}
                   </div>
 
-                  <p className="text-[11px] text-white/50">
-                    Enter your Codeforces handle to verify account existence and track rating &amp; contest telemetry.
-                  </p>
+                  {/* Bio Proof Instruction Box */}
+                  <div className="p-3 bg-[#141414] border border-white/10 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-white/70">1. Copy Verification Code:</span>
+                      <button
+                        type="button"
+                        onClick={copyToken}
+                        className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#00FF9C] font-mono transition-colors"
+                      >
+                        {copiedToken ? "✓ Copied!" : "Copy Code"}
+                      </button>
+                    </div>
+                    <div className="px-3 py-1.5 bg-black/60 rounded-lg border border-white/10 font-mono text-xs text-[#E4007C] select-all font-bold">
+                      {verificationToken}
+                    </div>
+                    <p className="text-[10px] text-white/50 leading-relaxed">
+                      2. Paste this code into your <strong>Codeforces profile</strong> (e.g. First Name or Organization at <span className="text-white/80">codeforces.com/settings/social</span>), then click Verify.
+                    </p>
+                  </div>
 
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={codeforcesHandle}
-                      onChange={(e) => {
-                        setCodeforcesHandle(e.target.value);
-                        setCfStatus({ verifying: false, verified: false, failed: false });
-                      }}
-                      placeholder="e.g. tourist, Petr, pragatighosh"
-                      className="flex-1 px-3.5 py-2 bg-[#141414] border border-white/15 rounded-xl text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#318CE7] transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleVerifyCodeforces}
-                      disabled={cfStatus.verifying || !codeforcesHandle.trim()}
-                      className="px-3.5 py-2 bg-[#318CE7] hover:bg-[#2374c4] disabled:opacity-50 text-white font-bold font-mono text-xs rounded-xl transition-colors flex items-center gap-1.5"
-                    >
-                      {cfStatus.verifying ? (
-                        <ArrowCycle size={12} className="animate-spin" />
-                      ) : (
-                        <Check size={12} />
-                      )}
-                      <span>Verify ID</span>
-                    </button>
+                  <div>
+                    <label className="block text-xs font-mono text-white/70 mb-1">
+                      Codeforces Handle
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={codeforcesHandle}
+                        onChange={(e) => {
+                          setCodeforcesHandle(e.target.value);
+                          setCfStatus({ verifying: false, verified: false, failed: false });
+                        }}
+                        placeholder="e.g. tourist, Petr, pragatighosh"
+                        className="flex-1 px-3.5 py-2.5 bg-[#141414] border border-white/15 rounded-xl text-xs font-mono text-white placeholder-white/30 focus:outline-none focus:border-[#E4007C] transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleVerifyCodeforces}
+                        disabled={cfStatus.verifying || !codeforcesHandle.trim()}
+                        className="px-4 py-2.5 bg-[#E4007C] hover:bg-[#c20069] disabled:opacity-50 text-white font-bold font-mono text-xs rounded-xl shadow transition-colors flex items-center gap-1.5"
+                      >
+                        {cfStatus.verifying ? (
+                          <>
+                            <ArrowCycle size={12} className="animate-spin" />
+                            <span>Checking...</span>
+                          </>
+                        ) : (
+                          <span>Verify ID</span>
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Codeforces Probe Result Feedback */}
                   {cfStatus.verified && (
                     <div className="p-3 rounded-xl bg-[#00FF9C]/10 border border-[#00FF9C]/30 text-[#00FF9C] text-[11px] space-y-1">
                       <div className="font-bold flex items-center gap-1">
-                        <Check size={12} strokeWidth={3} /> Codeforces handle found &amp; verified!
+                        <Check size={12} strokeWidth={3} /> Codeforces handle ownership verified!
                       </div>
                       <div className="text-white/70 text-[10px]">
                         Handle: @{codeforcesHandle.trim()} &bull; Rating: {cfStatus.profile?.rating || "Active"}
@@ -901,7 +941,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   {cfStatus.failed && (
                     <div className="p-3 rounded-xl bg-amber-950/40 border border-amber-500/40 text-amber-200 text-[11px] space-y-1">
                       <div className="font-bold flex items-center gap-1 text-amber-400">
-                        <CircleAlert size={12} /> {cfStatus.error || "Codeforces ID could not be found."}
+                        <CircleAlert size={12} /> {cfStatus.error || "Codeforces verification failed."}
                       </div>
                       <div className="text-white/60 text-[10px]">
                         If your LeetCode account is verified, you can still continue to create your account!
@@ -911,32 +951,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
 
                 {/* Status Summary Banner */}
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 font-mono text-[11px] space-y-1">
-                  <div className="text-white/70 font-semibold flex items-center justify-between">
-                    <span>Connected Platforms:</span>
-                    <span className="text-[10px] text-white/40">Min. 1 Required</span>
-                  </div>
-                  <div className="flex items-center gap-3 pt-1">
-                    <span
-                      className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded ${
-                        lcStatus.verified
-                          ? "bg-[#00FF9C]/15 text-[#00FF9C]"
-                          : "bg-white/5 text-white/40"
-                      }`}
-                    >
-                      {lcStatus.verified ? "✓" : "×"} LeetCode: {leetcodeHandle ? `@${leetcodeHandle}` : "Not Set"}
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded ${
-                        cfStatus.verified
-                          ? "bg-[#00FF9C]/15 text-[#00FF9C]"
-                          : "bg-white/5 text-white/40"
-                      }`}
-                    >
-                      {cfStatus.verified ? "✓" : "×"} Codeforces: {codeforcesHandle ? `@${codeforcesHandle}` : "Not Set"}
-                    </span>
-                  </div>
-                </div>
+                
 
                 {/* Navigation */}
                 <div className="flex items-center gap-2">
@@ -948,7 +963,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     }}
                     className="py-3 px-4 bg-white/5 hover:bg-white/10 text-white font-mono text-xs font-medium rounded-xl transition-colors flex items-center gap-1.5"
                   >
-                    <ArrowLeft size={14} />
                     <span>Back</span>
                   </button>
 
@@ -964,10 +978,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         <span>Creating Account...</span>
                       </>
                     ) : (
-                      <>
-                        <span>Complete Sign Up</span>
-                        <ArrowRight size={14} />
-                      </>
+                      <span>Complete Sign Up</span>
                     )}
                   </button>
                 </div>
@@ -999,9 +1010,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </div>
                     <div className="space-y-1">
                       <h3 className="text-lg font-bold text-white">Creating Account...</h3>
-                      <p className="text-xs text-white/60">
-                        Hashing credentials, provisioning DynamoDB records, and bootstrapping AI clustering graph.
-                      </p>
                     </div>
                   </>
                 )}
@@ -1065,10 +1073,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <span>Signing In...</span>
                 </>
               ) : (
-                <>
-                  <LockOn size={14} />
-                  <span>Sign In</span>
-                </>
+                <span>Sign In</span>
               )}
             </button>
 
@@ -1118,7 +1123,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               onClick={handleLaunchDemo}
               disabled={isLoading}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-[#E4007C] via-[#FF2E93] to-[#E4007C] hover:opacity-95 font-mono text-xs font-bold text-white rounded-xl shadow-lg shadow-[#E4007C]/20 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-4 bg-[#E4007C] hover:bg-[#c20069] font-mono text-xs font-bold text-white rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -1126,10 +1131,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <span>Loading Demo Workspace...</span>
                 </>
               ) : (
-                <>
-                  <Sparkles size={14} />
-                  <span>Launch 1-Click Demo</span>
-                </>
+                <span>Launch Demo</span>
               )}
             </button>
           </div>

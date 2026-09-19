@@ -94,11 +94,13 @@ export async function verifyLeetCodeHandle(
         const aboutMe = profile.aboutMe || "";
         const realName = profile.realName || "";
 
-        let verifiedOwnership = true;
+        let verifiedOwnership = false;
         if (verificationToken && verificationToken.trim()) {
           const token = verificationToken.trim().toLowerCase();
           verifiedOwnership =
             aboutMe.toLowerCase().includes(token) || realName.toLowerCase().includes(token);
+        } else {
+          verifiedOwnership = true;
         }
 
         return {
@@ -116,7 +118,7 @@ export async function verifyLeetCodeHandle(
           },
           message: verifiedOwnership
             ? `Verified LeetCode profile @${user.username} successfully.`
-            : `LeetCode profile found, but verification token '${verificationToken}' was not detected in the bio.`,
+            : `LeetCode profile found, but verification code '${verificationToken}' was not found in your bio/summary. Please add it to your bio on leetcode.com and try again.`,
         };
       }
     }
@@ -131,11 +133,21 @@ export async function verifyLeetCodeHandle(
     if (res.ok) {
       const json: any = await res.json();
       if (json && (json.username || json.totalSolved !== undefined)) {
+        const about = (json.about || "").toLowerCase();
+        const realName = (json.realName || json.name || "").toLowerCase();
+        let verifiedOwnership = false;
+        if (verificationToken && verificationToken.trim()) {
+          const token = verificationToken.trim().toLowerCase();
+          verifiedOwnership = about.includes(token) || realName.includes(token);
+        } else {
+          verifiedOwnership = true;
+        }
+
         return {
           platform: "leetcode",
           handle: cleanUsername,
           exists: true,
-          verifiedOwnership: true,
+          verifiedOwnership,
           profile: {
             username: cleanUsername,
             realName: json.name || json.realName,
@@ -144,7 +156,9 @@ export async function verifyLeetCodeHandle(
             aboutMe: json.about,
             totalSolved: json.totalSolved || 0,
           },
-          message: `Verified LeetCode profile @${cleanUsername}.`,
+          message: verifiedOwnership
+            ? `Verified LeetCode profile @${cleanUsername}.`
+            : `LeetCode profile found, but verification code '${verificationToken}' was not found in your bio. Please add it to your bio on leetcode.com and try again.`,
         };
       }
     }
@@ -193,19 +207,23 @@ export async function verifyCodeforcesHandle(
       if (json.status === "OK" && Array.isArray(json.result) && json.result.length > 0) {
         const user = json.result[0];
 
-        let verifiedOwnership = true;
+        let verifiedOwnership = false;
         if (verificationToken && verificationToken.trim()) {
           const token = verificationToken.trim().toLowerCase();
           const firstName = (user.firstName || "").toLowerCase();
           const lastName = (user.lastName || "").toLowerCase();
           const org = (user.organization || "").toLowerCase();
           const city = (user.city || "").toLowerCase();
+          const country = (user.country || "").toLowerCase();
 
           verifiedOwnership =
             firstName.includes(token) ||
             lastName.includes(token) ||
             org.includes(token) ||
-            city.includes(token);
+            city.includes(token) ||
+            country.includes(token);
+        } else {
+          verifiedOwnership = true;
         }
 
         return {
@@ -222,7 +240,7 @@ export async function verifyCodeforcesHandle(
           },
           message: verifiedOwnership
             ? `Verified Codeforces handle @${user.handle} (${user.rank || "unrated"}, rating: ${user.rating || 0}).`
-            : `Codeforces profile found, but verification token '${verificationToken}' was not found in profile details.`,
+            : `Codeforces profile found, but verification code '${verificationToken}' was not found in your profile fields (First/Last name or Organization on codeforces.com). Please add it and try again.`,
         };
       }
     }

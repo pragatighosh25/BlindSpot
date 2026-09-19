@@ -208,10 +208,24 @@ app.post("/api/verify-handle", async (req: Request, res: Response) => {
 
     if (platform === "leetcode") {
       const result = await verifyLeetCodeHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else if (platform === "codeforces") {
       const result = await verifyCodeforcesHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else {
       return res.status(400).json({
         success: false,
@@ -241,10 +255,24 @@ app.get("/api/verify-handle", async (req: Request, res: Response) => {
 
     if (platform === "leetcode") {
       const result = await verifyLeetCodeHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else if (platform === "codeforces") {
       const result = await verifyCodeforcesHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else {
       return res.status(400).json({
         success: false,
@@ -310,7 +338,7 @@ app.post("/api/auth/send-verification-email", async (req: Request, res: Response
       lastSentAt: Date.now(),
     });
 
-    // Send email using real nodemailer transport
+    // Send email using real transport
     await sendVerificationEmail(cleanEmail, code);
 
     res.json({
@@ -318,7 +346,7 @@ app.post("/api/auth/send-verification-email", async (req: Request, res: Response
       message: `Verification code sent to ${cleanEmail}`,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: (error as Error).message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
 

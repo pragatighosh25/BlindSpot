@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { ScheduledReviewItem } from "@/types/schedule";
 import { Check, LinkOut } from "akar-icons";
 
@@ -20,41 +20,57 @@ export const PracticeSchedulerSection: React.FC<PracticeSchedulerSectionProps> =
   scheduleData,
   onMarkCompleted,
 }) => {
+  const [tickingId, setTickingId] = useState<string | null>(null);
+
+  const handleTick = async (scheduleId: string) => {
+    if (tickingId) return;
+    setTickingId(scheduleId);
+    try {
+      // Allow visual green feedback animation for 500ms
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await onMarkCompleted(scheduleId);
+    } catch (err) {
+      console.error("Failed to advance spaced repetition item:", err);
+    } finally {
+      setTickingId(null);
+    }
+  };
+
   const columns = [
     {
-      title: "Today (Day 0)",
+      title: "Today",
       items: scheduleData.today,
       badgeColor: "bg-[#E4007C]/15 text-[#E4007C] border-[#E4007C]/30",
       accent: "border-[#E4007C]/40",
-      isDue: true,
+      
     },
     {
-      title: "Tomorrow (Day 1)",
+      title: "Tomorrow",
       items: scheduleData.tomorrow,
       badgeColor: "bg-[#00FF9C]/15 text-[#00FF9C] border-[#00FF9C]/30",
       accent: "border-white/10",
-      isDue: false,
+      
     },
     {
-      title: "In 3 Days (Day 3)",
+      title: "Day 3",
       items: scheduleData.in3Days,
       badgeColor: "bg-white/5 text-white/70 border-white/10",
       accent: "border-white/10",
-      isDue: false,
+      
     },
     {
-      title: "In 7 Days (Day 7)",
+      title: "Day 7",
       items: scheduleData.in7Days,
       badgeColor: "bg-white/5 text-white/70 border-white/10",
       accent: "border-white/10",
-      isDue: false,
+      
     },
     {
-      title: "In 14 Days (Day 14)",
+      title: "Day 14",
       items: scheduleData.later,
       badgeColor: "bg-[#00FF9C]/10 text-[#00FF9C] border-[#00FF9C]/20",
       accent: "border-white/10",
-      isDue: false,
+      
     },
   ];
 
@@ -80,9 +96,6 @@ export const PracticeSchedulerSection: React.FC<PracticeSchedulerSectionProps> =
           >
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
               <span className="text-xs font-mono font-bold text-white">{col.title}</span>
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${col.badgeColor}`}>
-                {col.items.length}
-              </span>
             </div>
 
             <div className="flex-1 space-y-2.5 overflow-y-auto">
@@ -91,57 +104,58 @@ export const PracticeSchedulerSection: React.FC<PracticeSchedulerSectionProps> =
                   No practice due
                 </div>
               ) : (
-                col.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 bg-[#0A0A0A] rounded-xl border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-mono font-bold uppercase text-[#E4007C]">
-                          {item.platform} #{item.problem_id}
-                        </span>
-                        <span className="text-[10px] font-mono text-white/50">
-                          Step {item.step_index + 1}/5
-                        </span>
+                col.items.map((item) => {
+                  const isTicking = tickingId === item.id;
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="p-3 bg-[#0A0A0A] rounded-xl border border-white/10 hover:border-white/20 transition-all flex flex-col justify-between gap-2.5 group"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase text-[#E4007C]">
+                            {item.platform} #{item.problem_id}
+                          </span>
+                        </div>
+
+                        <div className="text-xs font-mono font-semibold text-white mt-1 line-clamp-1" title={item.title}>
+                          {item.title}
+                        </div>
                       </div>
 
-                      <div className="text-xs font-mono font-semibold text-white mt-1 line-clamp-1">
-                        {item.title}
-                      </div>
+                      <div className="pt-2 border-white/10 flex items-center justify-between">
+                        {item.url ? (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-2 py-1 rounded-lg text-[11px] font-mono font-medium text-white/50 hover:text-[#00FF9C] hover:bg-white/5 transition-all flex items-center gap-1.5"
+                            title="Open Problem"
+                          >
+                            <span>Solve</span>
+                            <LinkOut size={12} />
+                          </a>
+                        ) : (
+                          <span />
+                        )}
 
-                      {item.reason && (
-                        <p className="text-[10px] font-sans text-white/60 mt-1 line-clamp-2 leading-tight">
-                          {item.reason}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between">
-                      {item.url ? (
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[11px] font-mono text-white/50 hover:text-[#00FF9C] flex items-center gap-1 transition-colors"
+                        <button
+                          onClick={() => handleTick(item.id)}
+                          disabled={isTicking}
+                          className={`p-1.5 rounded-lg border transition-all duration-300 flex items-center justify-center ${
+                            isTicking
+                              ? "bg-[#00FF9C] text-[#0A0A0A] border-[#00FF9C] shadow-[0_0_14px_rgba(0,255,156,0.6)] scale-110"
+                              : "text-white/40 hover:text-[#00FF9C] hover:border-[#00FF9C]/40 hover:bg-[#00FF9C]/10 border-white/10 bg-white/5"
+                          }`}
+                          
                         >
-                          <span>Solve</span>
-                          <LinkOut size={10} />
-                        </a>
-                      ) : (
-                        <span />
-                      )}
-
-                      <button
-                        onClick={() => onMarkCompleted(item.id)}
-                        className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-mono font-semibold rounded-full bg-[#00FF9C]/10 hover:bg-[#00FF9C] text-[#00FF9C] hover:text-[#0A0A0A] border border-[#00FF9C]/30 transition-all"
-                      >
-                        <Check size={10} />
-                        <span>Completed</span>
-                      </button>
+                          <Check size={13} className={isTicking ? "stroke-[3]" : ""} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

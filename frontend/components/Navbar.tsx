@@ -145,16 +145,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="hidden sm:inline text-[11px]">{isSyncing ? "Syncing..." : "Sync"}</span>
           </button>
 
-          <button
-            onClick={onAnalyze}
-            disabled={isAnalyzing}
-            className="btn-weevolve-primary py-1.5 px-3.5 text-xs flex items-center gap-1.5 disabled:opacity-50"
-            title="Trigger Strands AI Agent weakness diagnosis"
-          >
-            
-            <span>{isAnalyzing ? "Analyzing..." : "Run AI Analysis"}</span>
-          </button>
-
           {onSignOut && (
             <button
               onClick={onSignOut}

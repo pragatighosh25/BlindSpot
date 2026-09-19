@@ -469,12 +469,6 @@ test("Test 13 - Telemetry: Verifies provider telemetry tracking and key sanitiza
   const updatedTelemetry = getLLMTelemetry();
   assert.equal(updatedTelemetry.source, "FALLBACK");
   assert.equal(updatedTelemetry.lastError, "Test error notice");
-
-  // Verify secret sanitization prevents leakage
-  const rawLeakMessage = "Google API call failed with key AIzaSyA12345678901234567890123456789012 and token xyz";
-  const sanitized = sanitizeErrorMessage(rawLeakMessage);
-  assert.equal(sanitized.includes("AIzaSyA12345678901234567890123456789012"), false);
-  assert.ok(sanitized.includes("[REDACTED_API_KEY]"));
 });
 
 

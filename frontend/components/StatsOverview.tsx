@@ -29,9 +29,6 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
             <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
               01 / Submissions Ingested
             </span>
-            <span className="text-[10px] font-mono uppercase bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 px-2 py-0.5 rounded-full font-bold">
-              DynamoDB
-            </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight">
             {totalSubmissions}
@@ -48,9 +45,6 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
             <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
               02 / Accuracy &amp; Failures
             </span>
-            <span className="text-[10px] font-mono uppercase bg-[#00FF9C]/15 text-[#00FF9C] border border-[#00FF9C]/30 px-2 py-0.5 rounded-full font-bold">
-              Verified
-            </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono text-[#00FF9C] tracking-tight">
             {accuracyRate}%
@@ -66,9 +60,6 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
             <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
               03 / Active Blind Spots
             </span>
-            <span className="text-[10px] font-mono uppercase bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 px-2 py-0.5 rounded-full font-bold">
-              Strands AI
-            </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono text-[#E4007C] tracking-tight">
             {weaknessCount}
@@ -83,9 +74,6 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest">
               04 / SM-2 Queue Due
-            </span>
-            <span className="text-[10px] font-mono uppercase bg-[#00FF9C]/15 text-[#00FF9C] border border-[#00FF9C]/30 px-2 py-0.5 rounded-full font-bold">
-              Day 0 Due
             </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono text-white tracking-tight">

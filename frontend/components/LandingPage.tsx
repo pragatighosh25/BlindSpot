@@ -18,6 +18,7 @@ import {
 } from "akar-icons";
 import { TextLoop } from "./TextLoop";
 import { DiagnosticScrollSection } from "./DiagnosticScrollSection";
+import { PatternNetworkIllustration } from "./PatternNetworkIllustration";
 
 interface LandingPageProps {
   onOpenAuth: (mode: "demo" | "login" | "signup") => void;
@@ -28,58 +29,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenAuth,
   onLaunchDemo,
 }) => {
-  const [activeTabBug, setActiveTabBug] = useState<"binary-search" | "dp" | "bfs">("binary-search");
 
-  const stamps = [
-    {
-      title: "Real API Sync",
-      sub: "LeetCode & CF Live",
-      rotate: "-3deg",
-      icon: <Globe size={20} />,
-      desc: "Zero manual copy-pasting. Direct REST & GraphQL synchronization.",
-      isPink: false,
-    },
-    {
-      title: "Strands AI Agent",
-      sub: "94% Confidence",
-      rotate: "3deg",
-      icon: <Sparkles size={20} />,
-      desc: "Mines root causes, invariant bugs, and failure mechanisms.",
-      isPink: true,
-    },
-    {
-      title: "OpenSearch Index",
-      sub: "Sub-ms Search",
-      rotate: "-2deg",
-      icon: <Search size={20} />,
-      desc: "Full-text & semantic search across raw code & error traces.",
-      isPink: false,
-    },
-    {
-      title: "SM-2 Scheduler",
-      sub: "Day 0 → 1 → 3 → 7 → 14",
-      rotate: "4deg",
-      icon: <Calendar size={20} />,
-      desc: "Adaptive spaced repetition ensures long-term algorithmic memory.",
-      isPink: true,
-    },
-    {
-      title: "Pre-Verified Demo",
-      sub: "@pragatighosh25",
-      rotate: "-4deg",
-      icon: <Check size={20} />,
-      desc: "1-Click instant workspace with 37 canonical submissions.",
-      isPink: false,
-    },
-    {
-      title: "Rating Breakout",
-      sub: "+185 Elo Growth",
-      rotate: "2deg",
-      icon: <Trophy size={20} />,
-      desc: "Eliminates repetitive contest penalties permanently.",
-      isPink: true,
-    },
-  ];
+  
 
 
 
@@ -290,9 +241,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             {/* Navigation Links with Expanding Underlines */}
             <nav className="hidden md:flex items-center gap-8 text-xs font-mono text-white/70">
               <a href="#simulator" className="nav-link-underline hover:text-white">01. Simulator</a>
-              <a href="#pipeline" className="nav-link-underline hover:text-white">02. The Ledger</a>
-              <a href="#stamps" className="nav-link-underline hover:text-white">03. Capabilities</a>
-              <a href="#comparison" className="nav-link-underline hover:text-white">04. Comparison</a>
+              <a href="#comparison" className="nav-link-underline hover:text-white">02. Comparison</a>             
+              <a href="#pipeline" className="nav-link-underline hover:text-white">03. Capabilities</a>
             </nav>
 
             {/* Auth Action Buttons */}
@@ -330,13 +280,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </span>
               </h1>
 
-              {/* Sub-rule in collaboration with */}
-              <div className="flex items-center gap-4 text-xs font-mono text-white/50">
-                <span className="shrink-0 uppercase tracking-widest text-[10px] text-[#E4007C]">
-                  Live Ingestion &bull; LeetCode + Codeforces
-                </span>
-                <span className="h-px flex-1 bg-white/10" />
-              </div>
+              
 
               {/* Description */}
               <p className="text-sm sm:text-base text-white/70 leading-relaxed font-sans font-normal">
@@ -383,150 +327,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
             </div>
 
-            {/* Right Interactive Simulator Box */}
-            <div id="simulator" className="lg:col-span-6 relative">
-              <div className="card-candle-glow border-[#E4007C]/40 bg-[#121212] p-5 shadow-[0_20px_50px_rgba(228,0,124,0.15)] relative overflow-hidden">
-                {/* Simulator Header */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10 text-xs font-mono">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-                    </div>
-                    <span className="text-white/60 font-semibold ml-2">Live Strands Terminal</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-[#E4007C] font-bold uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E4007C] pulse-dot-pink" />
-                    <span>Real-Time Telemetry</span>
-                  </div>
-                </div>
-
-                {/* Bug Tab Switcher */}
-                <div className="grid grid-cols-3 gap-1 bg-[#0A0A0A] p-1 rounded-full border border-white/10 mb-4 font-mono text-[10px]">
-                  <button
-                    onClick={() => setActiveTabBug("binary-search")}
-                    className={`py-1 rounded-full font-semibold transition-all ${
-                      activeTabBug === "binary-search"
-                        ? "bg-[#E4007C] text-white shadow-sm"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Binary Search (WA)
-                  </button>
-                  <button
-                    onClick={() => setActiveTabBug("dp")}
-                    className={`py-1 rounded-full font-semibold transition-all ${
-                      activeTabBug === "dp"
-                        ? "bg-[#E4007C] text-white shadow-sm"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    DP Overlap (WA)
-                  </button>
-                  <button
-                    onClick={() => setActiveTabBug("bfs")}
-                    className={`py-1 rounded-full font-semibold transition-all ${
-                      activeTabBug === "bfs"
-                        ? "bg-[#E4007C] text-white shadow-sm"
-                        : "text-white/60 hover:text-white"
-                    }`}
-                  >
-                    Graph Visited (TLE)
-                  </button>
-                </div>
-
-                {/* Code Body */}
-                {activeTabBug === "binary-search" && (
-                  <div className="space-y-3 font-mono text-xs">
-                    <div className="p-3 bg-[#0A0A0A] rounded-xl border border-white/10 text-white/90">
-                      <div className="text-[10px] text-[#E4007C] uppercase font-bold mb-1">
-                        LC 704 &bull; Binary Search (Boundary Loss)
-                      </div>
-                      <pre className="text-[11px] text-white/80 overflow-x-auto leading-relaxed">
-                        <code>{`while (left < right) { // ⚠️ Terminates prematurely\n    int mid = left + (right - left) / 2;\n    if (nums[mid] == target) return mid;\n    else if (nums[mid] < target) left = mid + 1;\n    else right = mid - 1; \n}`}</code>
-                      </pre>
-                    </div>
-
-                    <div className="p-3 bg-[#E4007C]/10 rounded-xl border border-[#E4007C]/30 text-white space-y-1.5">
-                      <div className="flex items-center justify-between text-[10px] font-bold text-[#E4007C] uppercase">
-                        <span>Strands AI Diagnosis:</span>
-                        <span>94% Confidence</span>
-                      </div>
-                      <p className="text-[11px] text-white/90 font-sans leading-relaxed">
-                        Strict inequality with <code className="text-[#E4007C] bg-black/40 px-1 py-0.5 rounded">right = mid - 1</code> causes early loop termination when target is on single-element boundary index.
-                      </p>
-                      <div className="text-[10px] text-[#00FF9C] pt-1 border-t border-white/10 font-mono">
-                        &rarr; Queued in SM-2 Spaced Repetition (Day 0 &bull; LC 34)
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTabBug === "dp" && (
-                  <div className="space-y-3 font-mono text-xs">
-                    <div className="p-3 bg-[#0A0A0A] rounded-xl border border-white/10 text-white/90">
-                      <div className="text-[10px] text-[#E4007C] uppercase font-bold mb-1">
-                        LC 198 &bull; House Robber (Adjacent State Overlap)
-                      </div>
-                      <pre className="text-[11px] text-white/80 overflow-x-auto leading-relaxed">
-                        <code>{`// Flawed Recurrence:\ndp[i] = dp[i - 1] + nums[i]; // ⚠️ Violates adjacency constraint!\n// Correct Recurrence:\ndp[i] = max(dp[i - 1], dp[i - 2] + nums[i]);`}</code>
-                      </pre>
-                    </div>
-
-                    <div className="p-3 bg-[#E4007C]/10 rounded-xl border border-[#E4007C]/30 text-white space-y-1.5">
-                      <div className="flex items-center justify-between text-[10px] font-bold text-[#E4007C] uppercase">
-                        <span>Strands AI Diagnosis:</span>
-                        <span>98% Confidence</span>
-                      </div>
-                      <p className="text-[11px] text-white/90 font-sans leading-relaxed">
-                        Incorrectly accumulates contiguous values rather than evaluating the skip vs loot state transition.
-                      </p>
-                      <div className="text-[10px] text-[#00FF9C] pt-1 border-t border-white/10 font-mono">
-                        &rarr; Queued in SM-2 Spaced Repetition (Day 0 &bull; LC 213)
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTabBug === "bfs" && (
-                  <div className="space-y-3 font-mono text-xs">
-                    <div className="p-3 bg-[#0A0A0A] rounded-xl border border-white/10 text-white/90">
-                      <div className="text-[10px] text-[#E4007C] uppercase font-bold mb-1">
-                        CF 500A &bull; Graph BFS Visited State Delay
-                      </div>
-                      <pre className="text-[11px] text-white/80 overflow-x-auto leading-relaxed">
-                        <code>{`int curr = queue.pop();\nvisited[curr] = true; // ⚠️ Enqueues duplicate nodes -> TLE / Memory Limit!\n// Correct: Mark visited immediately upon push`}</code>
-                      </pre>
-                    </div>
-
-                    <div className="p-3 bg-[#E4007C]/10 rounded-xl border border-[#E4007C]/30 text-white space-y-1.5">
-                      <div className="flex items-center justify-between text-[10px] font-bold text-[#E4007C] uppercase">
-                        <span>Strands AI Diagnosis:</span>
-                        <span>96% Confidence</span>
-                      </div>
-                      <p className="text-[11px] text-white/90 font-sans leading-relaxed">
-                        Delayed visited array update results in redundant vertex insertion during high-degree BFS traversal.
-                      </p>
-                      <div className="text-[10px] text-[#00FF9C] pt-1 border-t border-white/10 font-mono">
-                        &rarr; Queued in SM-2 Spaced Repetition (Day 0 &bull; LC 1091)
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Bottom Trigger */}
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                  <span className="text-white/50 text-[11px]">37 Submissions Ingested</span>
-                  <button
-                    onClick={onLaunchDemo}
-                    className="text-[#E4007C] hover:underline flex items-center gap-1 font-bold text-xs"
-                  >
-                    <span>Full Live Analysis</span>
-                    
-                  </button>
-                </div>
-              </div>
+            {/* Right Editorial Isometric Pattern Network Illustration */}
+            <div id="simulator" className="lg:col-span-6 relative flex items-center justify-center">
+              <PatternNetworkIllustration />
             </div>
           </div>
         </section>
@@ -569,45 +372,92 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
             {/* Traditional Column */}
-            <div className="bg-[#121212] rounded-2xl p-6 border border-white/10 space-y-4">
+            <div className="bg-[#0D0D0D] rounded-2xl p-6 sm:p-7 border border-white/10 space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <span className="font-bold text-rose-400 uppercase tracking-wider">Traditional Random Grinding</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20">300+ Hrs Wasted</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
+                  <span className="font-semibold text-white/70 uppercase tracking-wider text-[11px]">
+                    Traditional Method
+                  </span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/40 border border-white/10">
+                  Uncalibrated
+                </span>
               </div>
-              <div className="space-y-3 text-white/70 font-sans">
-                <div className="p-3.5 bg-[#0A0A0A] rounded-xl border border-white/10">
-                  <strong className="text-rose-300 block font-mono text-xs mb-1">Week 1–4</strong>
-                  Solve 100 random problems without tracking underlying bug causes.
+
+              <div className="space-y-4 text-white/60 font-sans text-xs sm:text-[13px] leading-relaxed">
+                <div className="pl-4 border-l border-white/10 space-y-1">
+                  <div className="font-mono text-[11px] text-white/40 uppercase font-semibold">
+                    01 &bull; Volume Over Insight
+                  </div>
+                  <p>
+                    Solving random problem lists without diagnosing why specific test cases failed.
+                  </p>
                 </div>
-                <div className="p-3.5 bg-[#0A0A0A] rounded-xl border border-white/10">
-                  <strong className="text-rose-300 block font-mono text-xs mb-1">Week 8</strong>
-                  Hit Wrong Answer in contest on the exact same BFS visited array mistake.
+
+                <div className="pl-4 border-l border-white/10 space-y-1">
+                  <div className="font-mono text-[11px] text-white/40 uppercase font-semibold">
+                    02 &bull; Recurrent Contest Penalties
+                  </div>
+                  <p>
+                    Re-encountering the same boundary condition or unmemoized branch in high-pressure rounds.
+                  </p>
                 </div>
-                <div className="p-3.5 bg-[#0A0A0A] rounded-xl border border-white/10">
-                  <strong className="text-rose-300 block font-mono text-xs mb-1">Week 16</strong>
-                  Plateau at 1500–1800 rating due to recurrent blind spots.
+
+                <div className="pl-4 border-l border-white/10 space-y-1">
+                  <div className="font-mono text-[11px] text-white/40 uppercase font-semibold">
+                    03 &bull; Rating Plateau
+                  </div>
+                  <p>
+                    Progress stalls as identical conceptual blind spots remain unresolved in memory.
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* BlindSpot Column */}
-            <div className="bg-[#121212] rounded-2xl p-6 border border-[#E4007C] space-y-4 shadow-[0_0_30px_rgba(228,0,124,0.15)]">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <span className="font-bold text-[#E4007C] uppercase tracking-wider">BlindSpot AI Diagnostics</span>
-                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#E4007C]/20 text-[#E4007C] border border-[#E4007C]/40 font-semibold">10x Retention</span>
+            {/* BlindSpot Column (Highlighted) */}
+            <div className="bg-gradient-to-b from-[#131313] to-[#0C0C0C] rounded-2xl p-6 sm:p-7 border border-[#E4007C]/40 shadow-[0_0_35px_rgba(228,0,124,0.08)] space-y-6 relative overflow-hidden">
+              {/* Subtle top corner accent */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#E4007C]/5 blur-2xl pointer-events-none" />
+
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2 h-2 rounded-full bg-[#E4007C] shadow-[0_0_8px_#E4007C]" />
+                  <span className="font-bold text-white uppercase tracking-wider text-[11px]">
+                      Blindspot Method
+                  </span>
+                </div>
+                <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 font-semibold tracking-wide shadow-sm">
+                  10x Retention
+                </span>
               </div>
-              <div className="space-y-3 text-white/90 font-sans">
-                <div className="p-3.5 bg-[#0A0A0A] rounded-xl border border-white/10">
-                  <strong className="text-[#00FF9C] block font-mono text-xs mb-1">Day 1: Ingest & Mine</strong>
-                  Connect handles & auto-detect exact root causes in sub-seconds.
+
+              <div className="space-y-4 text-white/85 font-sans text-xs sm:text-[13px] leading-relaxed relative z-10">
+                <div className="pl-4 border-l-2 border-[#E4007C] space-y-1">
+                  <div className="font-mono text-[11px] text-[#E4007C] uppercase font-bold tracking-wide">
+                    01 &bull; Root Cause Extraction
+                  </div>
+                  <p className="text-white/80">
+                    Connect handles once to isolate the exact logical invariants causing recurring failure vectors.
+                  </p>
                 </div>
-                <div className="p-3.5 bg-[#0A0A0A] rounded-xl border border-white/10">
-                  <strong className="text-[#00FF9C] block font-mono text-xs mb-1">Day 3 & 7: SM-2 Spacing</strong>
-                  Targeted review problems queued automatically to solidify invariants.
+
+                <div className="pl-4 border-l-2 border-[#E4007C] space-y-1">
+                  <div className="font-mono text-[11px] text-[#E4007C] uppercase font-bold tracking-wide">
+                    02 &bull; Adaptive SM-2 Intervals
+                  </div>
+                  <p className="text-white/80">
+                    Targeted problems queued on <span className="font-mono text-[#00FF9C] font-semibold">Day 0 &rarr; 1 &rarr; 3 &rarr; 7 &rarr; 14</span> to convert weak points into second nature.
+                  </p>
                 </div>
-                <div className="p-3.5 bg-[#0A0A0A] rounded-xl border border-white/10">
-                  <strong className="text-[#00FF9C] block font-mono text-xs mb-1">Day 14: Mastery Locked</strong>
-                  Zero repeated failure patterns in target topic category.
+
+                <div className="pl-4 border-l-2 border-[#E4007C] space-y-1">
+                  <div className="font-mono text-[11px] text-[#E4007C] uppercase font-bold tracking-wide">
+                    03 &bull; Long-Term Invariant Lock
+                  </div>
+                  <p className="text-white/80">
+                    Eliminates recurring contest mistakes permanently through systematic spaced consolidation.
+                  </p>
                 </div>
               </div>
             </div>

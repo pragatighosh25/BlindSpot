@@ -94,7 +94,7 @@ export const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-end">
+              <div className="mt-4 pt-3 flex items-center justify-end">
                 <button
                   onClick={() => handleSchedule(rec)}
                   disabled={isScheduled || isLoading}

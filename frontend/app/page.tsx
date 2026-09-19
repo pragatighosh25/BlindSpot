@@ -11,6 +11,9 @@ import { SubmissionsExplorer } from "@/components/SubmissionsExplorer";
 import { SyncProfileModal } from "@/components/SyncProfileModal";
 import { LandingPage } from "@/components/LandingPage";
 import { AuthModal } from "@/components/AuthModal";
+import { LogoutConfirmModal } from "@/components/LogoutConfirmModal";
+import { ProfileSettingsModal } from "@/components/ProfileSettingsModal";
+import { Logo } from "@/components/Logo";
 import { WeakTopic, RecommendedProblem, AnalysisOutput } from "@/schemas/analysis.schema";
 import { CanonicalSubmission } from "@/schemas/submission.schema";
 import { ScheduledReviewItem } from "@/types/schedule";
@@ -21,12 +24,21 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"diagnostics" | "practice" | "submissions">("diagnostics");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authInitialMode, setAuthInitialMode] = useState<"demo" | "login" | "signup">("demo");
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // Active User Profile
-  const [activeProfile, setActiveProfile] = useState({
+  const [activeProfile, setActiveProfile] = useState<{
+    leetcode: string;
+    codeforces: string;
+    userId: string;
+    email?: string;
+    isDemo: boolean;
+  }>({
     leetcode: "pragatighosh25",
     codeforces: "pragatighosh",
     userId: "pragatighosh25",
+    email: "demo@blindspot.ai",
     isDemo: true,
   });
 
@@ -285,7 +297,8 @@ export default function App() {
             onSync={handleLiveSync}
             onAnalyze={handleRunAnalysis}
             onOpenSyncModal={() => setIsConnectModalOpen(true)}
-            onSignOut={() => setCurrentView("landing")}
+            onOpenProfileModal={() => setIsProfileModalOpen(true)}
+            onSignOut={() => setIsLogoutModalOpen(true)}
             isSyncing={isSyncing}
             isAnalyzing={isAnalyzing}
             activeProfile={activeProfile}
@@ -385,9 +398,7 @@ export default function App() {
           <footer className="border-t border-white/10 bg-[#080808] py-6 px-6">
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/50">
               <div className="flex items-center gap-2.5">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#E4007C] to-[#990053] flex items-center justify-center text-white font-mono font-bold text-[10px]">
-                  BS
-                </div>
+                <Logo className="w-5 h-5" />
                 <span className="font-bold text-white">BlindSpot</span>
                 <span>&bull; Precision Algorithmic Diagnostics</span>
               </div>
@@ -410,6 +421,38 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onLoginSuccess={handleAuthSuccess}
         initialMode={authInitialMode}
+      />
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirmLogout={() => {
+          setCurrentView("landing");
+          setActiveProfile({
+            leetcode: "pragatighosh25",
+            codeforces: "pragatighosh",
+            userId: "pragatighosh25",
+            email: "demo@blindspot.ai",
+            isDemo: true,
+          });
+        }}
+      />
+
+      {/* Profile Settings & Handle / Password Management */}
+      <ProfileSettingsModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        activeProfile={activeProfile}
+        onProfileUpdated={async (updated) => {
+          setActiveProfile(updated);
+          setIsSyncing(true);
+          try {
+            await Promise.all([loadSubmissions(), loadAnalysis(false), loadSchedule()]);
+          } finally {
+            setIsSyncing(false);
+          }
+        }}
       />
 
       {/* Evidence Code Inspection Modal */}

@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   title: "BlindSpot",
   description:
     "Analyze LeetCode & Codeforces submissions, detect recurring algorithmic failure patterns, and eliminate blind spots with targeted spaced repetition.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

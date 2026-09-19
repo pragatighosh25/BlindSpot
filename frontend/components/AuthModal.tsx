@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import {
   Cross,
   Check,
+  Copy,
   CircleAlert,
   ArrowCycle,
   EyeSlashed,
@@ -764,9 +765,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <button
                         type="button"
                         onClick={copyToken}
-                        className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#00FF9C] font-mono transition-colors"
+                        title={copiedToken ? "Copied!" : "Copy code"}
+                        aria-label="Copy verification code"
+                        className="p-1 rounded hover:bg-white/10 text-[#00FF9C] transition-colors flex items-center justify-center gap-1 text-[11px] font-mono"
                       >
-                        {copiedToken ? "✓ Copied!" : "Copy Code"}
+                        {copiedToken ? (
+                          <Check size={14} strokeWidth={2.5} className="text-[#00FF9C]" />
+                        ) : (
+                          <Copy size={14} strokeWidth={2} className="text-[#00FF9C]" />
+                        )}
                       </button>
                     </div>
                     <div className="px-3 py-1.5 bg-black/60 rounded-lg border border-white/10 font-mono text-xs text-[#E4007C] select-all font-bold">
@@ -816,9 +823,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <div className="font-bold flex items-center gap-1">
                         <Check size={12} strokeWidth={3} /> LeetCode profile ownership verified from bio!
                       </div>
-                      <div className="text-white/70 text-[10px]">
-                        ID: @{leetcodeHandle.trim()} &bull; Submissions ready for sync
-                      </div>
+                      
                     </div>
                   )}
 
@@ -880,9 +885,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <button
                         type="button"
                         onClick={copyToken}
-                        className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[#00FF9C] font-mono transition-colors"
+                        title={copiedToken ? "Copied!" : "Copy code"}
+                        aria-label="Copy verification code"
+                        className="p-1 rounded hover:bg-white/10 text-[#00FF9C] transition-colors flex items-center justify-center gap-1 text-[11px] font-mono"
                       >
-                        {copiedToken ? "✓ Copied!" : "Copy Code"}
+                        {copiedToken ? (
+                          <Check size={14} strokeWidth={2.5} className="text-[#00FF9C]" />
+                        ) : (
+                          <Copy size={14} strokeWidth={2} className="text-[#00FF9C]" />
+                        )}
                       </button>
                     </div>
                     <div className="px-3 py-1.5 bg-black/60 rounded-lg border border-white/10 font-mono text-xs text-[#E4007C] select-all font-bold">
@@ -932,9 +943,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <div className="font-bold flex items-center gap-1">
                         <Check size={12} strokeWidth={3} /> Codeforces handle ownership verified!
                       </div>
-                      <div className="text-white/70 text-[10px]">
-                        Handle: @{codeforcesHandle.trim()} &bull; Rating: {cfStatus.profile?.rating || "Active"}
-                      </div>
+                      
                     </div>
                   )}
 

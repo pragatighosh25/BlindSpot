@@ -123,9 +123,6 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
         {/* Top Header Bar */}
         <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-[#0A0A0A] shrink-0">
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-full bg-[#E4007C]/15 border border-[#E4007C]/30 text-[#E4007C]">
-              <Sparkles size={18} />
-            </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-bold px-3 py-0.5 bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 rounded-full">
@@ -162,7 +159,6 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-white/60">
                 EVIDENCE SUBMISSIONS ({submissions.length})
               </span>
-              <span className="badge-pill-accent text-[9px]">OPENSEARCH</span>
             </div>
 
             {loading && (
@@ -194,7 +190,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                   onClick={() => setSelectedSub(sub)}
                   className={`w-full text-left p-3.5 rounded-xl border transition-all ${
                     isSelected
-                      ? "bg-[#171717] border-[#E4007C] shadow-lg ring-1 ring-[#E4007C]/50 text-white"
+                      ? "bg-[#171717] border-white/5 shadow-lg ring-1 ring-[#E4007C]/50 text-white"
                       : "bg-[#121212] border-white/5 text-white/70 hover:bg-[#181818]"
                   }`}
                 >
@@ -262,96 +258,44 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                 </div>
 
                 {/* 2. EXECUTION RESULT */}
-                <div className="p-4 sm:p-5 bg-[#141414] rounded-2xl border border-white/10 space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                    <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-[#00FF9C]">
-                      <Laptop size={15} />
-                      <span>EXECUTION RESULT</span>
-                    </div>
-                    <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full ${
-                      selectedSub.submission.verdict === "AC"
-                        ? "bg-[#00FF9C]/15 text-[#00FF9C] border border-[#00FF9C]/30"
-                        : "bg-rose-500/15 text-rose-400 border border-rose-500/30"
-                    }`}>
-                      {formatVerdict(selectedSub.submission.verdict).toUpperCase()}
-                    </span>
-                  </div>
+                <div className="p-4 sm:p-5 bg-[#141414] rounded-2xl border border-white/10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs">
-                    {/* Col 1: Verdict */}
+                    {/* Verdict */}
                     <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-white/5 space-y-1">
-                      <span className="text-[11px] font-bold text-white/50 block">Verdict</span>
+                      <span className="text-[11px] font-bold text-white/50 block">
+                        Verdict
+                      </span>
+
                       <span className="text-sm font-bold text-[#E4007C] block">
                         {formatVerdict(selectedSub.submission.verdict)}
                       </span>
                     </div>
 
-                    {/* Col 2: Test Case Details */}
-                    <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-white/5 space-y-1 md:col-span-2">
+                    {/* Runtime & Memory */}
+                    <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-white/5 space-y-1">
                       <span className="text-[11px] font-bold text-white/50 block">
-                        Judge Error / Execution Trace
+                        Performance
                       </span>
-                      {evidence?.input || evidence?.expected_output || selectedSub.submission.error_message ? (
-                        <div className="text-xs space-y-1 text-white/90">
-                          {evidence?.input && (
-                            <div>
-                              <span className="text-white/60">Input: </span>
-                              <span className="text-white font-bold">{evidence.input}</span>
-                            </div>
-                          )}
-                          {evidence?.expected_output && (
-                            <div>
-                              <span className="text-white/60">Expected: </span>
-                              <span className="text-[#00FF9C] font-bold">{evidence.expected_output}</span>
-                              {evidence?.actual_output && (
-                                <span className="ml-3 text-rose-400">
-                                  Output: {evidence.actual_output}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          {selectedSub.submission.error_message && !evidence?.input && (
-                            <div className="text-rose-300 text-xs">
-                              {selectedSub.submission.error_message}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-xs text-white/40 italic flex items-center gap-1.5 pt-1">
-                          <Info size={13} />
-                          <span>No detailed judge execution trace provided by platform judge.</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Runtime & Memory */}
-                  <div className="flex items-center gap-2 text-xs font-mono text-white/50 pt-1">
-                    <span>Performance:</span>
-                    <span className="text-white/80 font-bold">{runtimeDisplay}</span>
+                      <span className="text-sm font-bold text-white/80 block">
+                        {runtimeDisplay}
+                      </span>
+                    </div>
+
                   </div>
                 </div>
-
                 {/* 3. AI ANALYSIS (STRANDS AGENT) */}
                 <div className="p-4 sm:p-5 bg-[#141414] rounded-2xl border border-[#E4007C]/30 space-y-4">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                  <div className="flex items-center justify-between pb-2.5">
                     <div className="flex items-center gap-2">
-                      <Sparkles size={16} className="text-[#E4007C]" />
-                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
-                        AI ANALYSIS (STRANDS AGENT)
-                      </span>
+                      
                     </div>
-                    {analysis?.confidence !== undefined && (
-                      <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold bg-[#00FF9C]/15 text-[#00FF9C] border border-[#00FF9C]/30 rounded-full">
-                        {Math.round(analysis.confidence * 100)}% Confidence
-                      </span>
-                    )}
                   </div>
 
                   {/* Section: What went wrong? */}
                   <div>
                     <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#E4007C] mb-2">
-                      <Target size={15} />
                       <span>Root Cause Diagnosis</span>
                     </div>
                     <p className="text-sm font-sans text-white/90 leading-relaxed bg-[#0A0A0A] p-3.5 rounded-xl border border-white/10">
@@ -363,7 +307,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                   {(whyItFails || correctConcept) && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                       {whyItFails && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-rose-500/20 space-y-1.5">
+                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-1.5">
                           <div className="text-xs font-mono font-bold text-rose-400">
                             Why It Violates Constraints
                           </div>
@@ -374,7 +318,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                       )}
 
                       {correctConcept && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-[#00FF9C]/20 space-y-1.5">
+                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-1.5">
                           <div className="text-xs font-mono font-bold text-[#00FF9C]">
                             Algorithmic Invariant / Fix Strategy
                           </div>
@@ -395,9 +339,9 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                   {(yourApproachBullets.length > 0 || correctApproachBullets.length > 0) && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
                       {yourApproachBullets.length > 0 && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-rose-500/20 space-y-2">
+                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-2">
                           <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#E4007C]">
-                            <Code2 size={15} />
+                            
                             <span>Your approach (inferred)</span>
                           </div>
                           <ul className="space-y-1.5 text-xs font-sans text-white/85 leading-relaxed">
@@ -412,9 +356,9 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
                       )}
 
                       {correctApproachBullets.length > 0 && (
-                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl border border-[#00FF9C]/20 space-y-2">
+                        <div className="bg-[#0A0A0A] p-3.5 rounded-xl space-y-2">
                           <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#00FF9C]">
-                            <Lightbulb size={15} />
+                            
                             <span>Correct approach</span>
                           </div>
                           <ul className="space-y-1.5 text-xs font-sans text-white/85 leading-relaxed">
@@ -433,10 +377,7 @@ export const EvidenceModal: React.FC<EvidenceModalProps> = ({ weakness, onClose 
 
                 {/* 4. KEY TAKEAWAY (if available) */}
                 {keyTakeaway && (
-                  <div className="p-4 bg-[#0E241B] border border-[#00FF9C]/40 rounded-2xl flex items-start gap-3 shadow-lg shadow-[#00FF9C]/5">
-                    <div className="p-1.5 rounded-lg bg-[#00FF9C]/20 text-[#00FF9C] shrink-0 mt-0.5">
-                      <Check size={16} />
-                    </div>
+                  <div className="p-4 border border-[#00FF9C]/40 rounded-2xl flex items-start gap-3 shadow-lg shadow-[#00FF9C]/5">
                     <div>
                       <span className="text-xs font-mono font-bold text-[#00FF9C] uppercase tracking-wider block">
                         Key Takeaway

@@ -69,12 +69,6 @@ export const PracticeSchedulerSection: React.FC<PracticeSchedulerSectionProps> =
           <h2 className="text-xl font-bold font-mono text-white mt-1">
             Spaced Repetition Review Schedule
           </h2>
-          <p className="text-xs font-sans text-white/60 mt-0.5">
-            Structured SM-2 intervals (Day 0 &rarr; 1 &rarr; 3 &rarr; 7 &rarr; 14) to permanently eliminate algorithmic blind spots
-          </p>
-        </div>
-        <div className="text-xs font-mono font-semibold px-3 py-1 bg-[#141414] rounded-full border border-white/10 text-white w-fit">
-          <span>{scheduleData.all.length} Tracked Problems</span>
         </div>
       </div>
 

@@ -38,11 +38,8 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
             01 / CANONICAL STORE
           </div>
           <h2 className="text-xl font-bold font-mono text-white mt-1">
-            OpenSearch Submissions Explorer
+            Submissions Explorer
           </h2>
-          <p className="text-xs font-sans text-white/60 mt-0.5">
-            Normalized submission store across LeetCode & Codeforces platforms
-          </p>
         </div>
 
         {/* Filters */}
@@ -99,7 +96,7 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                 <th className="px-4 py-3">Problem Title</th>
                 <th className="px-4 py-3">Verdict</th>
                 <th className="px-4 py-3">Topic Tags</th>
-                <th className="px-4 py-3">Language & Performance</th>
+                <th className="px-4 py-3">Language</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">

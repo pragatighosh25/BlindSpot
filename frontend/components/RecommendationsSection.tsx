@@ -37,13 +37,7 @@ export const RecommendationsSection: React.FC<RecommendationsSectionProps> = ({
           <h2 className="text-xl font-bold font-mono text-white mt-1">
             Targeted Practice Recommendations
           </h2>
-          <p className="text-xs font-sans text-white/60 mt-0.5">
-            Curated problem sets specifically addressing your recurring algorithmic failure modes
-          </p>
         </div>
-        <span className="text-xs font-mono font-semibold px-3 py-1 bg-[#00FF9C]/10 text-[#00FF9C] border border-[#00FF9C]/30 rounded-full w-fit">
-          {recommendations.length} Recommended
-        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

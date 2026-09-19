@@ -282,7 +282,7 @@ export const SyncProfileModal: React.FC<SyncProfileModalProps> = ({
                 disabled={loading}
                 className="btn-weevolve-primary py-2 px-4 text-xs flex items-center gap-1.5 disabled:opacity-50"
               >
-                <Sparkles size={14} />
+                
                 <span>{loading ? "Verifying & Syncing..." : "Verify & Sync Real Data"}</span>
               </button>
             </div>

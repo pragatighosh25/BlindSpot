@@ -106,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : "text-white/60 hover:text-white"
             }`}
           >
-            <span>02. Practice &amp; SM-2</span>
+            <span>02. Practice</span>
             {stats.dueCount > 0 && (
               <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
                 activeTab === "practice" ? "bg-[#00FF9C] text-[#0A0A0A] font-bold" : "bg-[#00FF9C]/20 text-[#00FF9C]"

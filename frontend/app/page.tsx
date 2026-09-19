@@ -328,40 +328,6 @@ export default function App() {
                   accuracyRate={accuracyRate}
                   isLive={isLiveMode}
                 />
-
-                {/* Strands AI Agent Reasoning Banner */}
-                {analysis?.summary && (
-                  <div className="card-candle-glow p-5 border-[#E4007C]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-                    <div className="flex items-start gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-[#E4007C]/15 border border-[#E4007C]/30 text-[#E4007C] flex items-center justify-center shrink-0 mt-0.5">
-                        <Sparkles size={18} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                            Strands AI Agent Reasoning Summary
-                          </h4>
-                          {analysis.analyzed_at && (
-                            <span className="text-[10px] font-mono text-white/40">
-                              &bull; Updated {new Date(analysis.analyzed_at).toLocaleTimeString()}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs font-sans text-white/80 mt-1 leading-relaxed">
-                          {analysis.summary}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleRunAnalysis}
-                      disabled={isAnalyzing}
-                      className="shrink-0 btn-weevolve-secondary text-xs py-2 px-4 flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      {isAnalyzing ? "Running Strands..." : "Run Fresh Analysis"}
-                    </button>
-                  </div>
-                )}
-
                 {/* Mined Algorithmic Blind Spots */}
                 {analysis && (
                   <WeaknessSection
@@ -372,7 +338,7 @@ export default function App() {
               </div>
             )}
 
-            {/* TAB 2: PRACTICE & SM-2 */}
+            {/* TAB 2: PRACTICE*/}
             {activeTab === "practice" && (
               <div className="space-y-10 animate-in fade-in duration-200">
                 {/* Targeted Recommendations */}

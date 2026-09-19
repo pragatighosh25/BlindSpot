@@ -23,9 +23,7 @@ export const WeaknessSection: React.FC<WeaknessSectionProps> = ({
           <h2 className="text-xl font-bold font-mono text-white mt-1">
             Mined Algorithmic Blind Spots
           </h2>
-          <p className="text-xs font-sans text-white/60 mt-0.5">
-            Identified by Strands AI Agent reasoning across LeetCode & Codeforces submissions
-          </p>
+          
         </div>
         <span className="text-xs font-mono font-semibold px-3 py-1 bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 rounded-full w-fit">
           {weaknesses.length} Patterns Detected
@@ -59,9 +57,7 @@ export const WeaknessSection: React.FC<WeaknessSectionProps> = ({
                       </span>
                     </div>
 
-                    <div className="text-[11px] font-mono font-semibold text-[#00FF9C] bg-[#00FF9C]/10 px-2.5 py-0.5 rounded-full border border-[#00FF9C]/20">
-                      <span>{confidencePercent}% confidence</span>
-                    </div>
+                    
                   </div>
 
                   <h3 className="text-base font-bold font-mono text-white mt-3">
@@ -77,14 +73,14 @@ export const WeaknessSection: React.FC<WeaknessSectionProps> = ({
 
                 <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
                   <div className="text-[11px] font-mono text-white/50">
-                    <span>{w.example_submissions.length} OpenSearch samples</span>
+                    
                   </div>
 
                   <button
                     onClick={() => onSelectEvidence(w)}
                     className="text-xs font-mono font-semibold text-[#E4007C] hover:text-white bg-[#E4007C]/10 hover:bg-[#E4007C] px-3.5 py-1.5 rounded-full border border-[#E4007C]/30 transition-all shadow-sm"
                   >
-                    <span>Inspect Evidence</span>
+                    <span>Inspect</span>
                   </button>
                 </div>
               </div>

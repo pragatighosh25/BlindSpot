@@ -50,6 +50,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
         success: true,
         userId,
         practice,
+        schedule: practice,
       });
     } catch (error) {
       console.error("[getSchedule Lambda Error]:", error);
@@ -61,18 +62,27 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
   if (event.httpMethod === "POST") {
     try {
       const body = event.body ? JSON.parse(event.body) : {};
-      const { action, scheduleId, problem } = body;
+      const { action, scheduleId, id } = body;
+      const problem = body.problem || (body.problem_id ? body : null);
 
-      if (action === "complete" && scheduleId) {
-        const updated = markProblemCompleted(scheduleId);
+      if (action === "complete" && (scheduleId || id)) {
+        const targetId = scheduleId || id;
+        const updated = markProblemCompleted(targetId);
         if (updated) {
           await saveScheduleToDynamo(userId, updated);
         }
         return apiResponse(200, { success: true, item: updated });
       }
 
-      if (action === "schedule" && problem) {
-        const scheduled = scheduleProblem(problem);
+      if (problem && problem.problem_id) {
+        const scheduled = scheduleProblem({
+          problem_id: String(problem.problem_id),
+          title: problem.title || `Problem ${problem.problem_id}`,
+          topic: problem.topic || "Targeted Practice",
+          platform: problem.platform || "leetcode",
+          reason: problem.reason || "Targeted reinforcement for diagnosed blind spot",
+          url: problem.url,
+        });
         await saveScheduleToDynamo(userId, scheduled);
         return apiResponse(200, { success: true, item: scheduled });
       }

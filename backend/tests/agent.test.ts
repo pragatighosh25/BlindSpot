@@ -276,6 +276,31 @@ test("Test 5 - AC: Accepted submission reports clean verdict with no false failu
 // Test 6: User History Analysis & Weakness Profile
 // -------------------------------------------------------------
 test("Test 6 - History: Aggregates recurring weaknesses with root-cause summaries", async () => {
+  const { saveSubmission } = await import("../services/opensearch.js");
+  
+  // Seed sample submissions for testing agent history aggregation
+  await saveSubmission({
+    submission_id: "test_dp_1",
+    user_id: "user_demo",
+    platform: "leetcode",
+    problem: { id: "198", title: "House Robber", difficulty: "Medium", topic_tags: ["Dynamic Programming"] },
+    submission: { language: "cpp", verdict: "WA", timestamp: Date.now() - 3000, code: "dp[i] = dp[i-1] + nums[i];" }
+  });
+  await saveSubmission({
+    submission_id: "test_bs_1",
+    user_id: "user_demo",
+    platform: "leetcode",
+    problem: { id: "704", title: "Binary Search", difficulty: "Easy", topic_tags: ["Binary Search"] },
+    submission: { language: "cpp", verdict: "WA", timestamp: Date.now() - 2000, code: "while (left < right) { if (nums[mid] == target) return mid; else right = mid - 1; }" }
+  });
+  await saveSubmission({
+    submission_id: "test_graph_1",
+    user_id: "user_demo",
+    platform: "leetcode",
+    problem: { id: "200", title: "Number of Islands", difficulty: "Medium", topic_tags: ["Graphs"] },
+    submission: { language: "cpp", verdict: "TLE", timestamp: Date.now() - 1000, code: "queue.push({nr, nc}); visited[r][c] = true;" }
+  });
+
   const output = await analyzeUserHistory("user_demo");
 
   const validation = AnalysisOutputSchema.safeParse(output);

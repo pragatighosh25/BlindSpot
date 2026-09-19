@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import { CanonicalSubmission } from "@/schemas/submission.schema";
-import { Search, EyeOpen } from "akar-icons";
+import { Search } from "akar-icons";
 
 interface SubmissionsExplorerProps {
   submissions: CanonicalSubmission[];
-  onSelectSubmission: (sub: CanonicalSubmission) => void;
+  onSelectSubmission?: (sub: CanonicalSubmission) => void;
   onSearchChange: (query: string) => void;
   selectedPlatform: string;
   onSelectPlatform: (platform: string) => void;
@@ -16,7 +16,6 @@ interface SubmissionsExplorerProps {
 
 export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
   submissions,
-  onSelectSubmission,
   onSearchChange,
   selectedPlatform,
   onSelectPlatform,
@@ -85,11 +84,12 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
             <option value="WA">WA (Wrong Answer)</option>
             <option value="TLE">TLE (Time Limit)</option>
             <option value="MLE">MLE (Memory Limit)</option>
+            <option value="RE">RE (Runtime Error)</option>
           </select>
         </div>
       </div>
 
-      {/* Submissions Table / Cards */}
+      {/* Submissions Table */}
       <div className="card-candle-glow overflow-hidden border-white/10">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono text-white/80">
@@ -99,14 +99,13 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                 <th className="px-4 py-3">Problem Title</th>
                 <th className="px-4 py-3">Verdict</th>
                 <th className="px-4 py-3">Topic Tags</th>
-                <th className="px-4 py-3">Language & Stats</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-4 py-3">Language & Performance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {submissions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-white/40 italic font-sans">
+                  <td colSpan={5} className="text-center py-8 text-white/40 italic font-sans">
                     No matching submissions found in OpenSearch.
                   </td>
                 </tr>
@@ -131,7 +130,18 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
                       </td>
 
                       <td className="px-4 py-3 font-semibold font-mono text-white max-w-xs truncate">
-                        {sub.problem.title}
+                        {sub.problem.url ? (
+                          <a
+                            href={sub.problem.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="hover:text-[#00FF9C] transition-colors"
+                          >
+                            {sub.problem.title}
+                          </a>
+                        ) : (
+                          sub.problem.title
+                        )}
                       </td>
 
                       <td className="px-4 py-3 whitespace-nowrap">
@@ -166,20 +176,13 @@ export const SubmissionsExplorer: React.FC<SubmissionsExplorerProps> = ({
 
                       <td className="px-4 py-3 whitespace-nowrap text-white/60 text-[11px]">
                         <div>{sub.submission.language}</div>
-                        {sub.submission.runtime_ms !== undefined && (
+                        {sub.submission.runtime_ms !== undefined ? (
                           <div className="text-[10px] text-white/40">
-                            {sub.submission.runtime_ms}ms &bull; {sub.submission.memory_mb || "-"}MB
+                            {sub.submission.runtime_ms}ms &bull; {sub.submission.memory_mb ? sub.submission.memory_mb + "MB" : "N/A"}
                           </div>
+                        ) : (
+                          <div className="text-[10px] text-white/30">N/A</div>
                         )}
-                      </td>
-
-                      <td className="px-4 py-3 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => onSelectSubmission(sub)}
-                          className="px-3 py-1 text-xs font-semibold rounded-full bg-[#141414] hover:bg-[#1F1F1F] text-white border border-white/10 transition-all hover:border-[#E4007C]/40"
-                        >
-                          View Code
-                        </button>
                       </td>
                     </tr>
                   );

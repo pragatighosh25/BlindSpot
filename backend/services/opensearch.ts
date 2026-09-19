@@ -1,6 +1,5 @@
 import { Client } from "@opensearch-project/opensearch";
 import { CanonicalSubmission, SubmissionAnalysis } from "@/schemas/submission.schema";
-import initialSubmissions from "@/data/mock-submissions.json";
 import { diagnoseSubmissionPattern } from "./agent/agent";
 
 export interface OpenSearchSubmissionDocument extends CanonicalSubmission {
@@ -84,24 +83,14 @@ async function ensureOpenSearchIndex(client: Client) {
 }
 
 /**
- * In-memory simulated OpenSearch store for standalone local development and testing.
+ * In-memory OpenSearch document store for local development and live index caching.
  */
 class LocalOpenSearchStore {
   private documents: Map<string, OpenSearchSubmissionDocument> = new Map();
   private isLive = false;
 
   constructor() {
-    this.seed();
-  }
-
-  private seed() {
-    for (const sub of initialSubmissions as CanonicalSubmission[]) {
-      const diag = diagnoseSubmissionPattern(sub);
-      this.documents.set(sub.submission_id, {
-        ...sub,
-        analysis: diag,
-      });
-    }
+    // Start empty so only real submissions ingested via live API or S3/OpenSearch are indexed
   }
 
   public clearAll() {
@@ -112,11 +101,10 @@ class LocalOpenSearchStore {
   public resetToMock() {
     this.documents.clear();
     this.isLive = false;
-    this.seed();
   }
 
   public isLiveMode(): boolean {
-    return this.isLive;
+    return this.documents.size > 0 || this.isLive;
   }
 
   public async save(sub: CanonicalSubmission, analysis?: SubmissionAnalysis): Promise<void> {
@@ -126,6 +114,7 @@ class LocalOpenSearchStore {
       analysis: diag,
     };
     this.documents.set(sub.submission_id, doc);
+    this.isLive = true;
   }
 
   public async get(submissionId: string): Promise<OpenSearchSubmissionDocument | null> {

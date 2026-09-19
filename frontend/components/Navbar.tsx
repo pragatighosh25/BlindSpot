@@ -151,7 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="btn-weevolve-primary py-1.5 px-3.5 text-xs flex items-center gap-1.5 disabled:opacity-50"
             title="Trigger Strands AI Agent weakness diagnosis"
           >
-            <Sparkles size={13} className={isAnalyzing ? "animate-spin" : ""} />
+            
             <span>{isAnalyzing ? "Analyzing..." : "Run AI Analysis"}</span>
           </button>
 

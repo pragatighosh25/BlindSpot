@@ -123,8 +123,9 @@ export default function App() {
       const res = await fetch("/api/schedule");
       if (!res.ok) return;
       const data = await res.json();
-      if (data.schedule) {
-        setScheduleData(data.schedule);
+      const sched = data.schedule || data.practice;
+      if (sched) {
+        setScheduleData(sched);
       }
     } catch (e) {
       console.error("Failed to load schedule:", e);
@@ -182,15 +183,26 @@ export default function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        action: "schedule",
         problem_id: rec.problem_id,
         platform: rec.platform,
         title: rec.title,
+        topic: rec.topic || "Targeted Practice",
         url: rec.url,
         reason: rec.reason,
+        problem: {
+          problem_id: rec.problem_id,
+          platform: rec.platform,
+          title: rec.title,
+          topic: rec.topic || "Targeted Practice",
+          url: rec.url,
+          reason: rec.reason,
+        },
       }),
     });
     if (!res.ok) {
-      throw new Error("Failed to add problem to practice schedule.");
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to add problem to practice schedule.");
     }
     await loadSchedule();
   };
@@ -200,7 +212,7 @@ export default function App() {
     const res = await fetch("/api/schedule/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: scheduleId }),
+      body: JSON.stringify({ id: scheduleId, scheduleId, action: "complete" }),
     });
     if (res.ok) {
       await loadSchedule();

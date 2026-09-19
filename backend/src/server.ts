@@ -138,10 +138,10 @@ async function autoSeedLiveUserSubmissions() {
         recommended_problems_count: analysis.recommended_problems.length,
       });
     } else {
-      console.log(`ℹ️ No live submissions retrieved for @${DEFAULT_USER_CONFIG.leetcodeUsername} / @${DEFAULT_USER_CONFIG.codeforcesHandle}. Keeping preloaded canonical dataset active.`);
+      console.log(`ℹ️ Ingestion notice: 0 live submissions retrieved for @${DEFAULT_USER_CONFIG.leetcodeUsername} / @${DEFAULT_USER_CONFIG.codeforcesHandle}.`);
     }
   } catch (err) {
-    console.warn(`[Auto-Sync Notice] Could not fetch remote profiles (${(err as Error).message}). Keeping local data active.`);
+    console.warn(`[Auto-Sync Error] Could not fetch remote profiles: ${(err as Error).message}`);
   }
 }
 
@@ -655,7 +655,7 @@ app.get("/api/schedule", async (req: Request, res: Response) => {
       };
     }
 
-    res.json({ success: true, userId, practice });
+    res.json({ success: true, userId, practice, schedule: practice });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });
   }
@@ -664,24 +664,57 @@ app.get("/api/schedule", async (req: Request, res: Response) => {
 // POST /api/schedule
 app.post("/api/schedule", async (req: Request, res: Response) => {
   try {
-    const { action, scheduleId, problem } = req.body;
-    const userId = currentProfile.userId;
+    const body = req.body || {};
+    const userId = (req.query.userId as string) || body.userId || currentProfile.userId;
+    const { action, scheduleId, id } = body;
+    const problem = body.problem || (body.problem_id ? body : null);
 
-    if (action === "complete" && scheduleId) {
-      const updated = markProblemCompleted(scheduleId);
+    // 1. Completion request
+    if (action === "complete" && (scheduleId || id)) {
+      const targetId = scheduleId || id;
+      const updated = markProblemCompleted(targetId);
       if (updated) {
         await saveScheduleToDynamo(userId, updated);
       }
       return res.json({ success: true, item: updated });
     }
 
-    if (action === "schedule" && problem) {
-      const scheduled = scheduleProblem(problem);
+    // 2. Schedule request (either explicit action or direct problem payload)
+    if (problem && problem.problem_id) {
+      const scheduled = scheduleProblem({
+        problem_id: String(problem.problem_id),
+        title: problem.title || `Problem ${problem.problem_id}`,
+        topic: problem.topic || "Targeted Practice",
+        platform: problem.platform || "leetcode",
+        reason: problem.reason || "Targeted reinforcement for diagnosed blind spot",
+        url: problem.url || (problem.platform === "codeforces" ? `https://codeforces.com/problemset/problem/${problem.problem_id}` : `https://leetcode.com/problems/${problem.problem_id}`),
+      });
       await saveScheduleToDynamo(userId, scheduled);
       return res.json({ success: true, item: scheduled });
     }
 
-    res.status(400).json({ success: false, error: "Invalid action or parameters" });
+    res.status(400).json({ success: false, error: "Invalid action or parameters. Provide problem details to schedule or ID to complete." });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/schedule/complete
+app.post("/api/schedule/complete", async (req: Request, res: Response) => {
+  try {
+    const body = req.body || {};
+    const targetId = body.id || body.scheduleId;
+    const userId = (req.query.userId as string) || body.userId || currentProfile.userId;
+
+    if (!targetId) {
+      return res.status(400).json({ success: false, error: "Missing schedule item ID" });
+    }
+
+    const updated = markProblemCompleted(targetId);
+    if (updated) {
+      await saveScheduleToDynamo(userId, updated);
+    }
+    return res.json({ success: true, item: updated });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });
   }

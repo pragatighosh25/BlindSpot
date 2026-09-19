@@ -4,6 +4,7 @@ import {
   AnalysisOutputSchema,
   WeakTopic,
   RecommendedProblem,
+  RecommendedProblemSchema,
 } from "@/schemas/analysis.schema";
 import {
   SubmissionDiagnosis,
@@ -21,108 +22,169 @@ import {
 import { saveSubmission } from "@/services/opensearch";
 
 /**
- * Curated pedagogical problem bank addressing algorithmic failure modes
+ * Dynamically generates targeted practice problem recommendations from OpenAI / Strands LLM
+ * based on the user's diagnosed algorithmic blind spots.
  */
-const TOPIC_PROBLEM_BANK: Record<string, RecommendedProblem[]> = {
-  "binary search": [
-    {
-      platform: "leetcode",
-      problem_id: "704",
-      title: "Binary Search",
-      difficulty: "Easy",
-      topic: "Binary Search",
-      reason: "Reinforce strict left <= right loop invariants and exact target matching on single-element boundaries.",
-      url: "https://leetcode.com/problems/binary-search/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "35",
-      title: "Search Insert Position",
-      difficulty: "Easy",
-      topic: "Binary Search",
-      reason: "Practice lower_bound invariant preservation when target is not present in array.",
-      url: "https://leetcode.com/problems/search-insert-position/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "875",
-      title: "Koko Eating Bananas",
-      difficulty: "Medium",
-      topic: "Binary Search",
-      reason: "Master monotonic condition predicate search (binary search on answer space).",
-      url: "https://leetcode.com/problems/koko-eating-bananas/",
-    },
-  ],
-  "dynamic programming": [
-    {
-      platform: "leetcode",
-      problem_id: "198",
-      title: "House Robber",
-      difficulty: "Medium",
-      topic: "Dynamic Programming",
-      reason: "Master non-adjacent optimal substructure recurrence dp[i] = max(dp[i-1], dp[i-2] + nums[i]).",
-      url: "https://leetcode.com/problems/house-robber/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "300",
-      title: "Longest Increasing Subsequence",
-      difficulty: "Medium",
-      topic: "Dynamic Programming",
-      reason: "Build intuition for precise 1D DP state formulation dp[i] = length of LIS ending strictly at index i.",
-      url: "https://leetcode.com/problems/longest-increasing-subsequence/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "322",
-      title: "Coin Change",
-      difficulty: "Medium",
-      topic: "Dynamic Programming",
-      reason: "Practice memoized unbounded knapsack state transitions to eliminate exponential call overhead.",
-      url: "https://leetcode.com/problems/coin-change/",
-    },
-  ],
-  "graphs": [
-    {
-      platform: "leetcode",
-      problem_id: "200",
-      title: "Number of Islands",
-      difficulty: "Medium",
-      topic: "Graphs",
-      reason: "Master immediate queue-enqueue visited marking in 2D grid BFS to prevent redundant node expansions.",
-      url: "https://leetcode.com/problems/number-of-islands/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "785",
-      title: "Is Graph Bipartite?",
-      difficulty: "Medium",
-      topic: "Graphs",
-      reason: "Reinforce two-coloring state tracking across disconnected graph components.",
-      url: "https://leetcode.com/problems/is-graph-bipartite/",
-    },
-  ],
-  "sliding window": [
-    {
-      platform: "leetcode",
-      problem_id: "3",
-      title: "Longest Substring Without Repeating Characters",
-      difficulty: "Medium",
-      topic: "Sliding Window",
-      reason: "Fix window shrink logic using left = max(left, seen[char] + 1) to prevent left pointer backwards regression.",
-      url: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
-    },
-    {
-      platform: "leetcode",
-      problem_id: "209",
-      title: "Minimum Size Subarray Sum",
-      difficulty: "Medium",
-      topic: "Sliding Window",
-      reason: "Practice dynamic window expansion and greedy contraction with while loops.",
-      url: "https://leetcode.com/problems/minimum-size-subarray-sum/",
-    },
-  ],
-};
+export async function generateTargetedRecommendationsWithLLM(
+  weakTopics: WeakTopic[],
+  userId = "default_user"
+): Promise<RecommendedProblem[]> {
+  if (weakTopics.length === 0) {
+    return [];
+  }
+
+  const prompt = `You are an expert competitive programming coach and curriculum curator.
+The user '${userId}' has been analyzed across their LeetCode and Codeforces submissions and diagnosed with the following specific algorithmic blind spots:
+
+${weakTopics.map((w, idx) => `[Blind Spot ${idx + 1}] Topic: ${w.topic}
+- Specific Failure Mode: ${w.failure_mode}
+- Root Cause: ${w.root_cause || w.description}
+- Why It Fails: ${w.why_it_fails || "Violates algorithmic state invariant or boundary condition"}
+- Algorithmic Invariant Needed: ${w.correct_concept || "Enforce correct problem constraints"}
+- Suggested Strategy: ${w.suggested_fix || "Master recurrence or loop condition"}`).join("\n\n")}
+
+Task:
+Recommend 3 to 6 targeted, official LeetCode or Codeforces problems specifically chosen to help the user practice and eliminate these exact failure patterns.
+Do NOT recommend generic problems; each recommendation MUST specifically address one of the diagnosed blind spots above.
+
+Format Requirement:
+Return ONLY a valid JSON array of objects matching this exact structure:
+[
+  {
+    "platform": "leetcode" or "codeforces",
+    "problem_id": "704",
+    "title": "Exact Official Problem Title",
+    "difficulty": "Easy" | "Medium" | "Hard" | "800" | "1200" | "1600",
+    "topic": "Targeted Topic",
+    "reason": "Clear 1-2 sentence pedagogical explanation of why solving this specific problem directly addresses their diagnosed blind spot.",
+    "url": "https://leetcode.com/problems/slug/ or https://codeforces.com/problemset/problem/contest/index"
+  }
+]`;
+
+  try {
+    const rawResponse = await invokeLLM(SYSTEM_PROMPT, prompt, {
+      temperature: 0.2,
+      maxTokens: 1500,
+    });
+
+    if (rawResponse) {
+      const parsed = extractJsonFromResponse<RecommendedProblem[]>(rawResponse);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const validated: RecommendedProblem[] = [];
+        for (const item of parsed) {
+          const result = RecommendedProblemSchema.safeParse(item);
+          if (result.success) {
+            validated.push(result.data);
+          }
+        }
+        if (validated.length > 0) {
+          console.log(`[Strands Agent] Generated ${validated.length} dynamic targeted recommendations via OpenAI.`);
+          return validated;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`[Strands Agent LLM recommendation notice]: ${(err as Error).message}`);
+  }
+
+  // Dynamic fallback: Generate tailored practice recommendations dynamically derived from the diagnosed weak topics
+  const dynamicFallback: RecommendedProblem[] = [];
+  const seenIds = new Set<string>();
+
+  for (const w of weakTopics) {
+    const topicLower = w.topic.toLowerCase();
+    let candidateProblems: RecommendedProblem[] = [];
+
+    if (topicLower.includes("binary search") || topicLower.includes("search")) {
+      candidateProblems = [
+        {
+          platform: "leetcode",
+          problem_id: "704",
+          title: "Binary Search",
+          difficulty: "Easy",
+          topic: w.topic,
+          reason: `Practice maintaining strict loop invariants to eliminate '${w.failure_mode}'.`,
+          url: "https://leetcode.com/problems/binary-search/",
+        },
+        {
+          platform: "leetcode",
+          problem_id: "34",
+          title: "Find First and Last Position of Element in Sorted Array",
+          difficulty: "Medium",
+          topic: w.topic,
+          reason: `Targeted boundary conditions to resolve: ${w.why_it_fails || w.failure_mode}.`,
+          url: "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
+        },
+      ];
+    } else if (topicLower.includes("dynamic programming") || topicLower.includes("dp")) {
+      candidateProblems = [
+        {
+          platform: "leetcode",
+          problem_id: "198",
+          title: "House Robber",
+          difficulty: "Medium",
+          topic: w.topic,
+          reason: `Practice non-adjacent state recurrence to fix: ${w.root_cause || w.failure_mode}.`,
+          url: "https://leetcode.com/problems/house-robber/",
+        },
+        {
+          platform: "leetcode",
+          problem_id: "300",
+          title: "Longest Increasing Subsequence",
+          difficulty: "Medium",
+          topic: w.topic,
+          reason: `Master state transitions and optimal substructure: ${w.correct_concept || w.failure_mode}.`,
+          url: "https://leetcode.com/problems/longest-increasing-subsequence/",
+        },
+      ];
+    } else if (topicLower.includes("graph") || topicLower.includes("bfs") || topicLower.includes("dfs")) {
+      candidateProblems = [
+        {
+          platform: "leetcode",
+          problem_id: "200",
+          title: "Number of Islands",
+          difficulty: "Medium",
+          topic: w.topic,
+          reason: `Practice immediate visited-marking upon queue enqueue: ${w.suggested_fix || w.failure_mode}.`,
+          url: "https://leetcode.com/problems/number-of-islands/",
+        },
+      ];
+    } else if (topicLower.includes("two pointer") || topicLower.includes("sliding window")) {
+      candidateProblems = [
+        {
+          platform: "leetcode",
+          problem_id: "3",
+          title: "Longest Substring Without Repeating Characters",
+          difficulty: "Medium",
+          topic: w.topic,
+          reason: `Practice window contraction without left pointer regression to resolve ${w.failure_mode}.`,
+          url: "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+        },
+      ];
+    } else {
+      candidateProblems = [
+        {
+          platform: "leetcode",
+          problem_id: "1",
+          title: `${w.topic} Targeted Reinforcement`,
+          difficulty: "Medium",
+          topic: w.topic,
+          reason: `Targeted problem to eliminate ${w.failure_mode.toLowerCase()} and reinforce ${w.correct_concept || "correct invariant"}.`,
+          url: "https://leetcode.com/problemset/all/",
+        },
+      ];
+    }
+
+    for (const p of candidateProblems) {
+      if (!seenIds.has(p.problem_id)) {
+        seenIds.add(p.problem_id);
+        dynamicFallback.push(p);
+      }
+    }
+  }
+
+  return dynamicFallback.slice(0, 6);
+}
 
 /**
  * Diagnoses a single submission using Strands reasoning + OpenSearch historical context + LLM (with deterministic expert fallback)
@@ -280,8 +342,6 @@ export async function runStrandsUserAnalysis(userId = "default_user"): Promise<A
   }
 
   const weakTopics: WeakTopic[] = [];
-  const recommendedProblems: RecommendedProblem[] = [];
-  const seenRecProblemIds = new Set<string>();
 
   for (const [topic, { diagnoses: topicDiags, subIds }] of topicMap.entries()) {
     // Tally failure modes within this topic
@@ -345,34 +405,14 @@ export async function runStrandsUserAnalysis(userId = "default_user"): Promise<A
         correct_concept: topExemplar.correct_concept,
         suggested_fix: topExemplar.suggested_fix,
       });
-
-      // Match recommended problems targeted to this weak topic
-      const normalizedTopic = topic.toLowerCase();
-      let matchedBankProblems: RecommendedProblem[] = [];
-
-      for (const [bankTopic, bankList] of Object.entries(TOPIC_PROBLEM_BANK)) {
-        if (normalizedTopic.includes(bankTopic) || bankTopic.includes(normalizedTopic)) {
-          matchedBankProblems = bankList;
-          break;
-        }
-      }
-
-      if (matchedBankProblems.length === 0) {
-        matchedBankProblems = TOPIC_PROBLEM_BANK["binary search"];
-      }
-
-      for (const p of matchedBankProblems) {
-        if (!seenRecProblemIds.has(p.problem_id)) {
-          seenRecProblemIds.add(p.problem_id);
-          recommendedProblems.push(p);
-          if (recommendedProblems.length >= 6) break;
-        }
-      }
     }
   }
 
   // Sort weaknesses by evidence count descending
   weakTopics.sort((a, b) => b.evidence_count - a.evidence_count);
+
+  // Dynamically generate targeted practice recommendations using Strands / OpenAI LLM
+  const recommendedProblems = await generateTargetedRecommendationsWithLLM(weakTopics, userId);
 
   const summary = `Strands Agent analyzed ${allSubmissions.length} submissions (${failedSubmissions.length} failed) for user '${userId}'. Identified ${weakTopics.length} algorithmic blind spots with ${weakTopics.reduce((acc, w) => acc + w.evidence_count, 0)} total failure evidence samples.`;
 

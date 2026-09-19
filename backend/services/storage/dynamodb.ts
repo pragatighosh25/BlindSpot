@@ -46,8 +46,14 @@ function getDocClient(): DynamoDBDocumentClient | null {
   return ddbDocClient;
 }
 
+import fs from "fs";
+import path from "path";
+
+const LOCAL_STORE_FILE = path.resolve(__dirname, "../../data/local_dynamodb.json");
+
 /**
- * Local In-Memory Fallback for Local Development & Unit Tests
+ * Local File-Backed Fallback for Local Development & Offline Mode
+ * Guarantees accounts, auth credentials, weaknesses, and schedules persist across server restarts.
  */
 class LocalDynamoDBStore {
   private profiles = new Map<string, UserProfileRecord>();
@@ -56,16 +62,112 @@ class LocalDynamoDBStore {
   private analysisRuns = new Map<string, any[]>();
   private fullAnalyses = new Map<string, any>();
 
-  public async saveProfile(profile: UserProfileRecord) {
-    this.profiles.set(profile.userId, { ...profile });
+  constructor() {
+    this.loadFromDisk();
   }
 
-  public async getProfile(userId: string): Promise<UserProfileRecord | null> {
-    return this.profiles.get(userId) || null;
+  private loadFromDisk() {
+    try {
+      if (fs.existsSync(LOCAL_STORE_FILE)) {
+        const raw = fs.readFileSync(LOCAL_STORE_FILE, "utf-8");
+        const data = JSON.parse(raw);
+
+        if (data.profiles && Array.isArray(data.profiles)) {
+          for (const p of data.profiles) {
+            this.profiles.set(p.userId, p);
+          }
+        }
+
+        if (data.weaknesses && typeof data.weaknesses === "object") {
+          for (const [uid, list] of Object.entries(data.weaknesses)) {
+            this.weaknesses.set(uid, list as WeakTopic[]);
+          }
+        }
+
+        if (data.schedules && typeof data.schedules === "object") {
+          for (const [uid, items] of Object.entries(data.schedules)) {
+            const userMap = new Map<string, ScheduledReviewItem>();
+            for (const item of items as ScheduledReviewItem[]) {
+              userMap.set(item.id, item);
+            }
+            this.schedules.set(uid, userMap);
+          }
+        }
+
+        if (data.analysisRuns && typeof data.analysisRuns === "object") {
+          for (const [uid, runs] of Object.entries(data.analysisRuns)) {
+            this.analysisRuns.set(uid, runs as any[]);
+          }
+        }
+
+        if (data.fullAnalyses && typeof data.fullAnalyses === "object") {
+          for (const [uid, a] of Object.entries(data.fullAnalyses)) {
+            this.fullAnalyses.set(uid, a);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`[LocalStore Load Warning]:`, (err as Error).message);
+    }
+  }
+
+  private saveToDisk() {
+    try {
+      const dir = path.dirname(LOCAL_STORE_FILE);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      const schedulesObj: Record<string, ScheduledReviewItem[]> = {};
+      for (const [uid, map] of this.schedules.entries()) {
+        schedulesObj[uid] = Array.from(map.values());
+      }
+
+      const dump = {
+        profiles: Array.from(this.profiles.values()),
+        weaknesses: Object.fromEntries(this.weaknesses.entries()),
+        schedules: schedulesObj,
+        analysisRuns: Object.fromEntries(this.analysisRuns.entries()),
+        fullAnalyses: Object.fromEntries(this.fullAnalyses.entries()),
+      };
+
+      fs.writeFileSync(LOCAL_STORE_FILE, JSON.stringify(dump, null, 2), "utf-8");
+    } catch (err) {
+      console.warn(`[LocalStore Save Warning]:`, (err as Error).message);
+    }
+  }
+
+  public async saveProfile(profile: UserProfileRecord) {
+    this.profiles.set(profile.userId, { ...profile });
+    this.saveToDisk();
+  }
+
+  public async getProfile(userIdOrEmail: string): Promise<UserProfileRecord | null> {
+    if (!userIdOrEmail) return null;
+    const clean = userIdOrEmail.trim().toLowerCase();
+
+    // 1. Direct key match by userId
+    if (this.profiles.has(clean)) {
+      return this.profiles.get(clean) || null;
+    }
+
+    // 2. Lookup by email or normalized userId
+    for (const p of this.profiles.values()) {
+      if (
+        p.userId.toLowerCase() === clean ||
+        p.email?.toLowerCase() === clean ||
+        p.userId === clean.replace(/[^a-z0-9]/gi, "_")
+      ) {
+        return p;
+      }
+    }
+
+    return null;
   }
 
   public async saveWeaknesses(userId: string, weakTopics: WeakTopic[]) {
     this.weaknesses.set(userId, [...weakTopics]);
+    this.saveToDisk();
   }
 
   public async getWeaknesses(userId: string): Promise<WeakTopic[]> {
@@ -77,6 +179,7 @@ class LocalDynamoDBStore {
       this.schedules.set(userId, new Map());
     }
     this.schedules.get(userId)!.set(item.id, { ...item });
+    this.saveToDisk();
   }
 
   public async getSchedule(userId: string): Promise<ScheduledReviewItem[]> {
@@ -89,6 +192,7 @@ class LocalDynamoDBStore {
       this.analysisRuns.set(userId, []);
     }
     this.analysisRuns.get(userId)!.push(run);
+    this.saveToDisk();
   }
 
   public async getLatestAnalysisRun(userId: string): Promise<any | null> {
@@ -98,6 +202,7 @@ class LocalDynamoDBStore {
 
   public async saveLatestAnalysis(userId: string, analysis: any) {
     this.fullAnalyses.set(userId, { ...analysis });
+    this.saveToDisk();
   }
 
   public async getLatestAnalysis(userId: string): Promise<any | null> {

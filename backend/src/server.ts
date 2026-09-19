@@ -209,10 +209,24 @@ app.post("/api/verify-handle", async (req: Request, res: Response) => {
 
     if (platform === "leetcode") {
       const result = await verifyLeetCodeHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else if (platform === "codeforces") {
       const result = await verifyCodeforcesHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else {
       return res.status(400).json({
         success: false,
@@ -242,10 +256,24 @@ app.get("/api/verify-handle", async (req: Request, res: Response) => {
 
     if (platform === "leetcode") {
       const result = await verifyLeetCodeHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else if (platform === "codeforces") {
       const result = await verifyCodeforcesHandle(cleanHandle, token);
-      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+      return res.json({
+        success: result.exists && result.verifiedOwnership,
+        exists: result.exists,
+        verifiedOwnership: result.verifiedOwnership,
+        message: result.message,
+        result,
+        profile: result.profile,
+      });
     } else {
       return res.status(400).json({
         success: false,
@@ -311,7 +339,7 @@ app.post("/api/auth/send-verification-email", async (req: Request, res: Response
       lastSentAt: Date.now(),
     });
 
-    // Send email using real nodemailer transport
+    // Send email using real transport
     await sendVerificationEmail(cleanEmail, code);
 
     res.json({
@@ -319,7 +347,7 @@ app.post("/api/auth/send-verification-email", async (req: Request, res: Response
       message: `Verification code sent to ${cleanEmail}`,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: (error as Error).message });
+    res.status(400).json({ success: false, error: (error as Error).message });
   }
 });
 
@@ -575,6 +603,130 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
         leetcodeUsername: profile.leetcodeUsername,
         codeforcesHandle: profile.codeforcesHandle,
         isVerified: profile.isVerified,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/user/change-password (Change account password)
+app.post("/api/user/change-password", async (req: Request, res: Response) => {
+  try {
+    const { userId = currentProfile.userId, currentPassword, newPassword } = req.body;
+    if (!userId || !currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: "User ID, current password, and new password are required.",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "New password must be at least 8 characters long.",
+      });
+    }
+
+    const profile = await getUserProfile(userId);
+    if (!profile) {
+      return res.status(404).json({ success: false, error: "User account not found." });
+    }
+
+    if (profile.passwordHash && !verifyPassword(currentPassword, profile.passwordHash)) {
+      return res.status(401).json({ success: false, error: "Incorrect current password." });
+    }
+
+    const newHash = hashPassword(newPassword);
+    await saveUserProfile({
+      userId: profile.userId,
+      email: profile.email,
+      passwordHash: newHash,
+      leetcodeUsername: profile.leetcodeUsername,
+      codeforcesHandle: profile.codeforcesHandle,
+    });
+
+    res.json({ success: true, message: "Password updated successfully." });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/user/update-handles (Update LeetCode or Codeforces handle with bio verification)
+app.post("/api/user/update-handles", async (req: Request, res: Response) => {
+  try {
+    const {
+      userId = currentProfile.userId,
+      leetcodeUsername,
+      codeforcesHandle,
+      verificationToken,
+    } = req.body;
+
+    const profile = await getUserProfile(userId);
+    if (!profile) {
+      return res.status(404).json({ success: false, error: "User account not found." });
+    }
+
+    const cleanLc = leetcodeUsername !== undefined ? leetcodeUsername.trim() : profile.leetcodeUsername;
+    const cleanCf = codeforcesHandle !== undefined ? codeforcesHandle.trim() : profile.codeforcesHandle;
+
+    // Verify changed handles
+    if (leetcodeUsername && leetcodeUsername.trim() !== profile.leetcodeUsername) {
+      const lcCheck = await verifyLeetCodeHandle(cleanLc, verificationToken);
+      if (!lcCheck.exists) {
+        return res.status(400).json({
+          success: false,
+          error: `LeetCode profile @${cleanLc} not found.`,
+        });
+      }
+      if (!lcCheck.verifiedOwnership) {
+        return res.status(400).json({
+          success: false,
+          error: `LeetCode bio verification failed: Verification code was not found in @${cleanLc}'s bio.`,
+        });
+      }
+    }
+
+    if (codeforcesHandle && codeforcesHandle.trim() !== profile.codeforcesHandle) {
+      const cfCheck = await verifyCodeforcesHandle(cleanCf, verificationToken);
+      if (!cfCheck.exists) {
+        return res.status(400).json({
+          success: false,
+          error: `Codeforces handle @${cleanCf} not found.`,
+        });
+      }
+      if (!cfCheck.verifiedOwnership) {
+        return res.status(400).json({
+          success: false,
+          error: `Codeforces verification failed: Verification code was not found in @${cleanCf}'s profile details.`,
+        });
+      }
+    }
+
+    const updated = await saveUserProfile({
+      userId: profile.userId,
+      email: profile.email,
+      passwordHash: profile.passwordHash,
+      leetcodeUsername: cleanLc || undefined,
+      codeforcesHandle: cleanCf || undefined,
+      lastSyncAt: Date.now(),
+    });
+
+    currentProfile.leetcodeUsername = cleanLc || currentProfile.leetcodeUsername;
+    currentProfile.codeforcesHandle = cleanCf || currentProfile.codeforcesHandle;
+
+    // Ingest submissions for updated handles in background
+    if (cleanLc) fetchLiveLeetCodeSubmissions(cleanLc, 30, userId).catch(() => {});
+    if (cleanCf) fetchLiveCodeforcesSubmissions(cleanCf, 30, userId).catch(() => {});
+
+    res.json({
+      success: true,
+      message: "Handles updated and verified successfully.",
+      user: {
+        userId: updated.userId,
+        email: updated.email,
+        leetcodeUsername: updated.leetcodeUsername,
+        codeforcesHandle: updated.codeforcesHandle,
       },
     });
   } catch (error) {

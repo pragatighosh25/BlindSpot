@@ -415,16 +415,16 @@ test("Test 11 - Persistence: Saves and verifies analysis in DynamoDB", async () 
 });
 
 // -------------------------------------------------------------
-// Test 12: OpenAI Response Extraction & Schema Validation
+// Test 12: Gemini Response Extraction & Schema Validation
 // -------------------------------------------------------------
-test("Test 12 - OpenAI: Correctly extracts and parses OpenAI completion response structure", async () => {
+test("Test 12 - Gemini: Correctly extracts and parses Gemini completion response structure", async () => {
   const { extractJsonFromResponse } = await import("../services/agent/llm.js");
 
-  // Simulated raw output from OpenAI chat.completions (choices[0].message.content)
-  const simulatedOpenAiText = `
+  // Simulated raw output from Gemini generateContent (response.text)
+  const simulatedGeminiText = `
   \`\`\`json
   {
-    "submission_id": "test_openai_01",
+    "submission_id": "test_gemini_01",
     "topic": "Binary Search",
     "verdict": "WA",
     "failure_pattern": "boundary_condition_error",
@@ -441,7 +441,7 @@ test("Test 12 - OpenAI: Correctly extracts and parses OpenAI completion response
   \`\`\`
   `;
 
-  const parsed = extractJsonFromResponse(simulatedOpenAiText);
+  const parsed = extractJsonFromResponse(simulatedGeminiText);
   const validated = SubmissionDiagnosisSchema.safeParse(parsed);
 
   assert.equal(validated.success, true);

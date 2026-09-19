@@ -22,7 +22,7 @@ import {
 import { saveSubmission } from "@/services/opensearch";
 
 /**
- * Dynamically generates targeted practice problem recommendations from OpenAI / Strands LLM
+ * Dynamically generates targeted practice problem recommendations from Gemini / Strands LLM
  * based on the user's diagnosed algorithmic blind spots.
  */
 export async function generateTargetedRecommendationsWithLLM(
@@ -78,7 +78,7 @@ Return ONLY a valid JSON array of objects matching this exact structure:
           }
         }
         if (validated.length > 0) {
-          console.log(`[Strands Agent] Generated ${validated.length} dynamic targeted recommendations via OpenAI.`);
+          console.log(`[Strands Agent] Generated ${validated.length} dynamic targeted recommendations via Gemini.`);
           return validated;
         }
       }
@@ -411,7 +411,7 @@ export async function runStrandsUserAnalysis(userId = "default_user"): Promise<A
   // Sort weaknesses by evidence count descending
   weakTopics.sort((a, b) => b.evidence_count - a.evidence_count);
 
-  // Dynamically generate targeted practice recommendations using Strands / OpenAI LLM
+  // Dynamically generate targeted practice recommendations using Strands / Gemini LLM
   const recommendedProblems = await generateTargetedRecommendationsWithLLM(weakTopics, userId);
 
   const summary = `Strands Agent analyzed ${allSubmissions.length} submissions (${failedSubmissions.length} failed) for user '${userId}'. Identified ${weakTopics.length} algorithmic blind spots with ${weakTopics.reduce((acc, w) => acc + w.evidence_count, 0)} total failure evidence samples.`;

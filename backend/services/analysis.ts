@@ -1,5 +1,5 @@
 import { AnalysisOutput } from "@/schemas/analysis.schema";
-import { analyzeUserHistory, analyzeSubmission, getWeaknessProfile, getRecommendations } from "./agent";
+import { analyzeUserHistory, analyzeSubmission, getWeaknessProfile, getRecommendations, getLLMTelemetry } from "./agent";
 import { DEFAULT_USER_CONFIG } from "./ingestion/config";
 import { getLatestAnalysisFromDynamo } from "./storage/dynamodb";
 
@@ -20,4 +20,4 @@ export async function getAnalysisForUser(
   return analyzeUserHistory(userId);
 }
 
-export { analyzeSubmission, analyzeUserHistory, getWeaknessProfile, getRecommendations };
+export { analyzeSubmission, analyzeUserHistory, getWeaknessProfile, getRecommendations, getLLMTelemetry };

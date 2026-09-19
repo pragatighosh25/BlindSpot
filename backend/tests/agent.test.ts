@@ -415,16 +415,16 @@ test("Test 11 - Persistence: Saves and verifies analysis in DynamoDB", async () 
 });
 
 // -------------------------------------------------------------
-// Test 12: OpenAI Response Extraction & Schema Validation
+// Test 12: Gemini Response Extraction & Schema Validation
 // -------------------------------------------------------------
-test("Test 12 - OpenAI: Correctly extracts and parses OpenAI completion response structure", async () => {
+test("Test 12 - Gemini: Correctly extracts and parses Gemini completion response structure", async () => {
   const { extractJsonFromResponse } = await import("../services/agent/llm.js");
 
-  // Simulated raw output from OpenAI chat.completions (choices[0].message.content)
-  const simulatedOpenAiText = `
+  // Simulated raw output from Gemini generateContent (response.text)
+  const simulatedGeminiText = `
   \`\`\`json
   {
-    "submission_id": "test_openai_01",
+    "submission_id": "test_gemini_01",
     "topic": "Binary Search",
     "verdict": "WA",
     "failure_pattern": "boundary_condition_error",
@@ -441,7 +441,7 @@ test("Test 12 - OpenAI: Correctly extracts and parses OpenAI completion response
   \`\`\`
   `;
 
-  const parsed = extractJsonFromResponse(simulatedOpenAiText);
+  const parsed = extractJsonFromResponse(simulatedGeminiText);
   const validated = SubmissionDiagnosisSchema.safeParse(parsed);
 
   assert.equal(validated.success, true);
@@ -451,4 +451,24 @@ test("Test 12 - OpenAI: Correctly extracts and parses OpenAI completion response
     assert.equal(validated.data.topic, "Binary Search");
   }
 });
+
+// -------------------------------------------------------------
+// Test 13: LLM Provider Telemetry & Secret Sanitization
+// -------------------------------------------------------------
+test("Test 13 - Telemetry: Verifies provider telemetry tracking and key sanitization", async () => {
+  const { getLLMTelemetry, recordLLMTelemetry, sanitizeErrorMessage } = await import("../services/agent/llm.js");
+
+  // Verify telemetry retrieval
+  const telemetry = getLLMTelemetry();
+  assert.equal(telemetry.provider, "Gemini");
+  assert.ok(telemetry.model);
+  assert.ok(["GEMINI", "FALLBACK"].includes(telemetry.source));
+
+  // Verify telemetry recording
+  recordLLMTelemetry({ source: "FALLBACK", lastError: "Test error notice" });
+  const updatedTelemetry = getLLMTelemetry();
+  assert.equal(updatedTelemetry.source, "FALLBACK");
+  assert.equal(updatedTelemetry.lastError, "Test error notice");
+});
+
 

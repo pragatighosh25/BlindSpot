@@ -63,16 +63,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="font-mono font-extrabold text-sm tracking-tight text-white">
               BlindSpot
             </span>
-            <button
-              onClick={onOpenSyncModal}
-              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 hover:border-[#E4007C]/40 transition-colors text-[10px] font-mono text-white/70"
-              title="Manage verified profiles"
-            >
-              <span>@{activeProfile.leetcode}</span>
-              {activeProfile.isDemo && (
-                <span className="text-[#E4007C] font-bold">DEMO</span>
-              )}
-            </button>
+              
+            
           </div>
         </div>
 

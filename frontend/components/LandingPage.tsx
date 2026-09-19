@@ -16,6 +16,8 @@ import {
   Globe,
   Trophy,
 } from "akar-icons";
+import { TextLoop } from "./TextLoop";
+import { DiagnosticScrollSection } from "./DiagnosticScrollSection";
 
 interface LandingPageProps {
   onOpenAuth: (mode: "demo" | "login" | "signup") => void;
@@ -26,17 +28,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenAuth,
   onLaunchDemo,
 }) => {
-  const [selectedPhase, setSelectedPhase] = useState<number>(2);
   const [activeTabBug, setActiveTabBug] = useState<"binary-search" | "dp" | "bfs">("binary-search");
-
-  const marqueeItems = [
-    "✦ BINARY SEARCH: WHILE (LEFT < RIGHT) PREMATURE TERMINATION",
-    "✦ DYNAMIC PROGRAMMING: ADJACENT STATE INDEX OVERLAP",
-    "✦ GRAPH BFS: POST-DEQUEUE VISITED ARRAY INFLATION",
-    "✦ SM-2 SPACED REPETITION (DAY 0 → DAY 1 → DAY 3 → DAY 7 → DAY 14)",
-    "✦ OPENSEARCH CODE SEARCH & CANONICAL PERSISTENCE",
-    "✦ LIVE VERIFIED HANDLES: LEETCODE + CODEFORCES",
-  ];
 
   const stamps = [
     {
@@ -89,40 +81,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
   ];
 
-  const pipelinePhases = [
-    {
-      step: "01",
-      title: "Multi-Platform Ingest",
-      subtitle: "LeetCode & Codeforces API",
-      desc: "Synchronizes raw submission payloads directly from platform endpoints and verifies handle authenticity.",
-      badge: "LIVE SYNC",
-      output: `[INGEST] Connected: @pragatighosh25 (LeetCode) + @pragatighosh (Codeforces)\n[STATUS] Fetched 37 submissions • 29 failed attempts cataloged\n[STORE] Canonical submission schema mapped in DynamoDB`,
-    },
-    {
-      step: "02",
-      title: "OpenSearch Indexing",
-      subtitle: "Code & Error Traces",
-      desc: "Normalizes submission code, error messages, and verdict metadata into sub-millisecond searchable clusters.",
-      badge: "OPENSEARCH",
-      output: `[SEARCH] Query: "while (left < right) nums[mid]" -> 5 matches\n[CLUSTER] Similarity score 0.94 across Binary Search submissions\n[INDEX] Tagged: Boundary Condition Errors • Array Invariants`,
-    },
-    {
-      step: "03",
-      title: "Strands AI Diagnostics",
-      subtitle: "Root Cause Reasoning",
-      desc: "Pinpoints exact logical flaws: unmemoized branches, visited state delays, or premature loop breakouts.",
-      badge: "AI REASONING",
-      output: `[DIAGNOSE] Binary Search — Boundary Condition Errors\n[ROOT CAUSE] Using while (left < right) with right = mid - 1\n[WHY IT FAILS] Premature loop termination on single-element search range\n[FIX] Use while (left <= right) or preserve right = mid for lower-bound`,
-    },
-    {
-      step: "04",
-      title: "SM-2 Interval Scheduling",
-      subtitle: "Spaced Memory Consolidation",
-      desc: "Automatically schedules targeted practice problems on optimal retention intervals (Day 0 → 1 → 3 → 7 → 14).",
-      badge: "RETENTION",
-      output: `[SCHEDULE] LC 34: Find First and Last Position -> Scheduled (Day 0)\n[INTERVAL] Day 0 [Today] → Day 1 [Tomorrow] → Day 3 → Day 7 → Day 14\n[TARGET] Lock in boundary condition invariant permanently`,
-    },
-  ];
+
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] bg-dot-grid text-[#FAFAF8] selection:bg-[#E4007C] selection:text-white">
@@ -149,10 +108,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <span className="font-mono font-extrabold text-base tracking-tight text-white">
                   BlindSpot
                 </span>
-                <span className="text-white/30 font-mono text-xs">×</span>
-                <span className="badge-pill-accent text-[9px]">
-                  AI Coach
-                </span>
+                
+                
               </div>
             </div>
 
@@ -189,13 +146,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Left Content */}
             <div className="lg:col-span-6 space-y-6">
-              {/* Eyebrow badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#141414] border border-[#E4007C]/40 text-[11px] font-mono shadow-[0_0_15px_rgba(228,0,124,0.2)]">
-                <span className="w-2 h-2 rounded-full bg-[#E4007C] pulse-dot-pink" />
-                <span className="text-white/90 uppercase tracking-wider font-semibold">
-                  Continuous Algorithmic Diagnostics
-                </span>
-              </div>
+              
 
               {/* Title */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-black font-mono tracking-tight leading-[1.05] text-white">
@@ -215,7 +166,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               {/* Description */}
               <p className="text-sm sm:text-base text-white/70 leading-relaxed font-sans font-normal">
-                BlindSpot mines your raw submission history, isolates recurring invariant flaws (boundary conditions, unmemoized recursions, visited state delays), and schedules targeted spaced repetition practice.
+                BlindSpot analyzes your coding mistakes, finds your weak areas, and gives you targeted practice to improve them.
               </p>
 
               {/* 2-Column KPI Ledger Box (WeMakeDevs style) */}
@@ -223,10 +174,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="pr-4 space-y-1">
                   <div className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase tracking-wider">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#E4007C]" />
-                    <span>Diagnostics Confidence</span>
+                    <span>Cross-Platform Sync</span>
                   </div>
-                  <div className="text-2xl font-bold text-[#E4007C]">94% Accuracy</div>
-                  <div className="text-[11px] text-white/50 font-sans">Strands AI reasoning engine</div>
+                  <div className="text-2xl font-bold text-[#E4007C]">LeetCode &amp; CF</div>
+                 
                 </div>
                 <div className="pl-4 space-y-1">
                   <div className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase tracking-wider">
@@ -234,7 +185,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <span>SM-2 Memory Lock</span>
                   </div>
                   <div className="text-2xl font-bold text-[#00FF9C]">5 Interval Steps</div>
-                  <div className="text-[11px] text-white/50 font-sans">Day 0 &bull; 1 &bull; 3 &bull; 7 &bull; 14</div>
+                  
                 </div>
               </div>
 
@@ -398,7 +349,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     className="text-[#E4007C] hover:underline flex items-center gap-1 font-bold text-xs"
                   >
                     <span>Full Live Analysis</span>
-                    <span>&rarr;</span>
+                    
                   </button>
                 </div>
               </div>
@@ -406,99 +357,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
         </section>
 
-        {/* Continuous Laser Marquee Ribbon */}
-        <div className="border-b border-white/10 bg-[#0D0D0D]/90 py-3 overflow-hidden select-none">
-          <div className="animate-marquee gap-8 items-center text-xs font-mono text-white/70">
-            {[...marqueeItems, ...marqueeItems].map((item, idx) => (
-              <span key={idx} className="whitespace-nowrap px-4 hover:text-[#E4007C] transition-colors cursor-default font-semibold">
-                {item}
-              </span>
-            ))}
-          </div>
+        {/* React Bits TextLoop Animated Ribbon */}
+        <div className="bg-[#080808] py-2 overflow-hidden select-none relative">
+          <TextLoop
+            text="Blindspot shows you where u are wrong, why it happens, and what to practise next"
+            shape="wave"
+            speed={80}
+            direction="reverse"
+            separator="✦"
+            curviness={40}
+            fontSize={22}
+            fontWeight={800}
+            letterSpacing={2}
+            uppercase={false}
+            color="#FFFFFF"
+            ribbon
+            ribbonColor="#E4007C"
+            ribbonWidth={48}
+            pauseOnHover
+            className="w-full max-h-[140px] flex items-center justify-center"
+          />
         </div>
 
-        {/* 01 / The Diagnostic Ledger (Vertical Timeline with Connector Stems) */}
-        <section id="pipeline" className="border-b border-white/10 px-6 py-14 md:py-20 relative">
-          <div className="crosshair-corner -top-[4px] -left-[4px]" />
-          <div className="crosshair-corner -top-[4px] -right-[4px]" />
-
-          <div className="max-w-2xl mx-auto text-center mb-12">
-            <div className="font-mono text-xs uppercase tracking-widest text-[#E4007C] font-semibold">
-              01 / THE DIAGNOSTIC LEDGER
-            </div>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-bold font-mono text-white tracking-tight">
-              From Raw Submissions to Locked Invariants.
-            </h2>
-            <p className="mt-3 text-sm text-white/60 font-sans">
-              Click any stage in the ledger to observe the architectural pipeline output.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Timeline Stepper (Left 5 Cols) */}
-            <div className="lg:col-span-5 space-y-3">
-              {pipelinePhases.map((phase, idx) => {
-                const isSelected = selectedPhase === idx;
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedPhase(idx)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3.5 ${
-                      isSelected
-                        ? "bg-[#161616] border-[#E4007C] shadow-[0_0_20px_rgba(228,0,124,0.2)]"
-                        : "bg-[#101010] border-white/10 hover:border-white/20 hover:bg-[#141414]"
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-mono text-xs font-bold shrink-0 ${
-                      isSelected ? "bg-[#E4007C] text-white" : "bg-white/10 text-white/60"
-                    }`}>
-                      {phase.step}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-mono font-bold text-sm text-white truncate">{phase.title}</h4>
-                        <span className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded-full ${
-                          isSelected ? "bg-[#E4007C]/20 text-[#E4007C] font-bold" : "bg-white/5 text-white/40"
-                        }`}>
-                          {phase.badge}
-                        </span>
-                      </div>
-                      <p className="text-xs text-white/60 font-sans mt-1 line-clamp-2 leading-relaxed">
-                        {phase.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Console Output Screen (Right 7 Cols) */}
-            <div className="lg:col-span-7 bg-[#121212] rounded-2xl border border-white/10 p-6 font-mono text-xs space-y-4 shadow-xl">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10 text-white/60 text-[11px]">
-                <span className="text-[#E4007C] font-bold uppercase">
-                  Phase {pipelinePhases[selectedPhase].step}: {pipelinePhases[selectedPhase].title}
-                </span>
-                <span className="text-[#00FF9C] flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#00FF9C]" />
-                  Active Telemetry
-                </span>
-              </div>
-              <pre className="bg-[#0A0A0A] p-4 rounded-xl border border-white/10 text-white/85 text-[11px] leading-relaxed overflow-x-auto">
-                <code>{pipelinePhases[selectedPhase].output}</code>
-              </pre>
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-white/50 text-[11px]">DynamoDB + OpenSearch Verified</span>
-                <button
-                  onClick={onLaunchDemo}
-                  className="text-xs font-bold text-[#E4007C] hover:underline flex items-center gap-1"
-                >
-                  <span>Explore in Workspace</span>
-                  <span>&rarr;</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* 01 / Scroll-Driven Editorial Diagnostic Process */}
+        <DiagnosticScrollSection onLaunchDemo={onLaunchDemo} />
 
         {/* 02 / Capabilities Stamp Board (WeMakeDevs Stamp Style with Hover Tilts) */}
         <section id="stamps" className="border-b border-white/10 px-6 py-14 md:py-20 relative">

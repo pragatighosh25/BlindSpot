@@ -14,7 +14,6 @@ interface NavbarProps {
   onTabChange: (tab: WorkspaceTab) => void;
   onSync: () => void;
   onAnalyze: () => void;
-  onOpenIngestModal: () => void;
   onOpenSyncModal: () => void;
   onSignOut?: () => void;
   isSyncing: boolean;
@@ -36,7 +35,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onTabChange,
   onSync,
   onAnalyze,
-  onOpenIngestModal,
   onOpenSyncModal,
   onSignOut,
   isSyncing,

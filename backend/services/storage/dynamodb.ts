@@ -32,6 +32,9 @@ let ddbDocClient: DynamoDBDocumentClient | null = null;
 
 function getDocClient(): DynamoDBDocumentClient | null {
   if (!IS_AWS_CONFIGURED) return null;
+  console.log(
+  `[DynamoDB] Using AWS DynamoDB → ${TABLE_NAME} (${process.env.AWS_REGION})`
+);
   if (!ddbDocClient) {
     const client = new DynamoDBClient({
       region: process.env.AWS_REGION || "us-east-1",

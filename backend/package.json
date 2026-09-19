@@ -15,6 +15,7 @@
     "@opensearch-project/opensearch": "^3.6.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "nodemailer": "^10.0.10",
     "openai": "^4.104.0",
     "zod": "^3.24.2"
   },
@@ -23,6 +24,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.13.9",
+    "@types/nodemailer": "^8.0.2",
     "esbuild": "^0.25.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"

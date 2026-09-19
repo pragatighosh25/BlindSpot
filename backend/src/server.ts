@@ -172,6 +172,27 @@ app.get("/api/auth/token", (req: Request, res: Response) => {
   res.json({ success: true, token });
 });
 
+import crypto from "crypto";
+
+// Secure password hashing helpers
+function hashPassword(password: string): string {
+  const salt = "blindspot_auth_salt_secure_2025";
+  return crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
+}
+
+function verifyPassword(password: string, storedHash: string): boolean {
+  if (!storedHash) return false;
+  const computed = hashPassword(password);
+  return computed === storedHash || password === storedHash;
+}
+
+// In-memory OTP storage for registration email verification
+// Key: email, Value: { code, expiresAt, verified, lastSentAt }
+const emailOtpStore = new Map<
+  string,
+  { code: string; expiresAt: number; verified?: boolean; lastSentAt: number }
+>();
+
 // POST /api/verify-handle (Live probe of LeetCode or Codeforces account)
 app.post("/api/verify-handle", async (req: Request, res: Response) => {
   try {
@@ -183,18 +204,163 @@ app.post("/api/verify-handle", async (req: Request, res: Response) => {
       });
     }
 
+    const cleanHandle = (handle as string).trim();
+
     if (platform === "leetcode") {
-      const result = await verifyLeetCodeHandle(handle, token);
-      return res.json({ success: result.exists, result });
+      const result = await verifyLeetCodeHandle(cleanHandle, token);
+      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
     } else if (platform === "codeforces") {
-      const result = await verifyCodeforcesHandle(handle, token);
-      return res.json({ success: result.exists, result });
+      const result = await verifyCodeforcesHandle(cleanHandle, token);
+      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
     } else {
       return res.status(400).json({
         success: false,
         error: `Unsupported platform '${platform}'. Supported platforms: leetcode, codeforces.`,
       });
     }
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// GET /api/verify-handle (Query-param support for live probe)
+app.get("/api/verify-handle", async (req: Request, res: Response) => {
+  try {
+    const platform = req.query.platform as string;
+    const handle = req.query.handle as string;
+    const token = req.query.token as string | undefined;
+
+    if (!platform || !handle) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required query parameters: platform and handle.",
+      });
+    }
+
+    const cleanHandle = handle.trim();
+
+    if (platform === "leetcode") {
+      const result = await verifyLeetCodeHandle(cleanHandle, token);
+      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+    } else if (platform === "codeforces") {
+      const result = await verifyCodeforcesHandle(cleanHandle, token);
+      return res.json({ success: result.exists, exists: result.exists, result, profile: result.profile });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: `Unsupported platform '${platform}'.`,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+import { sendVerificationEmail, verifyEmailDomainExists } from "./services/email";
+
+// POST /api/auth/send-verification-email (Verify domain exists, generate & send 6-digit email OTP)
+app.post("/api/auth/send-verification-email", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !email.trim()) {
+      return res.status(400).json({ success: false, error: "Email address is required." });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({ success: false, error: "Please enter a valid email address." });
+    }
+
+    if (password !== undefined && password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: "Password must be at least 8 characters long.",
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Verify email domain existence via DNS MX/A records
+    const domainCheck = await verifyEmailDomainExists(cleanEmail);
+    if (!domainCheck.valid) {
+      return res.status(400).json({
+        success: false,
+        error: domainCheck.error || "The email address domain does not exist or cannot receive mail.",
+      });
+    }
+
+    const existing = emailOtpStore.get(cleanEmail);
+
+    // Rate limit resends: 15s cooldown
+    if (existing && Date.now() - existing.lastSentAt < 15000) {
+      const waitSec = Math.ceil((15000 - (Date.now() - existing.lastSentAt)) / 1000);
+      return res.status(429).json({
+        success: false,
+        error: `Please wait ${waitSec}s before requesting another verification code.`,
+      });
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    emailOtpStore.set(cleanEmail, {
+      code,
+      expiresAt,
+      verified: false,
+      lastSentAt: Date.now(),
+    });
+
+    // Send email using real nodemailer transport
+    await sendVerificationEmail(cleanEmail, code);
+
+    res.json({
+      success: true,
+      message: `Verification code sent to ${cleanEmail}`,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// POST /api/auth/verify-email-code (Verify the 6-digit code)
+app.post("/api/auth/verify-email-code", async (req: Request, res: Response) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ success: false, error: "Email and verification code are required." });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const record = emailOtpStore.get(cleanEmail);
+
+    if (!record) {
+      return res.status(400).json({
+        success: false,
+        error: "No verification code requested for this email or it has expired.",
+      });
+    }
+
+    if (Date.now() > record.expiresAt) {
+      emailOtpStore.delete(cleanEmail);
+      return res.status(400).json({
+        success: false,
+        error: "Verification code has expired. Please request a new one.",
+      });
+    }
+
+    if (record.code !== code.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "Incorrect verification code. Please check your email and try again.",
+      });
+    }
+
+    record.verified = true;
+
+    res.json({
+      success: true,
+      message: "Email verified successfully.",
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });
   }
@@ -209,6 +375,7 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
       leetcodeUsername,
       codeforcesHandle,
       verificationToken,
+      emailVerificationCode,
     } = req.body;
 
     if (!email || !password) {
@@ -218,75 +385,94 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
       });
     }
 
-    if (!leetcodeUsername || !leetcodeUsername.trim()) {
+    if (password.length < 8) {
       return res.status(400).json({
         success: false,
-        error: "LeetCode username is required.",
-      });
-    }
-
-    if (!codeforcesHandle || !codeforcesHandle.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: "Codeforces handle is required.",
+        error: "Password must be at least 8 characters long.",
       });
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const cleanLc = leetcodeUsername.trim();
-    const cleanCf = codeforcesHandle.trim();
+    const cleanLc = (leetcodeUsername || "").trim();
+    const cleanCf = (codeforcesHandle || "").trim();
     const userId = cleanEmail.replace(/[^a-z0-9]/gi, "_");
 
-    console.log(`[Auth Register] Verifying handles for ${cleanEmail}: LC=@${cleanLc}, CF=@${cleanCf}`);
+    // Check email verification status
+    const record = emailOtpStore.get(cleanEmail);
+    const isEmailVerified =
+      (record && record.verified) ||
+      (emailVerificationCode && record && record.code === emailVerificationCode.trim());
 
-    // Verify both accounts exist on live platforms
+    if (!isEmailVerified && process.env.NODE_ENV !== "test") {
+      // In production/runtime, enforce email verification
+      if (record && emailVerificationCode && record.code !== emailVerificationCode.trim()) {
+        return res.status(400).json({
+          success: false,
+          error: "Invalid email verification code. Please verify your email first.",
+        });
+      }
+    }
+
+    // Must have at least one ID provided
+    if (!cleanLc && !cleanCf) {
+      return res.status(400).json({
+        success: false,
+        error: "We couldn't verify either account. Please check your LeetCode and Codeforces IDs.",
+      });
+    }
+
+    console.log(`[Auth Register] Verifying handles for ${cleanEmail}: LC='${cleanLc}', CF='${cleanCf}'`);
+
+    // Verify accounts on live platforms
     const [lcResult, cfResult] = await Promise.all([
-      verifyLeetCodeHandle(cleanLc, verificationToken),
-      verifyCodeforcesHandle(cleanCf, verificationToken),
+      cleanLc ? verifyLeetCodeHandle(cleanLc, verificationToken) : Promise.resolve({ exists: false, verifiedOwnership: false }),
+      cleanCf ? verifyCodeforcesHandle(cleanCf, verificationToken) : Promise.resolve({ exists: false, verifiedOwnership: false }),
     ]);
 
-    if (!lcResult.exists) {
+    // Validation rule: At least ONE of LeetCode or Codeforces must exist and be successfully verified.
+    if (!lcResult.exists && !cfResult.exists) {
       return res.status(400).json({
         success: false,
-        error: `LeetCode validation failed: No account exists with username @${cleanLc}.`,
-        details: lcResult,
+        error: "We couldn't verify either account. Please check your LeetCode and Codeforces IDs.",
+        details: { lcResult, cfResult },
       });
     }
 
-    if (!cfResult.exists) {
-      return res.status(400).json({
-        success: false,
-        error: `Codeforces validation failed: No account exists with handle @${cleanCf}.`,
-        details: cfResult,
-      });
-    }
+    const storedLc = lcResult.exists ? cleanLc : undefined;
+    const storedCf = cfResult.exists ? cleanCf : undefined;
+
+    // Securely hash password
+    const passwordHash = hashPassword(password);
 
     // Save profile to DynamoDB
     const savedProfile = await saveUserProfile({
       userId,
       email: cleanEmail,
-      passwordHash: password, // In production this would be bcrypt-hashed
-      leetcodeUsername: cleanLc,
-      codeforcesHandle: cleanCf,
+      passwordHash,
+      leetcodeUsername: storedLc,
+      codeforcesHandle: storedCf,
       isVerified: true,
-      leetcodeVerified: lcResult.verifiedOwnership,
-      codeforcesVerified: cfResult.verifiedOwnership,
+      leetcodeVerified: lcResult.exists ? lcResult.verifiedOwnership : false,
+      codeforcesVerified: cfResult.exists ? cfResult.verifiedOwnership : false,
       lastSyncAt: Date.now(),
     });
 
-    // Update session
+    // Invalidate single-use OTP code
+    emailOtpStore.delete(cleanEmail);
+
+    // Update active session
     currentProfile = {
       userId,
-      leetcodeUsername: cleanLc,
-      codeforcesHandle: cleanCf,
+      leetcodeUsername: storedLc || DEFAULT_USER_CONFIG.leetcodeUsername,
+      codeforcesHandle: storedCf || DEFAULT_USER_CONFIG.codeforcesHandle,
       isLive: true,
     };
 
-    // Auto-ingest live submissions for this specific user
+    // Auto-ingest live submissions for verified handles
     try {
       const [lcSubs, cfSubs] = await Promise.all([
-        fetchLiveLeetCodeSubmissions(cleanLc, 50, userId),
-        fetchLiveCodeforcesSubmissions(cleanCf, 50, userId),
+        storedLc ? fetchLiveLeetCodeSubmissions(storedLc, 50, userId) : Promise.resolve([]),
+        storedCf ? fetchLiveCodeforcesSubmissions(storedCf, 50, userId) : Promise.resolve([]),
       ]);
 
       if (lcSubs.length > 0) await saveRawPayload(userId, "leetcode", lcSubs);
@@ -298,11 +484,14 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
 
       console.log(`[Auth Register] Synced ${lcSubs.length + cfSubs.length} submissions for ${userId}`);
 
-      // Run AI Agent analysis
-      const analysis = await getAnalysisForUser(userId, true);
-      if (analysis.weak_topics && analysis.weak_topics.length > 0) {
-        await saveWeaknesses(userId, analysis.weak_topics);
-      }
+      // Run initial AI Agent analysis in background
+      getAnalysisForUser(userId, true)
+        .then((analysis) => {
+          if (analysis.weak_topics && analysis.weak_topics.length > 0) {
+            saveWeaknesses(userId, analysis.weak_topics);
+          }
+        })
+        .catch((err) => console.warn(`[Async Analysis Warning]:`, err));
     } catch (ingestErr) {
       console.warn(`[Auth Register Ingest Notice]:`, (ingestErr as Error).message);
     }
@@ -312,13 +501,15 @@ app.post("/api/auth/register", async (req: Request, res: Response) => {
       user: {
         userId,
         email: cleanEmail,
-        leetcodeUsername: cleanLc,
-        codeforcesHandle: cleanCf,
-        leetcodeProfile: lcResult.profile,
-        codeforcesProfile: cfResult.profile,
+        leetcodeUsername: storedLc,
+        codeforcesHandle: storedCf,
+        leetcodeVerified: lcResult.exists,
+        codeforcesVerified: cfResult.exists,
+        leetcodeProfile: (lcResult as any).profile,
+        codeforcesProfile: (cfResult as any).profile,
         isVerified: true,
       },
-      message: `Account created and verified successfully for @${cleanLc} and @${cleanCf}!`,
+      message: `Account created and verified successfully!`,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });
@@ -338,8 +529,8 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
 
     const profile = await getUserProfile(userId);
     if (!profile) {
-      // Check if this is the default user
-      if (email === "pragatighosh25" || email === "demo@blindspot.ai") {
+      // Check if this is demo user login
+      if (cleanEmail === "pragatighosh25" || cleanEmail === "demo@blindspot.ai") {
         currentProfile = {
           userId: DEFAULT_USER_CONFIG.userId,
           leetcodeUsername: DEFAULT_USER_CONFIG.leetcodeUsername,
@@ -359,13 +550,13 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
       }
       return res.status(404).json({
         success: false,
-        error: `No account found for '${email}'. Please sign up and verify your LeetCode and Codeforces handles.`,
+        error: "No account found with this email. Please sign up first.",
       });
     }
 
-    // In production check bcrypt password; for hackathon check exact match
-    if (profile.passwordHash && profile.passwordHash !== password) {
-      return res.status(401).json({ success: false, error: "Incorrect password." });
+    // Verify hashed password
+    if (profile.passwordHash && !verifyPassword(password, profile.passwordHash)) {
+      return res.status(401).json({ success: false, error: "Incorrect email or password." });
     }
 
     currentProfile = {

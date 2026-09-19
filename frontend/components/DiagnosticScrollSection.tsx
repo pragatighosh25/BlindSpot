@@ -2,7 +2,6 @@
 
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "framer-motion";
-import { Sparkles, Search, Calendar, Check, ArrowRight } from "akar-icons";
 
 interface DiagnosticScrollSectionProps {
   onLaunchDemo?: () => void;
@@ -11,47 +10,43 @@ interface DiagnosticScrollSectionProps {
 const STAGES = [
   {
     step: "01",
-    tag: "01 / PATTERN DISCOVERY",
-    headline: "FIND THE PATTERN.",
-    subtext: "Analyze your real coding history across LeetCode & Codeforces to automatically uncover and cluster mistakes that keep repeating.",
-    
+    headline: "Discover.",
+    subheading: "WHERE ARE THE REPEATING BLINDSPOTS?",
+    description:
+      "We ingest your raw coding histories across LeetCode & Codeforces to automatically isolate algorithmic blind spots. No guesswork or superficial practice logs.",
+    deliverable: "An automated inventory of persistent failure patterns.",
     accent: "#E4007C",
-
   },
   {
     step: "02",
-    tag: "02 / ROOT CAUSE EXTRACTION",
-    headline: "UNDERSTAND THE WHY.",
-    subtext: "See exactly where your approach breaks: unmemoized branches, boundary off-by-ones, or stale visited states—with rigorous reasoning.",
-    
-    
+    headline: "Diagnose.",
+    subheading: "WHERE DOES IT HURT, AND WHY?",
+    description:
+      "We isolate the root cause behind the symptom — unmemoized recurrence branches, boundary off-by-ones, or stale visited sets. A doctor doesn't prescribe before the diagnosis, and neither do we.",
+    deliverable: "A prioritized diagnosis with the real cost of each issue.",
     accent: "#E4007C",
-    
   },
   {
     step: "03",
-    tag: "03 / TARGETED MAPPING",
-    headline: "TARGET THE GAP.",
-    subtext: "Identify the exact conceptual gaps you need to master instead of grinding random problems and burning contest rating points.",
-    
-    
+    headline: "Design.",
+    subheading: "WHAT'S THE RIGHT FIT FOR YOU?",
+    description:
+      "We tailor the practice strategy around your exact cognitive gaps — pragmatic, measurable, and built to retain. No grinding random problems and burning contest rating points.",
+    deliverable: "A targeted study blueprint scoped to your weak invariants.",
     accent: "#E4007C",
-    
   },
   {
     step: "04",
-    tag: "04 / ADAPTIVE RETENTION",
-    headline: "IMPROVE & RETAIN.",
-    subtext: "Lock in algorithmic mastery permanently through automated SM-2 spaced repetition (Day 0 → 1 → 3 → 7 → 14) tailored to your mistakes.",
-  
+    headline: "Deliver.",
+    subheading: "CAN YOU ACTUALLY RETAIN IT?",
+    description:
+      "Lock in algorithmic invariants permanently through automated SM-2 spaced repetition schedules (Day 0 → 1 → 3 → 7 → 14) dynamically calibrated to your solve times.",
+    deliverable: "Permanent algorithmic intuition under contest pressure.",
     accent: "#E4007C",
-    
   },
 ];
 
-export const DiagnosticScrollSection: React.FC<DiagnosticScrollSectionProps> = ({
-  onLaunchDemo,
-}) => {
+export const DiagnosticScrollSection: React.FC<DiagnosticScrollSectionProps> = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
@@ -60,192 +55,129 @@ export const DiagnosticScrollSection: React.FC<DiagnosticScrollSectionProps> = (
     offset: ["start start", "end end"],
   });
 
-  // Smooth springs for buttery scroll scrub
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 24,
+    stiffness: 90,
+    damping: 20,
     restDelta: 0.001,
   });
 
-  // Desktop horizontal parallax transforms
-  // Headlines track translates from 0% to -68%
-  const headlineX = useTransform(
-    smoothProgress,
-    [0, 1],
-    ["0%", "-68%"]
-  );
-
-  // Background oversized numerals move at a different (slower) speed for depth
-  const backgroundNumbersX = useTransform(
-    smoothProgress,
-    [0, 1],
-    ["0%", "-38%"]
-  );
-
-  // Progress percentage (0 - 100)
-  const progressScaleY = useTransform(smoothProgress, [0, 1], [0.05, 1]);
+  // Track translates from first card to last card
+  const trackX = useTransform(smoothProgress, [0, 1], ["0vw", "-300vw"]);
 
   return (
     <section
       ref={containerRef}
       id="pipeline"
-      className="relative w-full border-b border-white/10 bg-[#080808]"
+      className="relative w-full bg-[#0d0d0d] text-white selection:bg-[#E4007C]/30 selection:text-white"
     >
-      {/* Top Crosshair Guides */}
-      <div className="crosshair-corner -top-[4px] -left-[4px]" />
-      <div className="crosshair-corner -top-[4px] -right-[4px]" />
+      {/* Background Dot Matrix Pattern */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-25 z-0"
+        style={{
+          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
 
-      {/* DESKTOP VIEW: Scroll-Driven Pinned Editorial Stage (hidden on mobile, shown on md+) */}
-      <div className="hidden md:block h-[340vh] relative">
-        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between py-10 px-8 lg:px-14 select-none">
+      {/* DESKTOP PINNED VIEW (md+) */}
+      <div className="hidden md:block h-[400vh] relative">
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between p-12 lg:p-16 z-10">
           
-          {/* Top Sticky Status Bar */}
-          <div className="flex items-center justify-between z-20 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-[#E4007C] animate-pulse" />
-              <span className="font-mono text-xs uppercase tracking-widest text-[#E4007C] font-semibold">
-                02 / THE DIAGNOSTIC PROCESS
-              </span>
-              <span className="text-white/20">|</span>
-              <span className="font-mono text-xs text-white/40 uppercase tracking-wider">
-                Scroll to explore stages
-              </span>
-            </div>
+          {/* Subtle horizontal alignment guide line */}
+          <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/[0.04] pointer-events-none z-0" />
 
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 font-mono text-xs text-white/60">
-                <span className="text-white font-bold">STAGE</span>
-                <span className="text-[#E4007C]">01</span>
-                <span>/</span>
-                <span>04</span>
-              </div>
-              
-            </div>
-          </div>
-
-          {/* Center Stage: Parallax Layers */}
-          <div className="relative flex-1 flex items-center overflow-hidden my-4">
-            
-            {/* Parallax Layer 1: Giant Background Numerals */}
-            <motion.div
-              style={{ x: shouldReduceMotion ? "0%" : backgroundNumbersX }}
-              className="absolute left-0 top-1/2 -translate-y-1/2 flex gap-[28vw] pointer-events-none z-0 whitespace-nowrap will-change-transform"
-            >
-              {STAGES.map((s, idx) => (
-                <div
-                  key={`bg-num-${idx}`}
-                  className="font-mono font-black text-[22vw] leading-none text-white/[0.03] select-none tracking-tighter"
-                  style={{
-                    WebkitTextStroke: "1px rgba(255,255,255,0.05)",
-                  }}
-                >
-                  {s.step}
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Parallax Layer 2: Main Editorial Content Stations */}
-            <motion.div
-              style={{ x: shouldReduceMotion ? "0%" : headlineX }}
-              className="relative z-10 flex gap-[12vw] lg:gap-[16vw] items-center pl-4 will-change-transform"
-            >
-              {STAGES.map((stage, idx) => (
-                <div
-                  key={idx}
-                  className="w-[72vw] max-w-[850px] shrink-0 space-y-6"
-                >
-                  {/* Stage Micro Badge */}
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="px-3 py-1 rounded-full font-mono text-xs font-bold flex items-center gap-2 border"
-                      style={{
-                        backgroundColor: `${stage.accent}15`,
-                        borderColor: `${stage.accent}40`,
-                        color: stage.accent,
-                      }}
-                    >
-                      
-                      <span>{stage.tag}</span>
-                    </div>
-                    <span className="font-mono text-[11px] text-white/40 tracking-wider">
-                      
-                    </span>
-                  </div>
-
-                  {/* Giant Headline */}
-                  <h2 className="text-4xl lg:text-6xl xl:text-7xl font-mono font-bold text-white tracking-tight leading-[1.05]">
+          {/* Horizontal Slider Track */}
+          <motion.div
+            style={{ x: shouldReduceMotion ? "0%" : trackX }}
+            className="flex h-full items-center will-change-transform z-10"
+          >
+            {STAGES.map((stage) => (
+              <div
+                key={stage.step}
+                className="w-screen h-full shrink-0 flex items-center px-8 lg:px-20 relative"
+              >
+                {/* Content Box */}
+                <div className="relative z-10 max-w-2xl space-y-7">
+                  {/* Main Bold Title */}
+                  <h2 className="text-7xl lg:text-[7.5rem] font-bold tracking-tight text-white leading-none font-sans">
                     {stage.headline}
                   </h2>
 
-                  {/* Editorial Description & Highlight Pill */}
-                  <div className="max-w-2xl space-y-4">
-                    <p className="text-lg lg:text-xl text-white/70 font-sans font-normal leading-relaxed">
-                      {stage.subtext}
-                    </p>
+                  {/* Pink Technical Eyebrow */}
+                  <div className="font-mono text-xs tracking-widest uppercase font-semibold text-[#E4007C]">
+                    {stage.subheading}
+                  </div>
 
-                    
+                  {/* Monospace Body Copy */}
+                  <p className="font-mono text-[13px] lg:text-sm leading-relaxed text-neutral-300 max-w-xl">
+                    {stage.description}
+                  </p>
+
+                  {/* "YOU GET" Key-Value Footnote */}
+                  <div className="pt-4 font-mono text-xs flex items-start gap-4">
+                    <span className="text-neutral-500 uppercase tracking-widest shrink-0 font-medium">
+                      YOU GET
+                    </span>
+                    <span className="text-neutral-200">
+                      {stage.deliverable}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </motion.div>
+
+                {/* Oversized Background/Adjacent Numeral */}
+                <div className="absolute left-[54vw] lg:left-[50vw] top-1/2 -translate-y-1/2 select-none pointer-events-none z-0">
+                  <span className="font-sans font-black text-[28vw] lg:text-[25vw] leading-none text-[#181818] tracking-tighter block select-none">
+                    {stage.step}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+
+          {/* Bottom Indicators */}
+          <div className="flex justify-between items-center z-20 font-mono text-xs text-neutral-500 border-t border-white/[0.08] pt-4">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E4007C]" />
+              <span className="tracking-widest uppercase">THE DIAGNOSTIC PIPELINE</span>
+            </div>
+            <div className="tracking-widest uppercase">
+              SCROLL DOWN TO PROGRESS
+            </div>
           </div>
         </div>
       </div>
 
-      {/* MOBILE VIEW: Clean, Responsive Vertical Editorial Flow (< md screens) */}
-      <div className="block md:hidden px-6 py-14 space-y-12">
-        <div className="text-center space-y-2 mb-8">
-          <div className="font-mono text-xs uppercase tracking-widest text-[#E4007C] font-semibold">
-            01 / THE DIAGNOSTIC PROCESS
-          </div>
-          <h2 className="text-2xl font-bold font-mono text-white tracking-tight">
-            How BlindSpot Works
-          </h2>
-          <p className="text-xs text-white/60 font-sans">
-            Moving from raw submissions to locked algorithmic invariants.
-          </p>
-        </div>
-
-        <div className="space-y-8">
-          {STAGES.map((stage, idx) => (
-            <div
-              key={idx}
-              className="p-6 rounded-2xl bg-[#0D0D0D] border border-white/10 relative overflow-hidden space-y-4"
-            >
-              {/* Giant Background Number for Mobile */}
-              <div className="absolute -right-2 -bottom-4 font-mono font-black text-7xl text-white/[0.04] pointer-events-none select-none">
-                {stage.step}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div
-                  className="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold flex items-center gap-1.5 border"
-                  style={{
-                    backgroundColor: `${stage.accent}15`,
-                    borderColor: `${stage.accent}40`,
-                    color: stage.accent,
-                  }}
-                >
-                  
-                  <span>{stage.tag}</span>
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-mono font-bold text-white tracking-tight">
-                {stage.headline}
-              </h3>
-
-              <p className="text-sm text-white/70 font-sans leading-relaxed">
-                {stage.subtext}
-              </p>
-
-              <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono text-white/50">
-                
-                <span className="text-[#E4007C] font-semibold">Step {stage.step}</span>
-              </div>
+      {/* MOBILE VERTICAL VIEW (< md) */}
+      <div className="block md:hidden px-6 py-20 space-y-20 relative z-10">
+        {STAGES.map((stage) => (
+          <div key={stage.step} className="relative space-y-5 pt-8 border-t border-white/10">
+            {/* Background Step Number */}
+            <div className="absolute right-0 top-0 font-sans font-black text-8xl text-neutral-900 pointer-events-none select-none">
+              {stage.step}
             </div>
-          ))}
-        </div>
+
+            <h2 className="text-5xl font-bold tracking-tight text-white font-sans">
+              {stage.headline}
+            </h2>
+
+            <div className="font-mono text-[11px] tracking-wider uppercase font-semibold text-[#E4007C]">
+              {stage.subheading}
+            </div>
+
+            <p className="font-mono text-xs leading-relaxed text-neutral-300">
+              {stage.description}
+            </p>
+
+            <div className="font-mono text-xs pt-2 flex flex-col gap-1">
+              <span className="text-neutral-500 uppercase tracking-widest text-[10px]">
+                YOU GET
+              </span>
+              <span className="text-neutral-200 text-xs">
+                {stage.deliverable}
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

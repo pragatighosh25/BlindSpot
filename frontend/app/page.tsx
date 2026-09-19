@@ -333,9 +333,7 @@ export default function App() {
                 {analysis?.summary && (
                   <div className="card-candle-glow p-5 border-[#E4007C]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
                     <div className="flex items-start gap-3.5">
-                      <div className="w-10 h-10 rounded-full bg-[#E4007C]/15 border border-[#E4007C]/30 text-[#E4007C] flex items-center justify-center shrink-0 mt-0.5">
-                        <Sparkles size={18} />
-                      </div>
+                      
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">

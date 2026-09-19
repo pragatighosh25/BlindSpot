@@ -106,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 : "text-white/60 hover:text-white"
             }`}
           >
-            <span>02. Practice &amp; SM-2</span>
+            <span>02. Practice</span>
             {stats.dueCount > 0 && (
               <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
                 activeTab === "practice" ? "bg-[#00FF9C] text-[#0A0A0A] font-bold" : "bg-[#00FF9C]/20 text-[#00FF9C]"
@@ -143,16 +143,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <CloudDownload size={13} className={isSyncing ? "animate-bounce text-[#00FF9C]" : "text-white/60"} />
             <span className="hidden sm:inline text-[11px]">{isSyncing ? "Syncing..." : "Sync"}</span>
-          </button>
-
-          <button
-            onClick={onAnalyze}
-            disabled={isAnalyzing}
-            className="btn-weevolve-primary py-1.5 px-3.5 text-xs flex items-center gap-1.5 disabled:opacity-50"
-            title="Trigger Strands AI Agent weakness diagnosis"
-          >
-            
-            <span>{isAnalyzing ? "Analyzing..." : "Run AI Analysis"}</span>
           </button>
 
           {onSignOut && (

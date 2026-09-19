@@ -148,16 +148,15 @@ class SpacedRepetitionScheduler {
       status: this.computeStatus(item.scheduled_date, item.step_index),
     }));
 
-    const now = Date.now();
-    const dayMs = 24 * 60 * 60 * 1000;
+    const active = all.filter((i) => i.status !== "mastered" && i.step_index < INTERVAL_DAYS.length);
 
-    const today = all.filter((i) => i.status === "due_today" || i.scheduled_date <= now + 12 * 3600 * 1000);
-    const tomorrow = all.filter((i) => i.scheduled_date > now + 12 * 3600 * 1000 && i.scheduled_date <= now + 1.5 * dayMs);
-    const in3Days = all.filter((i) => i.scheduled_date > now + 1.5 * dayMs && i.scheduled_date <= now + 3.5 * dayMs);
-    const in7Days = all.filter((i) => i.scheduled_date > now + 3.5 * dayMs && i.scheduled_date <= now + 7.5 * dayMs);
-    const later = all.filter((i) => i.scheduled_date > now + 7.5 * dayMs);
+    const today = active.filter((i) => i.step_index === 0);
+    const tomorrow = active.filter((i) => i.step_index === 1);
+    const in3Days = active.filter((i) => i.step_index === 2);
+    const in7Days = active.filter((i) => i.step_index === 3);
+    const later = active.filter((i) => i.step_index === 4);
 
-    return { today, tomorrow, in3Days, in7Days, later, all };
+    return { today, tomorrow, in3Days, in7Days, later, all: active };
   }
 
   public markProblemCompleted(scheduleId: string): ScheduledReviewItem | null {

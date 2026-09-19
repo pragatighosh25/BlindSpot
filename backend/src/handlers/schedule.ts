@@ -27,14 +27,12 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
       let practice = getUpcomingPractice();
 
       if (dynamoItems && dynamoItems.length > 0) {
-        // Compute active intervals from persisted DynamoDB items
-        const now = Date.now();
-        const dayMs = 24 * 60 * 60 * 1000;
-        const today = dynamoItems.filter((i) => i.status === "due_today" || i.scheduled_date <= now + 12 * 3600 * 1000);
-        const tomorrow = dynamoItems.filter((i) => i.scheduled_date > now + 12 * 3600 * 1000 && i.scheduled_date <= now + 1.5 * dayMs);
-        const in3Days = dynamoItems.filter((i) => i.scheduled_date > now + 1.5 * dayMs && i.scheduled_date <= now + 3.5 * dayMs);
-        const in7Days = dynamoItems.filter((i) => i.scheduled_date > now + 3.5 * dayMs && i.scheduled_date <= now + 7.5 * dayMs);
-        const later = dynamoItems.filter((i) => i.scheduled_date > now + 7.5 * dayMs);
+        const active = dynamoItems.filter((i) => i.status !== "mastered" && i.step_index < 5);
+        const today = active.filter((i) => i.step_index === 0);
+        const tomorrow = active.filter((i) => i.step_index === 1);
+        const in3Days = active.filter((i) => i.step_index === 2);
+        const in7Days = active.filter((i) => i.step_index === 3);
+        const later = active.filter((i) => i.step_index === 4);
 
         practice = {
           today,
@@ -42,7 +40,7 @@ export async function handler(event: APIGatewayProxyEvent): Promise<APIGatewayPr
           in3Days,
           in7Days,
           later,
-          all: dynamoItems,
+          all: active,
         };
       }
 

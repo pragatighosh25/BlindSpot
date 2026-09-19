@@ -87,13 +87,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <span>01. Diagnostics</span>
-            {stats.weaknessCount > 0 && (
-              <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
-                activeTab === "diagnostics" ? "bg-white/20 text-white" : "bg-white/10 text-white/60"
-              }`}>
-                {stats.weaknessCount}
-              </span>
-            )}
+            
           </button>
 
           <button
@@ -105,13 +99,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <span>02. Practice</span>
-            {stats.dueCount > 0 && (
-              <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
-                activeTab === "practice" ? "bg-[#00FF9C] text-[#0A0A0A] font-bold" : "bg-[#00FF9C]/20 text-[#00FF9C]"
-              }`}>
-                {stats.dueCount} due
-              </span>
-            )}
           </button>
 
           <button
@@ -123,11 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <span>03. Submissions</span>
-            <span className={`text-[9px] px-1.5 py-0.2 rounded-full ${
-              activeTab === "submissions" ? "bg-white/20 text-white" : "bg-white/10 text-white/60"
-            }`}>
-              {stats.submissionCount}
-            </span>
+
           </button>
         </nav>
 

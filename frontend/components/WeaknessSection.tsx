@@ -25,26 +25,22 @@ export const WeaknessSection: React.FC<WeaknessSectionProps> = ({
           </h2>
           
         </div>
-        <span className="text-xs font-mono font-semibold px-3 py-1 bg-[#E4007C]/15 text-[#E4007C] border border-[#E4007C]/30 rounded-full w-fit">
-          {weaknesses.length} Patterns Detected
-        </span>
+        
       </div>
 
       {weaknesses.length === 0 ? (
         <div className="card-candle-glow p-8 text-center space-y-2 border-white/10">
           <h3 className="text-sm font-semibold font-mono text-white">No Weakness Patterns Detected</h3>
-          <p className="text-xs text-white/60 max-w-md mx-auto">
-            Your analyzed submissions do not show recurring algorithmic failure patterns, or all tested submissions passed cleanly.
-          </p>
+          
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {weaknesses.map((w, idx) => {
-            const confidencePercent = Math.round(w.confidence * 100);
+          
             return (
               <div
                 key={idx}
-                className="card-candle-glow p-5 flex flex-col justify-between border-t-2 border-t-[#E4007C]"
+                className="card-candle-glow p-5 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
@@ -71,7 +67,7 @@ export const WeaknessSection: React.FC<WeaknessSectionProps> = ({
                   )}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                <div className="mt-4 pt-3  flex items-center justify-between">
                   <div className="text-[11px] font-mono text-white/50">
                     
                   </div>

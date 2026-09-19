@@ -8,7 +8,6 @@ import { EvidenceModal } from "@/components/EvidenceModal";
 import { RecommendationsSection } from "@/components/RecommendationsSection";
 import { PracticeSchedulerSection } from "@/components/PracticeSchedulerSection";
 import { SubmissionsExplorer } from "@/components/SubmissionsExplorer";
-import { IngestModal } from "@/components/IngestModal";
 import { SyncProfileModal } from "@/components/SyncProfileModal";
 import { LandingPage } from "@/components/LandingPage";
 import { AuthModal } from "@/components/AuthModal";
@@ -52,7 +51,6 @@ export default function App() {
   });
 
   const [selectedWeakness, setSelectedWeakness] = useState<WeakTopic | null>(null);
-  const [isIngestOpen, setIsIngestOpen] = useState(false);
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -286,7 +284,6 @@ export default function App() {
             onTabChange={setActiveTab}
             onSync={handleLiveSync}
             onAnalyze={handleRunAnalysis}
-            onOpenIngestModal={() => setIsIngestOpen(true)}
             onOpenSyncModal={() => setIsConnectModalOpen(true)}
             onSignOut={() => setCurrentView("landing")}
             isSyncing={isSyncing}
@@ -416,8 +413,24 @@ export default function App() {
           </main>
 
           {/* Dashboard Footer */}
-          <footer className="border-t border-white/10 bg-[#0A0A0A] py-6 px-6 text-center text-xs font-mono text-white/40">
-            BlindSpot &bull; AI Competitive-Programming Coach &bull; LeetCode (@pragatighosh25) & Codeforces (@pragatighosh)
+          <footer className="border-t border-white/10 bg-[#080808] py-6 px-6">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-white/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#E4007C] to-[#990053] flex items-center justify-center text-white font-mono font-bold text-[10px]">
+                  BS
+                </div>
+                <span className="font-bold text-white">BlindSpot</span>
+                <span>&bull; Precision Algorithmic Diagnostics</span>
+              </div>
+              <div className="flex items-center gap-3 text-white/40 text-[11px]">
+                <span className="flex items-center gap-1.5 text-[#00FF9C]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#00FF9C] animate-pulse" />
+                  <span>Sync Active</span>
+                </span>
+                <span>&bull;</span>
+                <span>&copy; {new Date().getFullYear()} BlindSpot</span>
+              </div>
+            </div>
           </footer>
         </div>
       )}
@@ -434,13 +447,6 @@ export default function App() {
       <EvidenceModal
         weakness={selectedWeakness}
         onClose={() => setSelectedWeakness(null)}
-      />
-
-      {/* Live Ingestion Test Modal */}
-      <IngestModal
-        isOpen={isIngestOpen}
-        onClose={() => setIsIngestOpen(false)}
-        onIngestSuccess={handleModalSyncComplete}
       />
 
       {/* Connect Real Accounts (LeetCode & Codeforces) Modal */}

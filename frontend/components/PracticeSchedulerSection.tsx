@@ -86,9 +86,6 @@ export const PracticeSchedulerSection: React.FC<PracticeSchedulerSectionProps> =
             Spaced Repetition Review Schedule
           </h2>
         </div>
-        <div className="text-xs font-mono font-semibold px-3 py-1 bg-[#141414] rounded-full border border-white/10 text-white w-fit">
-          <span>{scheduleData.all.length} Tracked Problems</span>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">

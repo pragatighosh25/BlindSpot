@@ -1,11 +1,11 @@
-# 🎯 BlindSpot — AI Competitive-Programming Coach & Algorithmic Diagnostic Engine
+# 🎯 BlindSpot - AI Competitive-Programming Coach & Algorithmic Diagnostic Engine
 
 > **AWS Hackathon Submission**  
 > *Transforming competitive programming from mindless grinding into precision algorithmic mastery using AWS Serverless, Amazon OpenSearch, and Strands AI Agents.*
 
 ---
 
-## 🌟 Executive Summary
+## Executive Summary
 
 Competitive programmers and software engineering candidates frequently hit plateaus where they solve hundreds of problems on LeetCode and Codeforces yet repeat the exact same subtle algorithmic blind spots:
 - **Boundary Condition Errors** (e.g., `while (left < right)` vs `while (left <= right)` in binary search)
@@ -17,7 +17,7 @@ Competitive programmers and software engineering candidates frequently hit plate
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```
                                ┌────────────────────────┐
@@ -61,7 +61,7 @@ Competitive programmers and software engineering candidates frequently hit plate
 
 ---
 
-## ☁️ AWS Cloud Stack & Deep Dive
+## AWS Cloud Stack & Deep Dive
 
 BlindSpot is architected from the ground up to take full advantage of the **AWS Serverless and Managed Data Ecosystem**:
 
@@ -76,36 +76,36 @@ BlindSpot is architected from the ground up to take full advantage of the **AWS 
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
-### 1. 🔄 Multi-Platform Automated Ingestion & Bio-Token Verification
+### 1. Multi-Platform Automated Ingestion & Bio-Token Verification
 - Ingests real submission histories from both **LeetCode** and **Codeforces**.
 - Offers interactive proof-of-ownership via biometric profile bio-token verification (`blindspot-verify-{token}`).
 - Seamless normalization of judge verdicts (`AC`, `WA`, `TLE`, `MLE`, `RE`, `CE`) into a strict **Canonical Submission Schema**.
 
-### 2. 🧠 Strands AI Agent with 1-Call Optimized Architecture
+### 2. Strands AI Agent with 1-Call Optimized Architecture
 - **Consolidated Reasoning**: Pre-aggregates all failed submissions, error outputs, test case mismatches, and OpenSearch similarity patterns before invoking the LLM.
 - **Strict Free-Tier Rate-Limit Protection**: Executes **exactly ONE Gemini API call per complete analysis run** (avoiding `429 RESOURCE_EXHAUSTED`).
 - **High-Density Pedagogical Output**: Produces structured root-cause explanations, variable/loop bug locations, correct invariant reasoning, and side-by-side code comparisons.
 
-### 3. 🛡️ Deterministic Offline Expert Fallback
+### 3. Deterministic Offline Expert Fallback
 - If the AI API experiences network issues or rate limits, BlindSpot's built-in **Deterministic AST Heuristic Engine** automatically generates structured algorithmic diagnoses and problem recommendations with zero downtime.
 
-### 4. 📅 SuperMemo SM-2 Spaced Repetition Practice Board
+### 4. SuperMemo SM-2 Spaced Repetition Practice Board
 - Converts diagnosed weaknesses into active practice queues across **Day 0, Day 1, Day 3, Day 7, and Day 14+**.
 - Automatically schedules targeted LeetCode / Codeforces problems specifically chosen to fix the user's diagnosed failure modes.
 
-### 5. 🔍 OpenSearch Submissions Explorer
+### 5. OpenSearch Submissions Explorer
 - Real-time search, platform filtering, and verdict breakdown across all historical user submissions.
 - Direct code inspector modal with execution feedback and syntax highlighting.
 
-### 6. 💾 Seamless Session & Profile Persistence
+### 6. Seamless Session & Profile Persistence
 - Instant session restoration via `localStorage` with zero landing page flash on refresh.
 - Quick toggle between live verified accounts and built-in interactive demo mode.
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ```text
 ├── Frontend
@@ -136,7 +136,7 @@ BlindSpot is architected from the ground up to take full advantage of the **AWS 
 
 ---
 
-## 💻 Local Setup & Quickstart
+## Local Setup & Quickstart
 
 ### Prerequisites
 - **Node.js 20.x+** installed ([Download Node.js](https://nodejs.org/))
@@ -236,7 +236,7 @@ Expected Output:
 
 ---
 
-## 🚢 Deploying to AWS via SAM
+## Deploying to AWS via SAM
 
 Deploy the complete serverless backend, DynamoDB tables, S3 buckets, and API Gateway directly to AWS:
 
@@ -256,7 +256,7 @@ SAM will automatically provision:
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 | Method | Endpoint | Description | Query / Body Params |
 | :--- | :--- | :--- | :--- |
@@ -273,15 +273,3 @@ SAM will automatically provision:
 | `POST` | `/api/auth/verify-handle` | Validates profile ownership token on LeetCode/Codeforces | `{ "platform", "handle", "token" }` |
 
 ---
-
-## 👥 Authors & Acknowledgments
-
-- **BlindSpot Engineering Team**
-- Built for the **AWS AI & Serverless Hackathon**
-- Powered by **AWS Serverless**, **Amazon OpenSearch**, and **Google Gemini**
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**.

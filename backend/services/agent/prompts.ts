@@ -119,3 +119,94 @@ Return a valid JSON object matching this exact schema:
   }
 }`;
 }
+
+export interface ConsolidatedAnalysisEvidence {
+  userId: string;
+  totalSubmissionsCount: number;
+  acCount: number;
+  failedSubmissions: CanonicalSubmission[];
+  historicalMistakes?: CanonicalSubmission[];
+}
+
+export function buildConsolidatedUserAnalysisPrompt(evidence: ConsolidatedAnalysisEvidence): string {
+  const { userId, totalSubmissionsCount, acCount, failedSubmissions, historicalMistakes = [] } = evidence;
+
+  const failedItems = failedSubmissions.map((sub, idx) => {
+    const p = sub.problem;
+    const s = sub.submission;
+    const codeSnippet = s.code.length > 2000 ? s.code.substring(0, 2000) + "\n// ... [code truncated for length]" : s.code;
+    return `[Failed Submission #${idx + 1}]
+- Submission ID: ${sub.submission_id}
+- Platform: ${sub.platform}
+- Problem: ${p.title} (ID: ${p.id}, Difficulty: ${p.difficulty || "Unknown"})
+- Topic Tags: ${p.topic_tags.join(", ") || "General"}
+- Language: ${s.language}
+- Verdict: ${s.verdict}
+${s.runtime_ms != null ? `- Runtime: ${s.runtime_ms} ms` : ""}
+${s.memory_mb != null ? `- Memory: ${s.memory_mb} MB` : ""}
+${s.error_message ? `- Judge Error / Test Feedback: ${s.error_message.replace(/\n+/g, " ")}` : ""}
+Submitted Code:
+\`\`\`${s.language}
+${codeSnippet}
+\`\`\``;
+  }).join("\n\n");
+
+  const historyContext = historicalMistakes.length > 0
+    ? `\nOpenSearch Historical Mistake Patterns in Repository:
+${historicalMistakes.slice(0, 5).map((m, idx) => `[Pattern ${idx + 1}] Problem: ${m.problem.title} (${m.platform}), Verdict: ${m.submission.verdict}, Topics: ${m.problem.topic_tags.join(", ")}`).join("\n")}\n`
+    : "";
+
+  return `You are BlindSpot, an expert competitive programming coach and deep algorithmic reasoning engine.
+
+You are analyzing the user's submission history as a whole. Look for recurring mistakes across submissions rather than treating each submission as an isolated event.
+
+USER PROFILE OVERVIEW:
+- User ID: ${userId}
+- Total Analyzed Submissions: ${totalSubmissionsCount}
+- Total Accepted (AC) Submissions: ${acCount}
+- Total Failing Submissions Analyzed: ${failedSubmissions.length}
+${historyContext}
+EVIDENCE - FAILED SUBMISSIONS:
+${failedItems}
+
+TASK:
+1. Identify all recurring algorithmic blind spots across these failed submissions. Group related failure modes within each primary topic (e.g. Dynamic Programming, Binary Search, Graphs, Two Pointers).
+2. For each identified blind spot, determine the exact failure mode, root cause, why it fails on test inputs, required invariant / correct concept, concrete suggested fix, and list the example submission IDs exhibiting this mistake.
+3. Recommend 3 to 6 targeted practice problems from LeetCode or Codeforces specifically designed to eliminate these diagnosed failure patterns.
+
+Controlled Vocabulary of Failure Patterns:
+${FailurePatterns.map((p) => `- ${p}`).join("\n")}
+
+RESPONSE FORMAT:
+Return ONLY a valid JSON object matching this exact schema:
+{
+  "user_id": "${userId}",
+  "analyzed_at": ${Date.now()},
+  "summary": "<2-3 sentence overarching executive summary diagnosing the user's primary algorithmic blind spots across their history>",
+  "weak_topics": [
+    {
+      "topic": "<primary topic name e.g. Binary Search, Dynamic Programming, Graphs>",
+      "failure_mode": "<descriptive title of the specific recurring failure pattern>",
+      "confidence": <confidence score between 0.60 and 0.99>,
+      "evidence_count": <number of failing submissions displaying this pattern>,
+      "example_submissions": ["<submission_id_1>", "<submission_id_2>"],
+      "description": "<detailed 2-3 sentence explanation of the pattern seen in their submissions>",
+      "root_cause": "<precise technical explanation of what assumption was flawed in their code>",
+      "why_it_fails": "<explanation of failure mechanism or test input case where it breaks>",
+      "correct_concept": "<algorithmic invariant, formula, or recurrence rule required>",
+      "suggested_fix": "<concrete actionable code fix or invariant rule to apply>"
+    }
+  ],
+  "recommended_problems": [
+    {
+      "platform": "leetcode" | "codeforces",
+      "problem_id": "<problem id or slug>",
+      "title": "<official problem title>",
+      "difficulty": "Easy" | "Medium" | "Hard" | "800" | "1200" | "1600",
+      "topic": "<targeted topic>",
+      "reason": "<1-2 sentence pedagogical explanation of why solving this problem eliminates the diagnosed blind spot>",
+      "url": "<direct URL to problem e.g. https://leetcode.com/problems/...>"
+    }
+  ]
+}`;
+}

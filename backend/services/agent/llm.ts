@@ -22,9 +22,36 @@ export interface LLMTelemetryInfo {
   fallbackCount: number;
 }
 
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 
 let geminiClient: GoogleGenAI | null = null;
+
+let currentRunInvocationCount = 0;
+let isInAnalysisRun = false;
+
+/**
+ * Marks the beginning of an analysis run and resets invocation counters.
+ */
+export function startAnalysisRun(): void {
+  isInAnalysisRun = true;
+  currentRunInvocationCount = 0;
+  console.log(`[LLM] Analysis run started`);
+}
+
+/**
+ * Marks the completion of an analysis run.
+ */
+export function endAnalysisRun(): void {
+  isInAnalysisRun = false;
+  currentRunInvocationCount = 0;
+}
+
+/**
+ * Returns the invocation count for the current analysis run.
+ */
+export function getAnalysisRunInvocationCount(): number {
+  return currentRunInvocationCount;
+}
 
 let telemetryState: LLMTelemetryInfo = {
   provider: "Gemini",
@@ -124,6 +151,17 @@ export async function invokeLLM(
   userPrompt: string,
   options: LLMRequestOptions = {}
 ): Promise<string | null> {
+  if (isInAnalysisRun) {
+    currentRunInvocationCount++;
+    if (currentRunInvocationCount === 1) {
+      console.log(`[LLM] Gemini invocation #1`);
+    } else {
+      console.log(`[LLM] WARNING: Gemini invocation #${currentRunInvocationCount} in the same analysis run`);
+    }
+  } else {
+    console.log(`[LLM] Gemini invocation #1`);
+  }
+
   const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
   const gemini = getGeminiClient();
 

@@ -1,0 +1,522 @@
+{
+  "profiles": [],
+  "weaknesses": {
+    "user_demo": [
+      {
+        "topic": "Graphs",
+        "failure_mode": "Graph Traversal Invariant or Visited State Error",
+        "confidence": 0.8,
+        "evidence_count": 1,
+        "example_submissions": [
+          "test_graph_1"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting graph traversal invariant or visited state error.",
+        "root_cause": "Incorrect vertex state tracking or cycle handling during graph exploration.",
+        "why_it_fails": "Traversal revisits nodes infinitely or skips connected components.",
+        "correct_concept": "Ensure complete visited state tracking across all graph components.",
+        "suggested_fix": "Use a visited array/set and check all nodes in 0..V-1."
+      },
+      {
+        "topic": "Binary Search",
+        "failure_mode": "Lower Bound Over-Reduction on Upper Bound Branch",
+        "confidence": 0.9,
+        "evidence_count": 1,
+        "example_submissions": [
+          "test_bs_1"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting lower bound over-reduction on upper bound branch.",
+        "root_cause": "Setting `right = mid - 1` when `nums[mid] > target` in a search-insert position skips `mid` as a candidate insertion point.",
+        "why_it_fails": "When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position.",
+        "correct_concept": "In lower_bound / insertion search, the candidate range must preserve `mid` on the upper branch (`right = mid`) until `left == right`.",
+        "suggested_fix": "Change the upper branch update to `right = mid;` while keeping `left = mid + 1;` when `nums[mid] < target`."
+      },
+      {
+        "topic": "Dynamic Programming",
+        "failure_mode": "Adjacent State Overlap in Dynamic Programming Recurrence",
+        "confidence": 0.95,
+        "evidence_count": 1,
+        "example_submissions": [
+          "test_dp_1"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting adjacent state overlap in dynamic programming recurrence.",
+        "root_cause": "The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint.",
+        "why_it_fails": "Because `dp[i-1]` already contains optimal loot that may include house `i-1`, adding `nums[i]` robs two adjacent houses. For input [2,7,9,3,1], at i=2 (val 9), it computes dp[2] = dp[1] + 9 = 7 + 9 = 16, resulting in total 20 instead of the optimal non-adjacent sum 12.",
+        "correct_concept": "Dynamic programming optimal substructure requires choosing between two mutually exclusive choices: (1) skip house `i` and keep `dp[i-1]`, or (2) rob house `i` and add it to non-adjacent optimal loot `dp[i-2]`.",
+        "suggested_fix": "Update the recurrence relation to `dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i])` with base cases `dp[0] = nums[0]` and `dp[1] = Math.max(nums[0], nums[1])`."
+      }
+    ]
+  },
+  "schedules": {
+    "user_demo": [
+      {
+        "problem_id": "200",
+        "title": "Number of Islands",
+        "topic": "Graphs",
+        "platform": "leetcode",
+        "reason": "BFS immediate queue visited-marking",
+        "url": "https://leetcode.com/problems/number-of-islands/",
+        "step_index": 3,
+        "scheduled_date": 1790509887824,
+        "id": "sched_200_leetcode",
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "completed_history": [],
+        "status": "upcoming"
+      },
+      {
+        "problem_id": "704",
+        "title": "Binary Search",
+        "topic": "Binary Search",
+        "platform": "leetcode",
+        "reason": "Fix off-by-one error (left <= right single element boundary)",
+        "url": "https://leetcode.com/problems/binary-search/",
+        "step_index": 0,
+        "scheduled_date": 1789897887824,
+        "id": "sched_704_leetcode",
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "completed_history": [],
+        "status": "due_today"
+      },
+      {
+        "id": "sched_34_leetcode",
+        "problem_id": "34",
+        "title": "Find First and Last Position of Element in Sorted Array",
+        "topic": "Binary Search",
+        "platform": "leetcode",
+        "reason": "Targeted boundary conditions to resolve: When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position..",
+        "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
+        "step_index": 0,
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "scheduled_date": 1789905088138,
+        "completed_history": [],
+        "status": "due_today"
+      },
+      {
+        "id": "sched_198_leetcode",
+        "problem_id": "198",
+        "title": "House Robber",
+        "topic": "Dynamic Programming",
+        "platform": "leetcode",
+        "reason": "Practice non-adjacent state recurrence to fix: The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint..",
+        "url": "https://leetcode.com/problems/house-robber/",
+        "step_index": 0,
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "scheduled_date": 1789905088139,
+        "completed_history": [],
+        "status": "due_today"
+      },
+      {
+        "problem_id": "300",
+        "title": "Longest Increasing Subsequence",
+        "topic": "Dynamic Programming",
+        "platform": "leetcode",
+        "reason": "1D DP state formulation practice",
+        "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
+        "step_index": 2,
+        "scheduled_date": 1790164287824,
+        "id": "sched_300_leetcode",
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "completed_history": [],
+        "status": "upcoming"
+      }
+    ],
+    "non_existent_user_xyz": [
+      {
+        "problem_id": "704",
+        "title": "Binary Search",
+        "topic": "Binary Search",
+        "platform": "leetcode",
+        "reason": "Fix off-by-one error (left <= right single element boundary)",
+        "url": "https://leetcode.com/problems/binary-search/",
+        "step_index": 0,
+        "scheduled_date": 1789897887824,
+        "id": "sched_704_leetcode",
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "completed_history": [],
+        "status": "due_today"
+      },
+      {
+        "id": "sched_198_leetcode",
+        "problem_id": "198",
+        "title": "House Robber",
+        "topic": "Dynamic Programming",
+        "platform": "leetcode",
+        "reason": "Practice non-adjacent state recurrence to fix: The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint..",
+        "url": "https://leetcode.com/problems/house-robber/",
+        "step_index": 0,
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "scheduled_date": 1789905088139,
+        "completed_history": [],
+        "status": "due_today"
+      }
+    ],
+    "user_perfect_coder": [
+      {
+        "problem_id": "300",
+        "title": "Longest Increasing Subsequence",
+        "topic": "Dynamic Programming",
+        "platform": "leetcode",
+        "reason": "1D DP state formulation practice",
+        "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
+        "step_index": 2,
+        "scheduled_date": 1790164287824,
+        "id": "sched_300_leetcode",
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "completed_history": [],
+        "status": "upcoming"
+      }
+    ]
+  },
+  "analysisRuns": {
+    "user_demo": [
+      {
+        "analyzed_at": 1789904550176,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904550296,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904550452,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904550655,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904893967,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904894032,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904894125,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904894489,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904918827,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904918946,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904919099,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904919338,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789904919490,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789905088094,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789905088236,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789905088246,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789905088367,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      },
+      {
+        "analyzed_at": 1789905088498,
+        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+        "weak_topics_count": 3,
+        "recommended_problems_count": 5
+      }
+    ],
+    "non_existent_user_xyz": [
+      {
+        "analyzed_at": 1789904550540,
+        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 2
+      },
+      {
+        "analyzed_at": 1789904894295,
+        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 2
+      },
+      {
+        "analyzed_at": 1789904919243,
+        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 2
+      },
+      {
+        "analyzed_at": 1789905088256,
+        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 2
+      }
+    ],
+    "user_perfect_coder": [
+      {
+        "analyzed_at": 1789904550614,
+        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 1
+      },
+      {
+        "analyzed_at": 1789904894396,
+        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 1
+      },
+      {
+        "analyzed_at": 1789904919272,
+        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 1
+      },
+      {
+        "analyzed_at": 1789905088290,
+        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
+        "weak_topics_count": 0,
+        "recommended_problems_count": 1
+      }
+    ]
+  },
+  "fullAnalyses": {
+    "user_demo": {
+      "user_id": "user_demo",
+      "analyzed_at": 1789905088498,
+      "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+      "weak_topics": [
+        {
+          "topic": "Graphs",
+          "failure_mode": "Graph Traversal Invariant or Visited State Error",
+          "confidence": 0.8,
+          "evidence_count": 1,
+          "example_submissions": [
+            "test_graph_1"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting graph traversal invariant or visited state error.",
+          "root_cause": "Incorrect vertex state tracking or cycle handling during graph exploration.",
+          "why_it_fails": "Traversal revisits nodes infinitely or skips connected components.",
+          "correct_concept": "Ensure complete visited state tracking across all graph components.",
+          "suggested_fix": "Use a visited array/set and check all nodes in 0..V-1."
+        },
+        {
+          "topic": "Binary Search",
+          "failure_mode": "Lower Bound Over-Reduction on Upper Bound Branch",
+          "confidence": 0.9,
+          "evidence_count": 1,
+          "example_submissions": [
+            "test_bs_1"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting lower bound over-reduction on upper bound branch.",
+          "root_cause": "Setting `right = mid - 1` when `nums[mid] > target` in a search-insert position skips `mid` as a candidate insertion point.",
+          "why_it_fails": "When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position.",
+          "correct_concept": "In lower_bound / insertion search, the candidate range must preserve `mid` on the upper branch (`right = mid`) until `left == right`.",
+          "suggested_fix": "Change the upper branch update to `right = mid;` while keeping `left = mid + 1;` when `nums[mid] < target`."
+        },
+        {
+          "topic": "Dynamic Programming",
+          "failure_mode": "Adjacent State Overlap in Dynamic Programming Recurrence",
+          "confidence": 0.95,
+          "evidence_count": 1,
+          "example_submissions": [
+            "test_dp_1"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting adjacent state overlap in dynamic programming recurrence.",
+          "root_cause": "The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint.",
+          "why_it_fails": "Because `dp[i-1]` already contains optimal loot that may include house `i-1`, adding `nums[i]` robs two adjacent houses. For input [2,7,9,3,1], at i=2 (val 9), it computes dp[2] = dp[1] + 9 = 7 + 9 = 16, resulting in total 20 instead of the optimal non-adjacent sum 12.",
+          "correct_concept": "Dynamic programming optimal substructure requires choosing between two mutually exclusive choices: (1) skip house `i` and keep `dp[i-1]`, or (2) rob house `i` and add it to non-adjacent optimal loot `dp[i-2]`.",
+          "suggested_fix": "Update the recurrence relation to `dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i])` with base cases `dp[0] = nums[0]` and `dp[1] = Math.max(nums[0], nums[1])`."
+        }
+      ],
+      "recommended_problems": [
+        {
+          "platform": "leetcode",
+          "problem_id": "200",
+          "title": "Number of Islands",
+          "difficulty": "Medium",
+          "topic": "Graphs",
+          "reason": "Practice immediate visited-marking upon queue enqueue: Use a visited array/set and check all nodes in 0..V-1..",
+          "url": "https://leetcode.com/problems/number-of-islands/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "704",
+          "title": "Binary Search",
+          "difficulty": "Easy",
+          "topic": "Binary Search",
+          "reason": "Practice maintaining strict loop invariants to eliminate 'Lower Bound Over-Reduction on Upper Bound Branch'.",
+          "url": "https://leetcode.com/problems/binary-search/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "34",
+          "title": "Find First and Last Position of Element in Sorted Array",
+          "difficulty": "Medium",
+          "topic": "Binary Search",
+          "reason": "Targeted boundary conditions to resolve: When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position..",
+          "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "198",
+          "title": "House Robber",
+          "difficulty": "Medium",
+          "topic": "Dynamic Programming",
+          "reason": "Practice non-adjacent state recurrence to fix: The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint..",
+          "url": "https://leetcode.com/problems/house-robber/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "300",
+          "title": "Longest Increasing Subsequence",
+          "difficulty": "Medium",
+          "topic": "Dynamic Programming",
+          "reason": "Master state transitions and optimal substructure: Dynamic programming optimal substructure requires choosing between two mutually exclusive choices: (1) skip house `i` and keep `dp[i-1]`, or (2) rob house `i` and add it to non-adjacent optimal loot `dp[i-2]`..",
+          "url": "https://leetcode.com/problems/longest-increasing-subsequence/"
+        }
+      ]
+    },
+    "non_existent_user_xyz": {
+      "user_id": "non_existent_user_xyz",
+      "analyzed_at": 1789905088256,
+      "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
+      "weak_topics": [],
+      "recommended_problems": [
+        {
+          "platform": "leetcode",
+          "problem_id": "704",
+          "title": "Binary Search",
+          "difficulty": "Easy",
+          "topic": "Binary Search",
+          "reason": "Foundational baseline problem to assess loop invariants and search boundaries.",
+          "url": "https://leetcode.com/problems/binary-search/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "198",
+          "title": "House Robber",
+          "difficulty": "Medium",
+          "topic": "Dynamic Programming",
+          "reason": "Foundational problem to assess optimal substructure state recurrence definition.",
+          "url": "https://leetcode.com/problems/house-robber/"
+        }
+      ]
+    },
+    "user_perfect_coder": {
+      "user_id": "user_perfect_coder",
+      "analyzed_at": 1789905088290,
+      "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
+      "weak_topics": [],
+      "recommended_problems": [
+        {
+          "platform": "leetcode",
+          "problem_id": "300",
+          "title": "Longest Increasing Subsequence",
+          "difficulty": "Medium",
+          "topic": "Dynamic Programming",
+          "reason": "Advance your mastery with O(N log N) patience sorting / binary search state transitions.",
+          "url": "https://leetcode.com/problems/longest-increasing-subsequence/"
+        }
+      ]
+    }
+  }
+}

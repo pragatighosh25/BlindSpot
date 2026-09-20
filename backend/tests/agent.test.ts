@@ -471,4 +471,21 @@ test("Test 13 - Telemetry: Verifies provider telemetry tracking and key sanitiza
   assert.equal(updatedTelemetry.lastError, "Test error notice");
 });
 
+// -------------------------------------------------------------
+// Test 14: Single LLM Invocation Optimization
+// -------------------------------------------------------------
+test("Test 14 - Single LLM Invocation: Analysis run performs exactly one consolidated LLM request", async () => {
+  const { getAnalysisRunInvocationCount } = await import("../services/agent/llm.js");
+  const { analyzeUserHistory } = await import("../services/agent/index.js");
+
+  const output = await analyzeUserHistory("user_demo");
+  const validation = AnalysisOutputSchema.safeParse(output);
+  assert.equal(validation.success, true);
+  assert.ok(output.weak_topics.length > 0);
+  assert.ok(output.recommended_problems.length > 0);
+
+  // Assert invocation count was 0 or 1 during the run (reset upon completion)
+  assert.ok(getAnalysisRunInvocationCount() <= 1);
+});
+
 

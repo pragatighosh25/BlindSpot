@@ -11,8 +11,19 @@ import {
   SubmissionDiagnosisSchema,
 } from "./types";
 import { diagnoseSubmissionPattern } from "./agent";
-import { SYSTEM_PROMPT, buildSingleSubmissionPrompt } from "./prompts";
-import { invokeLLM, extractJsonFromResponse, recordLLMTelemetry, sanitizeErrorMessage } from "./llm";
+import {
+  SYSTEM_PROMPT,
+  buildSingleSubmissionPrompt,
+  buildConsolidatedUserAnalysisPrompt,
+} from "./prompts";
+import {
+  invokeLLM,
+  extractJsonFromResponse,
+  recordLLMTelemetry,
+  sanitizeErrorMessage,
+  startAnalysisRun,
+  endAnalysisRun,
+} from "./llm";
 import {
   getUserSubmissions,
   getFailedSubmissions,
@@ -22,93 +33,12 @@ import {
 import { saveSubmission } from "@/services/opensearch";
 
 /**
- * Dynamically generates targeted practice problem recommendations from Gemini / Strands LLM
- * based on the user's diagnosed algorithmic blind spots.
+ * Deterministically generates tailored practice problem recommendations
+ * derived directly from diagnosed algorithmic weak topics (Zero LLM calls).
  */
-export async function generateTargetedRecommendationsWithLLM(
-  weakTopics: WeakTopic[],
-  userId = "default_user"
-): Promise<RecommendedProblem[]> {
-  if (weakTopics.length === 0) {
-    return [];
-  }
-
-  const prompt = `You are an expert competitive programming coach and curriculum curator.
-The user '${userId}' has been analyzed across their LeetCode and Codeforces submissions and diagnosed with the following specific algorithmic blind spots:
-
-${weakTopics.map((w, idx) => `[Blind Spot ${idx + 1}] Topic: ${w.topic}
-- Specific Failure Mode: ${w.failure_mode}
-- Root Cause: ${w.root_cause || w.description}
-- Why It Fails: ${w.why_it_fails || "Violates algorithmic state invariant or boundary condition"}
-- Algorithmic Invariant Needed: ${w.correct_concept || "Enforce correct problem constraints"}
-- Suggested Strategy: ${w.suggested_fix || "Master recurrence or loop condition"}`).join("\n\n")}
-
-Task:
-Recommend 3 to 6 targeted, official LeetCode or Codeforces problems specifically chosen to help the user practice and eliminate these exact failure patterns.
-Do NOT recommend generic problems; each recommendation MUST specifically address one of the diagnosed blind spots above.
-
-Format Requirement:
-Return ONLY a valid JSON array of objects matching this exact structure:
-[
-  {
-    "platform": "leetcode" or "codeforces",
-    "problem_id": "704",
-    "title": "Exact Official Problem Title",
-    "difficulty": "Easy" | "Medium" | "Hard" | "800" | "1200" | "1600",
-    "topic": "Targeted Topic",
-    "reason": "Clear 1-2 sentence pedagogical explanation of why solving this specific problem directly addresses their diagnosed blind spot.",
-    "url": "https://leetcode.com/problems/slug/ or https://codeforces.com/problemset/problem/contest/index"
-  }
-]`;
-
-  try {
-    const rawResponse = await invokeLLM(SYSTEM_PROMPT, prompt, {
-      temperature: 0.2,
-      maxTokens: 1500,
-    });
-
-    if (rawResponse) {
-      const parsed = extractJsonFromResponse<RecommendedProblem[]>(rawResponse);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const validated: RecommendedProblem[] = [];
-        for (const item of parsed) {
-          const result = RecommendedProblemSchema.safeParse(item);
-          if (result.success) {
-            validated.push(result.data);
-          }
-        }
-        if (validated.length > 0) {
-          console.log(`[LLM] Analysis source: GEMINI`);
-          console.log(`[Strands Agent] Generated ${validated.length} dynamic targeted recommendations via Gemini.`);
-          recordLLMTelemetry({
-            source: "GEMINI",
-          });
-          return validated;
-        } else {
-          const errorMsg = "Schema validation failed for recommendations response";
-          console.log(`[LLM] Gemini request failed: ${errorMsg}`);
-          recordLLMTelemetry({
-            source: "FALLBACK",
-            lastError: errorMsg,
-          });
-        }
-      }
-    }
-  } catch (err) {
-    const safeError = sanitizeErrorMessage((err as Error).message || "Unknown error during recommendation parsing");
-    console.log(`[LLM] Gemini request failed: ${safeError}`);
-    recordLLMTelemetry({
-      source: "FALLBACK",
-      lastError: safeError,
-    });
-  }
-
-  // Dynamic fallback: Generate tailored practice recommendations dynamically derived from the diagnosed weak topics
-  console.log(`[LLM] Falling back to deterministic analysis`);
-  console.log(`[LLM] Analysis source: FALLBACK`);
-  recordLLMTelemetry({
-    source: "FALLBACK",
-  });
+export function generateTargetedRecommendationsDeterministic(
+  weakTopics: WeakTopic[]
+): RecommendedProblem[] {
   const dynamicFallback: RecommendedProblem[] = [];
   const seenIds = new Set<string>();
 
@@ -208,6 +138,97 @@ Return ONLY a valid JSON array of objects matching this exact structure:
 }
 
 /**
+ * Dynamically generates targeted practice problem recommendations from Gemini / Strands LLM
+ * based on the user's diagnosed algorithmic blind spots.
+ */
+export async function generateTargetedRecommendationsWithLLM(
+  weakTopics: WeakTopic[],
+  userId = "default_user"
+): Promise<RecommendedProblem[]> {
+  if (weakTopics.length === 0) {
+    return [];
+  }
+
+  const prompt = `You are an expert competitive programming coach and curriculum curator.
+The user '${userId}' has been analyzed across their LeetCode and Codeforces submissions and diagnosed with the following specific algorithmic blind spots:
+
+${weakTopics.map((w, idx) => `[Blind Spot ${idx + 1}] Topic: ${w.topic}
+- Specific Failure Mode: ${w.failure_mode}
+- Root Cause: ${w.root_cause || w.description}
+- Why It Fails: ${w.why_it_fails || "Violates algorithmic state invariant or boundary condition"}
+- Algorithmic Invariant Needed: ${w.correct_concept || "Enforce correct problem constraints"}
+- Suggested Strategy: ${w.suggested_fix || "Master recurrence or loop condition"}`).join("\n\n")}
+
+Task:
+Recommend 3 to 6 targeted, official LeetCode or Codeforces problems specifically chosen to help the user practice and eliminate these exact failure patterns.
+Do NOT recommend generic problems; each recommendation MUST specifically address one of the diagnosed blind spots above.
+
+Format Requirement:
+Return ONLY a valid JSON array of objects matching this exact structure:
+[
+  {
+    "platform": "leetcode" or "codeforces",
+    "problem_id": "704",
+    "title": "Exact Official Problem Title",
+    "difficulty": "Easy" | "Medium" | "Hard" | "800" | "1200" | "1600",
+    "topic": "Targeted Topic",
+    "reason": "Clear 1-2 sentence pedagogical explanation of why solving this specific problem directly addresses their diagnosed blind spot.",
+    "url": "https://leetcode.com/problems/slug/ or https://codeforces.com/problemset/problem/contest/index"
+  }
+]`;
+
+  try {
+    const rawResponse = await invokeLLM(SYSTEM_PROMPT, prompt, {
+      temperature: 0.2,
+      maxTokens: 1500,
+    });
+
+    if (rawResponse) {
+      const parsed = extractJsonFromResponse<RecommendedProblem[]>(rawResponse);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const validated: RecommendedProblem[] = [];
+        for (const item of parsed) {
+          const result = RecommendedProblemSchema.safeParse(item);
+          if (result.success) {
+            validated.push(result.data);
+          }
+        }
+        if (validated.length > 0) {
+          console.log(`[LLM] Analysis source: GEMINI`);
+          console.log(`[Strands Agent] Generated ${validated.length} dynamic targeted recommendations via Gemini.`);
+          recordLLMTelemetry({
+            source: "GEMINI",
+          });
+          return validated;
+        } else {
+          const errorMsg = "Schema validation failed for recommendations response";
+          console.log(`[LLM] Gemini request failed: ${errorMsg}`);
+          recordLLMTelemetry({
+            source: "FALLBACK",
+            lastError: errorMsg,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    const safeError = sanitizeErrorMessage((err as Error).message || "Unknown error during recommendation parsing");
+    console.log(`[LLM] Gemini request failed: ${safeError}`);
+    recordLLMTelemetry({
+      source: "FALLBACK",
+      lastError: safeError,
+    });
+  }
+
+  // Deterministic fallback
+  console.log(`[LLM] Falling back to deterministic analysis`);
+  console.log(`[LLM] Analysis source: FALLBACK`);
+  recordLLMTelemetry({
+    source: "FALLBACK",
+  });
+  return generateTargetedRecommendationsDeterministic(weakTopics);
+}
+
+/**
  * Diagnoses a single submission using Strands reasoning + OpenSearch historical context + LLM (with deterministic expert fallback)
  */
 export async function analyzeSingleSubmissionWithStrands(
@@ -277,7 +298,102 @@ export async function analyzeSingleSubmissionWithStrands(
 }
 
 /**
- * Main Strands Agent Orchestrator for analyzing a user's real submission history
+ * Aggregates deterministic diagnoses by topic to extract dominant failure patterns (Zero LLM calls).
+ */
+export function computeDeterministicWeakTopics(
+  diagnoses: { submission: CanonicalSubmission; diagnosis: SubmissionDiagnosis }[]
+): WeakTopic[] {
+  const topicMap = new Map<
+    string,
+    {
+      diagnoses: SubmissionDiagnosis[];
+      subIds: string[];
+    }
+  >();
+
+  for (const { submission, diagnosis } of diagnoses) {
+    const topic = diagnosis.topic || submission.problem.topic_tags[0] || "General Algorithms";
+    if (!topicMap.has(topic)) {
+      topicMap.set(topic, { diagnoses: [], subIds: [] });
+    }
+    const entry = topicMap.get(topic)!;
+    entry.diagnoses.push(diagnosis);
+    if (!entry.subIds.includes(submission.submission_id)) {
+      entry.subIds.push(submission.submission_id);
+    }
+  }
+
+  const weakTopics: WeakTopic[] = [];
+
+  for (const [topic, { diagnoses: topicDiags, subIds }] of topicMap.entries()) {
+    const modeStats = new Map<
+      string,
+      {
+        count: number;
+        totalConf: number;
+        exemplar: SubmissionDiagnosis;
+      }
+    >();
+
+    for (const d of topicDiags) {
+      const mode = d.failure_pattern;
+      if (!modeStats.has(mode)) {
+        modeStats.set(mode, {
+          count: 0,
+          totalConf: 0,
+          exemplar: d,
+        });
+      }
+      const stat = modeStats.get(mode)!;
+      stat.count += 1;
+      stat.totalConf += d.confidence;
+      if (d.confidence > stat.exemplar.confidence) {
+        stat.exemplar = d;
+      }
+    }
+
+    let topMode = "unknown";
+    let maxCount = 0;
+    let avgConf = 0.6;
+    let topExemplar: SubmissionDiagnosis | null = null;
+
+    for (const [mode, stat] of modeStats.entries()) {
+      if (stat.count > maxCount) {
+        maxCount = stat.count;
+        topMode = mode;
+        avgConf = stat.totalConf / stat.count;
+        topExemplar = stat.exemplar;
+      }
+    }
+
+    if (maxCount >= 1 && topExemplar) {
+      const confidence = Math.min(
+        0.98,
+        Math.max(0.65, Math.round((avgConf + (maxCount > 1 ? 0.05 * Math.min(maxCount, 3) : 0)) * 100) / 100)
+      );
+
+      weakTopics.push({
+        topic,
+        failure_mode: topExemplar.failure_mode || topMode.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        confidence,
+        evidence_count: maxCount,
+        example_submissions: subIds.slice(0, 5),
+        description: `Detected ${maxCount} failure ${maxCount === 1 ? "occurrence" : "occurrences"} exhibiting ${topExemplar.failure_mode.toLowerCase()}.`,
+        root_cause: topExemplar.root_cause,
+        why_it_fails: topExemplar.why_it_fails,
+        correct_concept: topExemplar.correct_concept,
+        suggested_fix: topExemplar.suggested_fix,
+      });
+    }
+  }
+
+  weakTopics.sort((a, b) => b.evidence_count - a.evidence_count);
+  return weakTopics;
+}
+
+/**
+ * Main Strands Agent Orchestrator for analyzing a user's real submission history.
+ * Aggregates all submission evidence and performs exactly ONE Gemini LLM call per run.
  */
 export async function runStrandsUserAnalysis(userId = "default_user"): Promise<AnalysisOutput> {
   console.log(`[Strands Agent] Starting intelligent analysis for user: ${userId}`);
@@ -345,132 +461,114 @@ export async function runStrandsUserAnalysis(userId = "default_user"): Promise<A
     return AnalysisOutputSchema.parse(cleanOutput);
   }
 
-  // Step 2: Prioritize and process failed submissions (limit to 30 most recent to manage latency & budget)
+  // Step 2: Prioritize and aggregate failed submission evidence (limit to 30 most recent)
   const prioritizedFailures = failedSubmissions
     .sort((a, b) => b.submission.timestamp - a.submission.timestamp)
     .slice(0, 30);
 
-  // Step 3: Run Strands diagnosis on each failed submission
-  const diagnoses: { submission: CanonicalSubmission; diagnosis: SubmissionDiagnosis }[] = [];
-
+  // Run deterministic diagnostic engine to enrich submissions for OpenSearch & deterministic fallback (0 LLM calls)
+  const deterministicDiagnoses: { submission: CanonicalSubmission; diagnosis: SubmissionDiagnosis }[] = [];
   for (const sub of prioritizedFailures) {
-    const diag = await analyzeSingleSubmissionWithStrands(sub, userId);
-    diagnoses.push({ submission: sub, diagnosis: diag });
-    // Persist rich diagnosis directly to OpenSearch submission document
+    const diag = diagnoseSubmissionPattern(sub);
+    deterministicDiagnoses.push({ submission: sub, diagnosis: diag });
     try {
       await saveSubmission(sub, diag);
     } catch {}
   }
 
-  // Step 4: Group diagnoses by topic and identify recurring patterns vs single mistakes
-  const topicMap = new Map<
-    string,
-    {
-      diagnoses: SubmissionDiagnosis[];
-      subIds: string[];
-    }
-  >();
+  // Retrieve historical context from OpenSearch for grounding (0 LLM calls)
+  let historicalMistakes: CanonicalSubmission[] = [];
+  try {
+    const primaryTopic = prioritizedFailures[0]?.problem?.topic_tags?.[0] || "General";
+    historicalMistakes = await searchPastMistakes(primaryTopic, "WA", userId);
+    const failureIds = new Set(prioritizedFailures.map((f) => f.submission_id));
+    historicalMistakes = historicalMistakes.filter((m) => !failureIds.has(m.submission_id));
+  } catch {}
 
-  for (const { submission, diagnosis } of diagnoses) {
-    const topic = diagnosis.topic || submission.problem.topic_tags[0] || "General Algorithms";
-    if (!topicMap.has(topic)) {
-      topicMap.set(topic, { diagnoses: [], subIds: [] });
-    }
-    const entry = topicMap.get(topic)!;
-    entry.diagnoses.push(diagnosis);
-    if (!entry.subIds.includes(submission.submission_id)) {
-      entry.subIds.push(submission.submission_id);
-    }
-  }
-
-  const weakTopics: WeakTopic[] = [];
-
-  for (const [topic, { diagnoses: topicDiags, subIds }] of topicMap.entries()) {
-    // Tally failure modes within this topic
-    const modeStats = new Map<
-      string,
-      {
-        count: number;
-        totalConf: number;
-        exemplar: SubmissionDiagnosis;
-      }
-    >();
-
-    for (const d of topicDiags) {
-      const mode = d.failure_pattern;
-      if (!modeStats.has(mode)) {
-        modeStats.set(mode, {
-          count: 0,
-          totalConf: 0,
-          exemplar: d,
-        });
-      }
-      const stat = modeStats.get(mode)!;
-      stat.count += 1;
-      stat.totalConf += d.confidence;
-      if (d.confidence > stat.exemplar.confidence) {
-        stat.exemplar = d;
-      }
-    }
-
-    // Identify dominant failure pattern
-    let topMode = "unknown";
-    let maxCount = 0;
-    let avgConf = 0.6;
-    let topExemplar: SubmissionDiagnosis | null = null;
-
-    for (const [mode, stat] of modeStats.entries()) {
-      if (stat.count > maxCount) {
-        maxCount = stat.count;
-        topMode = mode;
-        avgConf = stat.totalConf / stat.count;
-        topExemplar = stat.exemplar;
-      }
-    }
-
-    if (maxCount >= 1 && topExemplar) {
-      // Calculate grounded confidence
-      const confidence = Math.min(
-        0.98,
-        Math.max(0.65, Math.round((avgConf + (maxCount > 1 ? 0.05 * Math.min(maxCount, 3) : 0)) * 100) / 100)
-      );
-
-      weakTopics.push({
-        topic,
-        failure_mode: topExemplar.failure_mode || topMode.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        confidence,
-        evidence_count: maxCount,
-        example_submissions: subIds.slice(0, 5),
-        description: `Detected ${maxCount} failure ${maxCount === 1 ? "occurrence" : "occurrences"} exhibiting ${topExemplar.failure_mode.toLowerCase()}.`,
-        root_cause: topExemplar.root_cause,
-        why_it_fails: topExemplar.why_it_fails,
-        correct_concept: topExemplar.correct_concept,
-        suggested_fix: topExemplar.suggested_fix,
-      });
-    }
-  }
-
-  // Sort weaknesses by evidence count descending
-  weakTopics.sort((a, b) => b.evidence_count - a.evidence_count);
-
-  // Dynamically generate targeted practice recommendations using Strands / Gemini LLM
-  const recommendedProblems = await generateTargetedRecommendationsWithLLM(weakTopics, userId);
-
-  const summary = `Strands Agent analyzed ${allSubmissions.length} submissions (${failedSubmissions.length} failed) for user '${userId}'. Identified ${weakTopics.length} algorithmic blind spots with ${weakTopics.reduce((acc, w) => acc + w.evidence_count, 0)} total failure evidence samples.`;
-
-  const output: AnalysisOutput = {
+  // Compute deterministic fallback analysis in advance
+  const deterministicWeakTopics = computeDeterministicWeakTopics(deterministicDiagnoses);
+  const deterministicRecommendations = generateTargetedRecommendationsDeterministic(deterministicWeakTopics);
+  const deterministicFallbackOutput: AnalysisOutput = {
     user_id: userId,
     analyzed_at: Date.now(),
-    summary,
-    weak_topics: weakTopics,
-    recommended_problems: recommendedProblems,
+    summary: `Strands Agent analyzed ${allSubmissions.length} submissions (${failedSubmissions.length} failed) for user '${userId}'. Identified ${deterministicWeakTopics.length} algorithmic blind spots with ${deterministicWeakTopics.reduce((acc, w) => acc + w.evidence_count, 0)} total failure evidence samples.`,
+    weak_topics: deterministicWeakTopics,
+    recommended_problems: deterministicRecommendations,
   };
 
-  const validatedOutput = AnalysisOutputSchema.parse(output);
+  // Step 3: ONE Gemini request for the complete user analysis run
+  startAnalysisRun();
 
-  // Step 5: Save structured result to DynamoDB
-  await saveAnalysis(userId, validatedOutput);
+  const prompt = buildConsolidatedUserAnalysisPrompt({
+    userId,
+    totalSubmissionsCount: allSubmissions.length,
+    acCount: allSubmissions.length - failedSubmissions.length,
+    failedSubmissions: prioritizedFailures,
+    historicalMistakes,
+  });
+
+  let finalOutput: AnalysisOutput | null = null;
+
+  try {
+    const rawResponse = await invokeLLM(SYSTEM_PROMPT, prompt, {
+      temperature: 0.2,
+      maxTokens: 4096,
+      jsonMode: true,
+    });
+
+    if (rawResponse) {
+      const parsed = extractJsonFromResponse<Partial<AnalysisOutput>>(rawResponse);
+      const validatedCandidate = {
+        user_id: userId,
+        analyzed_at: Date.now(),
+        summary: parsed.summary || deterministicFallbackOutput.summary,
+        weak_topics: parsed.weak_topics || [],
+        recommended_problems:
+          parsed.recommended_problems && parsed.recommended_problems.length > 0
+            ? parsed.recommended_problems
+            : deterministicRecommendations,
+      };
+
+      const parsedResult = AnalysisOutputSchema.safeParse(validatedCandidate);
+      if (parsedResult.success && parsedResult.data.weak_topics.length > 0) {
+        console.log(`[LLM] Analysis source: GEMINI`);
+        recordLLMTelemetry({
+          source: "GEMINI",
+        });
+        finalOutput = parsedResult.data;
+      } else {
+        const errorMsg = "Schema validation failed or empty weak_topics from Gemini response";
+        console.log(`[LLM] Gemini request failed: ${errorMsg}`);
+        recordLLMTelemetry({
+          source: "FALLBACK",
+          lastError: errorMsg,
+        });
+      }
+    }
+  } catch (err) {
+    const safeError = sanitizeErrorMessage((err as Error).message || "Unknown error during consolidated analysis parsing");
+    console.log(`[LLM] Gemini request failed: ${safeError}`);
+    recordLLMTelemetry({
+      source: "FALLBACK",
+      lastError: safeError,
+    });
+  }
+
+  if (!finalOutput) {
+    console.log(`[LLM] Falling back to deterministic analysis`);
+    console.log(`[LLM] Analysis source: FALLBACK`);
+    recordLLMTelemetry({
+      source: "FALLBACK",
+    });
+    finalOutput = AnalysisOutputSchema.parse(deterministicFallbackOutput);
+  }
+
+  endAnalysisRun();
+
+  // Step 4: Persist structured analysis to DynamoDB
+  await saveAnalysis(userId, finalOutput);
   console.log(`[Strands Agent] Analysis completed & persisted for user: ${userId}`);
 
-  return validatedOutput;
+  return finalOutput;
 }
+

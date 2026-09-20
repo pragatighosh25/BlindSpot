@@ -19,8 +19,19 @@ import { CanonicalSubmission } from "@/schemas/submission.schema";
 import { ScheduledReviewItem } from "@/types/schedule";
 import { Sparkles, CircleAlert } from "akar-icons";
 
+const BLINDSPOT_SESSION_KEY = "blindspot_user_session";
+
+const DEFAULT_PROFILE = {
+  leetcode: "pragatighosh25",
+  codeforces: "pragatighosh",
+  userId: "pragatighosh25",
+  email: "demo@blindspot.ai",
+  isDemo: true,
+};
+
 export default function App() {
   const [currentView, setCurrentView] = useState<"landing" | "dashboard">("landing");
+  const [isSessionRestored, setIsSessionRestored] = useState(false);
   const [activeTab, setActiveTab] = useState<"diagnostics" | "practice" | "submissions">("diagnostics");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authInitialMode, setAuthInitialMode] = useState<"demo" | "login" | "signup">("demo");
@@ -34,13 +45,25 @@ export default function App() {
     userId: string;
     email?: string;
     isDemo: boolean;
-  }>({
-    leetcode: "pragatighosh25",
-    codeforces: "pragatighosh",
-    userId: "pragatighosh25",
-    email: "demo@blindspot.ai",
-    isDemo: true,
-  });
+  }>(DEFAULT_PROFILE);
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(BLINDSPOT_SESSION_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.currentView === "dashboard" && parsed?.activeProfile) {
+          setActiveProfile(parsed.activeProfile);
+          setCurrentView("dashboard");
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to restore session from localStorage:", e);
+    } finally {
+      setIsSessionRestored(true);
+    }
+  }, []);
 
   // App Data State
   const [analysis, setAnalysis] = useState<AnalysisOutput | null>(null);
@@ -238,13 +261,23 @@ export default function App() {
 
   // Launch Demo Handler
   const handleLaunchDemo = () => {
-    setActiveProfile({
+    const demoProfile = {
       leetcode: "pragatighosh25",
       codeforces: "pragatighosh",
       userId: "pragatighosh25",
+      email: "demo@blindspot.ai",
       isDemo: true,
-    });
+    };
+    setActiveProfile(demoProfile);
     setCurrentView("dashboard");
+    try {
+      localStorage.setItem(
+        BLINDSPOT_SESSION_KEY,
+        JSON.stringify({ currentView: "dashboard", activeProfile: demoProfile })
+      );
+    } catch (e) {
+      console.warn("Failed to persist session to localStorage:", e);
+    }
   };
 
   // Auth Success Handler
@@ -257,6 +290,14 @@ export default function App() {
   }) => {
     setActiveProfile(handles);
     setCurrentView("dashboard");
+    try {
+      localStorage.setItem(
+        BLINDSPOT_SESSION_KEY,
+        JSON.stringify({ currentView: "dashboard", activeProfile: handles })
+      );
+    } catch (e) {
+      console.warn("Failed to persist session to localStorage:", e);
+    }
     setIsSyncing(true);
     try {
       await Promise.all([loadSubmissions(), loadAnalysis(false), loadSchedule()]);
@@ -278,6 +319,12 @@ export default function App() {
   const accuracyRate = totalSubmissions > 0 ? Math.round((solvedCount / totalSubmissions) * 100) : 0;
   const weaknessCount = analysis?.weak_topics.length || 0;
   const dueTodayCount = scheduleData.today.length;
+
+  if (!isSessionRestored) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] bg-dot-grid flex items-center justify-center text-white" />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] bg-dot-grid text-[#FAFAF8] flex flex-col selection:bg-[#E4007C] selection:text-white">
@@ -429,13 +476,12 @@ export default function App() {
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirmLogout={() => {
           setCurrentView("landing");
-          setActiveProfile({
-            leetcode: "pragatighosh25",
-            codeforces: "pragatighosh",
-            userId: "pragatighosh25",
-            email: "demo@blindspot.ai",
-            isDemo: true,
-          });
+          setActiveProfile(DEFAULT_PROFILE);
+          try {
+            localStorage.removeItem(BLINDSPOT_SESSION_KEY);
+          } catch (e) {
+            console.warn("Failed to clear session from localStorage:", e);
+          }
         }}
       />
 
@@ -446,6 +492,14 @@ export default function App() {
         activeProfile={activeProfile}
         onProfileUpdated={async (updated) => {
           setActiveProfile(updated);
+          try {
+            localStorage.setItem(
+              BLINDSPOT_SESSION_KEY,
+              JSON.stringify({ currentView: "dashboard", activeProfile: updated })
+            );
+          } catch (e) {
+            console.warn("Failed to update session in localStorage:", e);
+          }
           setIsSyncing(true);
           try {
             await Promise.all([loadSubmissions(), loadAnalysis(false), loadSchedule()]);

@@ -24,12 +24,10 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
 
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-rose-950/60 border border-rose-800/60 text-[#E4007C] flex items-center justify-center shrink-0">
-              <SignOut size={20} />
-            </div>
+            
             <div>
               <h3 className="text-base font-bold font-mono text-white">Log Out</h3>
-              <p className="text-xs text-white/50 font-mono">Confirm session termination</p>
+              
             </div>
           </div>
 
@@ -41,8 +39,8 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
           </button>
         </div>
 
-        <p className="text-xs font-mono text-white/70 leading-relaxed bg-[#141414] p-3 rounded-xl border border-white/5">
-          Are you sure you want to log out? Your submissions telemetry and diagnostic graphs remain safely saved.
+        <p className="text-xs font-mono text-white/70 leading-relaxed bg-[#141414] p-3 rounded-xl">
+          Are you sure you want to log out?
         </p>
 
         <div className="flex items-center justify-end gap-2 pt-2">

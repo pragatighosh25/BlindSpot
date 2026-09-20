@@ -191,10 +191,8 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Logo className="w-8 h-8" />
             <div>
               <h2 className="text-base font-bold font-mono text-white">Profile Settings</h2>
-              <p className="text-xs text-white/50 font-mono">Manage handles and credentials</p>
             </div>
           </div>
 
@@ -215,11 +213,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               setErrorMsg(null);
               setSuccessMsg(null);
             }}
-            className={`py-1.5 font-semibold rounded-full transition-all ${
-              tab === "handles"
-                ? "bg-[#E4007C] text-white shadow-sm"
-                : "text-white/60 hover:text-white"
-            }`}
+            className={`py-1.5 font-semibold rounded-full transition-all ${tab === "handles"
+              ? "bg-[#E4007C] text-white shadow-sm"
+              : "text-white/60 hover:text-white"
+              }`}
           >
             Connected Handles
           </button>
@@ -231,11 +228,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               setErrorMsg(null);
               setSuccessMsg(null);
             }}
-            className={`py-1.5 font-semibold rounded-full transition-all ${
-              tab === "password"
-                ? "bg-[#E4007C] text-white shadow-sm"
-                : "text-white/60 hover:text-white"
-            }`}
+            className={`py-1.5 font-semibold rounded-full transition-all ${tab === "password"
+              ? "bg-[#E4007C] text-white shadow-sm"
+              : "text-white/60 hover:text-white"
+              }`}
           >
             Password
           </button>
@@ -247,11 +243,10 @@ export const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({
               setErrorMsg(null);
               setSuccessMsg(null);
             }}
-            className={`py-1.5 font-semibold rounded-full transition-all ${
-              tab === "account"
-                ? "bg-[#E4007C] text-white shadow-sm"
-                : "text-white/60 hover:text-white"
-            }`}
+            className={`py-1.5 font-semibold rounded-full transition-all ${tab === "account"
+              ? "bg-[#E4007C] text-white shadow-sm"
+              : "text-white/60 hover:text-white"
+              }`}
           >
             Account Info
           </button>

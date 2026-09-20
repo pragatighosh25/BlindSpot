@@ -25,23 +25,42 @@ export interface UserProfileRecord {
 }
 
 const TABLE_NAME = process.env.DYNAMODB_TABLE || process.env.CORE_TABLE || "BlindSpot-Core";
-const IS_AWS_CONFIGURED = Boolean(process.env.AWS_REGION && (process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.DYNAMODB_TABLE));
+let isAwsConfigured = Boolean(
+  (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_REGION) ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME
+);
 
 // Lazy-initialized AWS DynamoDB Document Client
 let ddbDocClient: DynamoDBDocumentClient | null = null;
+let hasLoggedStoreMode = false;
 
 function getDocClient(): DynamoDBDocumentClient | null {
-  if (!IS_AWS_CONFIGURED) return null;
-  console.log(
-  `[DynamoDB] Using AWS DynamoDB → ${TABLE_NAME} (${process.env.AWS_REGION})`
-);
+  if (!isAwsConfigured) {
+    if (!hasLoggedStoreMode) {
+      console.log(`[DynamoDB] Running in Local Storage Mode (data/local_dynamodb.json)`);
+      hasLoggedStoreMode = true;
+    }
+    return null;
+  }
+  
+  if (!hasLoggedStoreMode) {
+    console.log(`[DynamoDB] Using AWS DynamoDB → ${TABLE_NAME} (${process.env.AWS_REGION})`);
+    hasLoggedStoreMode = true;
+  }
+
   if (!ddbDocClient) {
-    const client = new DynamoDBClient({
-      region: process.env.AWS_REGION || "us-east-1",
-    });
-    ddbDocClient = DynamoDBDocumentClient.from(client, {
-      marshallOptions: { removeUndefinedValues: true },
-    });
+    try {
+      const client = new DynamoDBClient({
+        region: process.env.AWS_REGION || "us-east-1",
+      });
+      ddbDocClient = DynamoDBDocumentClient.from(client, {
+        marshallOptions: { removeUndefinedValues: true },
+      });
+    } catch (err) {
+      console.warn(`[DynamoDB Client Init Warning]:`, (err as Error).message);
+      isAwsConfigured = false;
+      return null;
+    }
   }
   return ddbDocClient;
 }
@@ -180,6 +199,19 @@ class LocalDynamoDBStore {
     }
     this.schedules.get(userId)!.set(item.id, { ...item });
     this.saveToDisk();
+  }
+
+  public async deleteScheduleItem(userId: string, itemId: string) {
+    const userMap = this.schedules.get(userId);
+    if (userMap) {
+      userMap.delete(itemId);
+      for (const [key, val] of userMap.entries()) {
+        if (val.id === itemId || val.problem_id === itemId || `sched_${val.problem_id}_${val.platform}` === itemId) {
+          userMap.delete(key);
+        }
+      }
+      this.saveToDisk();
+    }
   }
 
   public async getSchedule(userId: string): Promise<ScheduledReviewItem[]> {
@@ -380,21 +412,52 @@ export async function getWeaknessesFromDynamo(userId: string): Promise<WeakTopic
 export async function saveScheduleToDynamo(userId: string, item: ScheduledReviewItem): Promise<void> {
   const client = getDocClient();
   if (client) {
-    await client.send(
-      new PutCommand({
-        TableName: TABLE_NAME,
-        Item: {
-          PK: `USER#${userId}`,
-          SK: `SCHEDULE#${item.platform}#${item.problem_id}`,
-          Type: "ScheduleItem",
-          userId,
-          ...item,
-        },
-      })
-    );
-  } else {
-    await localStore.saveScheduleItem(userId, item);
+    try {
+      await client.send(
+        new PutCommand({
+          TableName: TABLE_NAME,
+          Item: {
+            PK: `USER#${userId}`,
+            SK: `SCHEDULE#${item.platform}#${item.problem_id}`,
+            Type: "ScheduleItem",
+            userId,
+            ...item,
+          },
+        })
+      );
+      await localStore.saveScheduleItem(userId, item);
+      return;
+    } catch (err) {
+      console.warn(`[DynamoDB saveSchedule Warning - falling back to local store]:`, (err as Error).message);
+    }
   }
+
+  await localStore.saveScheduleItem(userId, item);
+}
+
+export async function deleteScheduleFromDynamo(userId: string, itemOrId: string | ScheduledReviewItem): Promise<void> {
+  const itemId = typeof itemOrId === "string" ? itemOrId : itemOrId.id;
+  const platform = typeof itemOrId === "object" ? itemOrId.platform : undefined;
+  const problemId = typeof itemOrId === "object" ? itemOrId.problem_id : undefined;
+
+  const client = getDocClient();
+  if (client && platform && problemId) {
+    try {
+      await client.send(
+        new DeleteCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            PK: `USER#${userId}`,
+            SK: `SCHEDULE#${platform}#${problemId}`,
+          },
+        })
+      );
+    } catch (e) {
+      console.warn(`[DynamoDB deleteSchedule Warning]:`, (e as Error).message);
+    }
+  }
+
+  await localStore.deleteScheduleItem(userId, itemId);
 }
 
 export async function getScheduleFromDynamo(userId: string): Promise<ScheduledReviewItem[]> {
@@ -412,7 +475,7 @@ export async function getScheduleFromDynamo(userId: string): Promise<ScheduledRe
         })
       );
 
-      if (res.Items) {
+      if (res.Items && res.Items.length > 0) {
         return res.Items.map((item) => ({
           id: item.id || `sched_${item.problem_id}_${item.platform}`,
           problem_id: item.problem_id,
@@ -422,14 +485,14 @@ export async function getScheduleFromDynamo(userId: string): Promise<ScheduledRe
           reason: item.reason,
           url: item.url,
           step_index: item.step_index,
-          intervals_days: item.intervals_days,
+          intervals_days: item.intervals_days || [0, 1, 3, 7, 14],
           scheduled_date: item.scheduled_date,
           completed_history: item.completed_history || [],
           status: item.status,
         }));
       }
     } catch (e) {
-      console.warn(`[DynamoDB getSchedule Error]:`, (e as Error).message);
+      console.warn(`[DynamoDB getSchedule Warning - falling back to local store]:`, (e as Error).message);
     }
   }
 

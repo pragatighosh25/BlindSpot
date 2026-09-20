@@ -245,7 +245,12 @@ export default function App() {
     const res = await fetch("/api/schedule/complete", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: scheduleId, scheduleId, action: "complete" }),
+      body: JSON.stringify({
+        id: scheduleId,
+        scheduleId,
+        action: "complete",
+        userId: activeProfile.userId,
+      }),
     });
     if (res.ok) {
       await loadSchedule();

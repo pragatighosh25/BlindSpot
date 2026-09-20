@@ -28,6 +28,7 @@ import {
   saveWeaknesses,
   getWeaknessesFromDynamo,
   saveScheduleToDynamo,
+  deleteScheduleFromDynamo,
   getScheduleFromDynamo,
   recordAnalysisRun,
 } from "../services/storage/dynamodb";
@@ -1004,6 +1005,53 @@ app.get("/api/schedule", async (req: Request, res: Response) => {
   }
 });
 
+// Helper function to advance/complete a spaced repetition schedule item
+async function advanceScheduleItem(userId: string, targetId: string) {
+  // 1. Check DynamoDB / LocalStore for the user's schedule items
+  const userSchedule = await getScheduleFromDynamo(userId);
+  let item = userSchedule.find(
+    (s) => s.id === targetId || s.problem_id === targetId || `sched_${s.problem_id}_${s.platform}` === targetId
+  );
+
+  // 2. If not found in DynamoDB, check in-memory scheduler
+  if (!item) {
+    const memoryItem = markProblemCompleted(targetId);
+    if (memoryItem) {
+      item = memoryItem;
+      await saveScheduleToDynamo(userId, item);
+      return item;
+    }
+    return null;
+  }
+
+  // 3. Increment step_index: 0 (Today) -> 1 (Tomorrow) -> 2 (Day 3) -> 3 (Day 7) -> 4 (Day 14) -> 5 (Mastered/Removed)
+  const INTERVAL_DAYS = item.intervals_days || [0, 1, 3, 7, 14];
+  const nextStep = item.step_index + 1;
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  if (!item.completed_history) item.completed_history = [];
+  item.completed_history.push({ step: item.step_index, completed_at: now });
+  item.step_index = nextStep;
+
+  if (nextStep < INTERVAL_DAYS.length) {
+    const nextIntervalDays = INTERVAL_DAYS[nextStep];
+    item.scheduled_date = now + nextIntervalDays * dayMs;
+    item.status = "upcoming";
+    await saveScheduleToDynamo(userId, item);
+  } else {
+    // Reached 14th day / step 4 completed -> now step 5 / mastered!
+    item.status = "mastered";
+    // Delete from active schedule so it is removed from the calendar
+    await deleteScheduleFromDynamo(userId, item);
+  }
+
+  // Also sync in-memory global scheduler if it exists there
+  markProblemCompleted(targetId);
+
+  return item;
+}
+
 // POST /api/schedule
 app.post("/api/schedule", async (req: Request, res: Response) => {
   try {
@@ -1015,10 +1063,7 @@ app.post("/api/schedule", async (req: Request, res: Response) => {
     // 1. Completion request
     if (action === "complete" && (scheduleId || id)) {
       const targetId = scheduleId || id;
-      const updated = markProblemCompleted(targetId);
-      if (updated) {
-        await saveScheduleToDynamo(userId, updated);
-      }
+      const updated = await advanceScheduleItem(userId, targetId);
       return res.json({ success: true, item: updated });
     }
 
@@ -1053,10 +1098,7 @@ app.post("/api/schedule/complete", async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: "Missing schedule item ID" });
     }
 
-    const updated = markProblemCompleted(targetId);
-    if (updated) {
-      await saveScheduleToDynamo(userId, updated);
-    }
+    const updated = await advanceScheduleItem(userId, targetId);
     return res.json({ success: true, item: updated });
   } catch (error) {
     res.status(500).json({ success: false, error: (error as Error).message });

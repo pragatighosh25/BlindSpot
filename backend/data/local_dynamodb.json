@@ -1,63 +1,162 @@
 {
-  "profiles": [],
+  "profiles": [
+    {
+      "userId": "pragatighosh25",
+      "leetcodeUsername": "pragatighosh25",
+      "codeforcesHandle": "pragatighosh",
+      "isVerified": true,
+      "leetcodeVerified": true,
+      "codeforcesVerified": true,
+      "createdAt": 1789905078669,
+      "updatedAt": 1789907814865,
+      "lastSyncAt": 1789907814865
+    }
+  ],
   "weaknesses": {
-    "user_demo": [
-      {
-        "topic": "Graphs",
-        "failure_mode": "Graph Traversal Invariant or Visited State Error",
-        "confidence": 0.8,
-        "evidence_count": 1,
-        "example_submissions": [
-          "test_graph_1"
-        ],
-        "description": "Detected 1 failure occurrence exhibiting graph traversal invariant or visited state error.",
-        "root_cause": "Incorrect vertex state tracking or cycle handling during graph exploration.",
-        "why_it_fails": "Traversal revisits nodes infinitely or skips connected components.",
-        "correct_concept": "Ensure complete visited state tracking across all graph components.",
-        "suggested_fix": "Use a visited array/set and check all nodes in 0..V-1."
-      },
-      {
-        "topic": "Binary Search",
-        "failure_mode": "Lower Bound Over-Reduction on Upper Bound Branch",
-        "confidence": 0.9,
-        "evidence_count": 1,
-        "example_submissions": [
-          "test_bs_1"
-        ],
-        "description": "Detected 1 failure occurrence exhibiting lower bound over-reduction on upper bound branch.",
-        "root_cause": "Setting `right = mid - 1` when `nums[mid] > target` in a search-insert position skips `mid` as a candidate insertion point.",
-        "why_it_fails": "When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position.",
-        "correct_concept": "In lower_bound / insertion search, the candidate range must preserve `mid` on the upper branch (`right = mid`) until `left == right`.",
-        "suggested_fix": "Change the upper branch update to `right = mid;` while keeping `left = mid + 1;` when `nums[mid] < target`."
-      },
+    "pragatighosh25": [
       {
         "topic": "Dynamic Programming",
-        "failure_mode": "Adjacent State Overlap in Dynamic Programming Recurrence",
-        "confidence": 0.95,
+        "failure_mode": "Empty Submission / Missing Implementation",
+        "confidence": 0.98,
         "evidence_count": 1,
         "example_submissions": [
-          "test_dp_1"
+          "lc_pragatighosh25_1789477942_3",
+          "cf_247354135"
         ],
-        "description": "Detected 1 failure occurrence exhibiting adjacent state overlap in dynamic programming recurrence.",
-        "root_cause": "The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint.",
-        "why_it_fails": "Because `dp[i-1]` already contains optimal loot that may include house `i-1`, adding `nums[i]` robs two adjacent houses. For input [2,7,9,3,1], at i=2 (val 9), it computes dp[2] = dp[1] + 9 = 7 + 9 = 16, resulting in total 20 instead of the optimal non-adjacent sum 12.",
-        "correct_concept": "Dynamic programming optimal substructure requires choosing between two mutually exclusive choices: (1) skip house `i` and keep `dp[i-1]`, or (2) rob house `i` and add it to non-adjacent optimal loot `dp[i-2]`.",
-        "suggested_fix": "Update the recurrence relation to `dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i])` with base cases `dp[0] = nums[0]` and `dp[1] = Math.max(nums[0], nums[1])`."
+        "description": "Detected 1 failure occurrence exhibiting empty submission / missing implementation.",
+        "root_cause": "Empty source code submission.",
+        "why_it_fails": "When the judge attempts to invoke the `tribonacci` method on an instance of `Solution`, it encounters a null or missing symbol. For example, if the judge calls `Solution().tribonacci(4)`, the program crashes because no such logic exists to handle the input.",
+        "correct_concept": "Class-based method implementation.",
+        "suggested_fix": "Implement the `tribonacci` method within the `Solution` class."
+      },
+      {
+        "topic": "Binary Tree",
+        "failure_mode": "Failure to distinguish between left child and left leaf",
+        "confidence": 0.98,
+        "evidence_count": 1,
+        "example_submissions": [
+          "lc_pragatighosh25_1789321072_7"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting failure to distinguish between left child and left leaf.",
+        "root_cause": "Incorrect identification of leaf nodes in the recursive step.",
+        "why_it_fails": "For a tree like [1, 2, 3, 4, 5], the node '2' is a left child but not a leaf. If the code simply checks `if (root->left)`, it incorrectly includes the value of '2' (or its subtree) instead of only targeting nodes that are left children AND have no children of their own.",
+        "correct_concept": "Tree traversal with state-based leaf validation.",
+        "suggested_fix": "Implement a check for `!node->left && !node->right` specifically for the left child."
+      },
+      {
+        "topic": "Graphs",
+        "failure_mode": "Infinite Recursion / Cycle Traversal",
+        "confidence": 0.98,
+        "evidence_count": 1,
+        "example_submissions": [
+          "lc_pragatighosh25_1789320308_9"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting infinite recursion / cycle traversal.",
+        "root_cause": "Missing visited state tracking in DFS.",
+        "why_it_fails": "In a graph with a cycle (e.g., 0-1, 1-2, 2-0), the DFS will call `dfs(0) -> dfs(1) -> dfs(2) -> dfs(0)`, repeating this sequence until the stack memory is exhausted. It fails to recognize that node 0 has already been processed.",
+        "correct_concept": "Graph traversal with cycle detection.",
+        "suggested_fix": "Pass a boolean visited array through the recursion."
+      },
+      {
+        "topic": "Matrix / Simulation",
+        "failure_mode": "Empty Submission / Incomplete Implementation",
+        "confidence": 0.98,
+        "evidence_count": 1,
+        "example_submissions": [
+          "lc_pragatighosh25_1789319362_11"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting empty submission / incomplete implementation.",
+        "root_cause": "Empty implementation.",
+        "why_it_fails": "Because the function body is empty, the code returns a default value (or fails to compile/link), resulting in a Wrong Answer for any non-empty grid input like `[[1]]`, where the expected output is 4.",
+        "correct_concept": "Grid traversal and edge counting.",
+        "suggested_fix": "Implement nested loops to iterate over the grid and apply the perimeter logic."
+      },
+      {
+        "topic": "Two Pointers",
+        "failure_mode": "Incomplete Vowel Set Definition",
+        "confidence": 0.98,
+        "evidence_count": 1,
+        "example_submissions": [
+          "lc_pragatighosh25_1789148373_16"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting incomplete vowel set definition.",
+        "root_cause": "Incomplete character set validation for vowels.",
+        "why_it_fails": "For an input like 'Aa', the code only identifies 'a' as a vowel. Consequently, it fails to swap the 'A' at index 0 with the 'a' at index 1, returning 'Aa' instead of the expected 'aA'.",
+        "correct_concept": "Two-pointer string manipulation with case-insensitive character matching.",
+        "suggested_fix": "Update the vowel check condition to include uppercase characters or normalize input to lowercase."
+      },
+      {
+        "topic": "Math",
+        "failure_mode": "Empty Submission / Missing Implementation",
+        "confidence": 0.98,
+        "evidence_count": 1,
+        "example_submissions": [
+          "cf_387042705",
+          "cf_385978450"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting empty submission / missing implementation.",
+        "root_cause": "Empty submission file.",
+        "why_it_fails": "Because there is no code to read the input or print the result, the judge receives an empty output stream. For any input like `3 17 4`, the program terminates immediately without printing the required result `13`.",
+        "correct_concept": "Arithmetic series summation and basic I/O.",
+        "suggested_fix": "Implement the main function and the cost calculation formula."
+      },
+      {
+        "topic": "Implementation",
+        "failure_mode": "Missing implementation logic for string comparison",
+        "confidence": 0.98,
+        "evidence_count": 1,
+        "example_submissions": [
+          "cf_381881974",
+          "cf_342082158"
+        ],
+        "description": "Detected 1 failure occurrence exhibiting missing implementation logic for string comparison.",
+        "root_cause": "Missing implementation",
+        "why_it_fails": "Without code, the program produces no output or fails to compile, resulting in a verdict of WA or Compilation Error. For example, given inputs 'aaa' and 'aaa', the program must output '0', but it currently performs no operations.",
+        "correct_concept": "Lexicographical string comparison",
+        "suggested_fix": "Implement input reading and character-by-character comparison"
       }
     ]
   },
   "schedules": {
-    "user_demo": [
+    "pragatighosh25": [
       {
-        "problem_id": "200",
-        "title": "Number of Islands",
+        "id": "sched_404_leetcode",
+        "problem_id": "404",
+        "title": "Sum of Left Leaves",
+        "topic": "Binary Tree",
+        "platform": "leetcode",
+        "reason": "Directly targets the inability to distinguish between a left child and a left leaf, requiring the specific `!node->left && !node->right` check.",
+        "url": "https://leetcode.com/problems/sum-of-left-leaves/",
+        "step_index": 1,
+        "intervals_days": [
+          0,
+          1,
+          3,
+          7,
+          14
+        ],
+        "scheduled_date": 1789994229827,
+        "completed_history": [
+          {
+            "step": 0,
+            "completed_at": 1789907829827
+          },
+          {
+            "step": 0,
+            "completed_at": 1789907829827
+          }
+        ],
+        "status": "upcoming"
+      },
+      {
+        "id": "sched_207_leetcode",
+        "problem_id": "207",
+        "title": "Course Schedule",
         "topic": "Graphs",
         "platform": "leetcode",
-        "reason": "BFS immediate queue visited-marking",
-        "url": "https://leetcode.com/problems/number-of-islands/",
-        "step_index": 3,
-        "scheduled_date": 1790511337335,
-        "id": "sched_200_leetcode",
+        "reason": "Requires cycle detection using a visited state (or recursion stack tracking) to prevent infinite recursion, addressing Blind Spot 3.",
+        "url": "https://leetcode.com/problems/course-schedule/",
+        "step_index": 1,
         "intervals_days": [
           0,
           1,
@@ -65,79 +164,28 @@
           7,
           14
         ],
-        "completed_history": [],
+        "scheduled_date": 1789994247052,
+        "completed_history": [
+          {
+            "step": 0,
+            "completed_at": 1789907847052
+          },
+          {
+            "step": 0,
+            "completed_at": 1789907847053
+          }
+        ],
         "status": "upcoming"
       },
       {
-        "problem_id": "704",
-        "title": "Binary Search",
-        "topic": "Binary Search",
+        "id": "sched_345_leetcode",
+        "problem_id": "345",
+        "title": "Reverse Vowels of a String",
+        "topic": "Two Pointers",
         "platform": "leetcode",
-        "reason": "Fix off-by-one error (left <= right single element boundary)",
-        "url": "https://leetcode.com/problems/binary-search/",
-        "step_index": 0,
-        "scheduled_date": 1789899337335,
-        "id": "sched_704_leetcode",
-        "intervals_days": [
-          0,
-          1,
-          3,
-          7,
-          14
-        ],
-        "completed_history": [],
-        "status": "due_today"
-      },
-      {
-        "id": "sched_34_leetcode",
-        "problem_id": "34",
-        "title": "Find First and Last Position of Element in Sorted Array",
-        "topic": "Binary Search",
-        "platform": "leetcode",
-        "reason": "Targeted boundary conditions to resolve: When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position..",
-        "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/",
-        "step_index": 0,
-        "intervals_days": [
-          0,
-          1,
-          3,
-          7,
-          14
-        ],
-        "scheduled_date": 1789906537671,
-        "completed_history": [],
-        "status": "due_today"
-      },
-      {
-        "id": "sched_198_leetcode",
-        "problem_id": "198",
-        "title": "House Robber",
-        "topic": "Dynamic Programming",
-        "platform": "leetcode",
-        "reason": "Practice non-adjacent state recurrence to fix: The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint..",
-        "url": "https://leetcode.com/problems/house-robber/",
-        "step_index": 0,
-        "intervals_days": [
-          0,
-          1,
-          3,
-          7,
-          14
-        ],
-        "scheduled_date": 1789906537693,
-        "completed_history": [],
-        "status": "due_today"
-      },
-      {
-        "problem_id": "300",
-        "title": "Longest Increasing Subsequence",
-        "topic": "Dynamic Programming",
-        "platform": "leetcode",
-        "reason": "1D DP state formulation practice",
-        "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
+        "reason": "Forces the user to handle case-insensitive vowel sets (A, E, I, O, U, a, e, i, o, u), fixing the incomplete character set validation in Blind Spot 5.",
+        "url": "https://leetcode.com/problems/reverse-vowels-of-a-string/",
         "step_index": 2,
-        "scheduled_date": 1790165737335,
-        "id": "sched_300_leetcode",
         "intervals_days": [
           0,
           1,
@@ -145,39 +193,31 @@
           7,
           14
         ],
-        "completed_history": [],
+        "scheduled_date": 1790167048836,
+        "completed_history": [
+          {
+            "step": 0,
+            "completed_at": 1789907844447
+          },
+          {
+            "step": 0,
+            "completed_at": 1789907844447
+          },
+          {
+            "step": 1,
+            "completed_at": 1789907848836
+          }
+        ],
         "status": "upcoming"
-      }
-    ],
-    "non_existent_user_xyz": [
-      {
-        "problem_id": "704",
-        "title": "Binary Search",
-        "topic": "Binary Search",
-        "platform": "leetcode",
-        "reason": "Fix off-by-one error (left <= right single element boundary)",
-        "url": "https://leetcode.com/problems/binary-search/",
-        "step_index": 0,
-        "scheduled_date": 1789899337335,
-        "id": "sched_704_leetcode",
-        "intervals_days": [
-          0,
-          1,
-          3,
-          7,
-          14
-        ],
-        "completed_history": [],
-        "status": "due_today"
       },
       {
-        "id": "sched_198_leetcode",
-        "problem_id": "198",
-        "title": "House Robber",
-        "topic": "Dynamic Programming",
-        "platform": "leetcode",
-        "reason": "Practice non-adjacent state recurrence to fix: The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint..",
-        "url": "https://leetcode.com/problems/house-robber/",
+        "id": "sched_4A_codeforces",
+        "problem_id": "4A",
+        "title": "Watermelon",
+        "topic": "Implementation",
+        "platform": "codeforces",
+        "reason": "Requires basic I/O and conditional logic to solve, ensuring the user moves past the 'Empty Submission' and 'Missing Implementation' patterns found in Blind Spots 6 and 7.",
+        "url": "https://codeforces.com/problemset/problem/4/A",
         "step_index": 0,
         "intervals_days": [
           0,
@@ -186,419 +226,196 @@
           7,
           14
         ],
-        "scheduled_date": 1789906537693,
+        "scheduled_date": 1789907814871,
         "completed_history": [],
         "status": "due_today"
-      }
-    ],
-    "user_perfect_coder": [
-      {
-        "problem_id": "300",
-        "title": "Longest Increasing Subsequence",
-        "topic": "Dynamic Programming",
-        "platform": "leetcode",
-        "reason": "1D DP state formulation practice",
-        "url": "https://leetcode.com/problems/longest-increasing-subsequence/",
-        "step_index": 2,
-        "scheduled_date": 1790165737335,
-        "id": "sched_300_leetcode",
-        "intervals_days": [
-          0,
-          1,
-          3,
-          7,
-          14
-        ],
-        "completed_history": [],
-        "status": "upcoming"
       }
     ]
   },
   "analysisRuns": {
-    "user_demo": [
+    "pragatighosh25": [
       {
-        "analyzed_at": 1789904550176,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
+        "analyzed_at": 1789905165988,
+        "summary": "Strands Agent analyzed 52 submissions (10 failed) for user 'pragatighosh25'. Identified 7 algorithmic blind spots with 7 total failure evidence samples.",
+        "weak_topics_count": 7,
+        "recommended_problems_count": 6
       },
       {
-        "analyzed_at": 1789904550296,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
+        "analyzed_at": 1789905165988,
+        "summary": "Strands Agent analyzed 52 submissions (10 failed) for user 'pragatighosh25'. Identified 7 algorithmic blind spots with 7 total failure evidence samples.",
+        "weak_topics_count": 7,
+        "recommended_problems_count": 6
       },
       {
-        "analyzed_at": 1789904550452,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904550655,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904893967,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904894032,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904894125,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904894489,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904918827,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904918946,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904919099,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904919338,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789904919490,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789905088094,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789905088236,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789905088246,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789905088367,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789905088498,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906189366,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906189433,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906189542,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906189846,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906189939,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906537642,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906537750,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906537895,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906538134,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      },
-      {
-        "analyzed_at": 1789906538217,
-        "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
-        "weak_topics_count": 3,
-        "recommended_problems_count": 5
-      }
-    ],
-    "non_existent_user_xyz": [
-      {
-        "analyzed_at": 1789904550540,
-        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 2
-      },
-      {
-        "analyzed_at": 1789904894295,
-        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 2
-      },
-      {
-        "analyzed_at": 1789904919243,
-        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 2
-      },
-      {
-        "analyzed_at": 1789905088256,
-        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 2
-      },
-      {
-        "analyzed_at": 1789906189702,
-        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 2
-      },
-      {
-        "analyzed_at": 1789906538007,
-        "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 2
-      }
-    ],
-    "user_perfect_coder": [
-      {
-        "analyzed_at": 1789904550614,
-        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 1
-      },
-      {
-        "analyzed_at": 1789904894396,
-        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 1
-      },
-      {
-        "analyzed_at": 1789904919272,
-        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 1
-      },
-      {
-        "analyzed_at": 1789905088290,
-        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 1
-      },
-      {
-        "analyzed_at": 1789906189801,
-        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 1
-      },
-      {
-        "analyzed_at": 1789906538050,
-        "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-        "weak_topics_count": 0,
-        "recommended_problems_count": 1
+        "analyzed_at": 1789905165988,
+        "summary": "Strands Agent analyzed 52 submissions (10 failed) for user 'pragatighosh25'. Identified 7 algorithmic blind spots with 7 total failure evidence samples.",
+        "weak_topics_count": 7,
+        "recommended_problems_count": 6
       }
     ]
   },
   "fullAnalyses": {
-    "user_demo": {
-      "user_id": "user_demo",
-      "analyzed_at": 1789906538217,
-      "summary": "Strands Agent analyzed 3 submissions (3 failed) for user 'user_demo'. Identified 3 algorithmic blind spots with 3 total failure evidence samples.",
+    "pragatighosh25": {
+      "user_id": "pragatighosh25",
+      "analyzed_at": 1789905165988,
+      "summary": "Strands Agent analyzed 52 submissions (10 failed) for user 'pragatighosh25'. Identified 7 algorithmic blind spots with 7 total failure evidence samples.",
       "weak_topics": [
         {
-          "topic": "Graphs",
-          "failure_mode": "Graph Traversal Invariant or Visited State Error",
-          "confidence": 0.8,
-          "evidence_count": 1,
-          "example_submissions": [
-            "test_graph_1"
-          ],
-          "description": "Detected 1 failure occurrence exhibiting graph traversal invariant or visited state error.",
-          "root_cause": "Incorrect vertex state tracking or cycle handling during graph exploration.",
-          "why_it_fails": "Traversal revisits nodes infinitely or skips connected components.",
-          "correct_concept": "Ensure complete visited state tracking across all graph components.",
-          "suggested_fix": "Use a visited array/set and check all nodes in 0..V-1."
-        },
-        {
-          "topic": "Binary Search",
-          "failure_mode": "Lower Bound Over-Reduction on Upper Bound Branch",
-          "confidence": 0.9,
-          "evidence_count": 1,
-          "example_submissions": [
-            "test_bs_1"
-          ],
-          "description": "Detected 1 failure occurrence exhibiting lower bound over-reduction on upper bound branch.",
-          "root_cause": "Setting `right = mid - 1` when `nums[mid] > target` in a search-insert position skips `mid` as a candidate insertion point.",
-          "why_it_fails": "When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position.",
-          "correct_concept": "In lower_bound / insertion search, the candidate range must preserve `mid` on the upper branch (`right = mid`) until `left == right`.",
-          "suggested_fix": "Change the upper branch update to `right = mid;` while keeping `left = mid + 1;` when `nums[mid] < target`."
-        },
-        {
           "topic": "Dynamic Programming",
-          "failure_mode": "Adjacent State Overlap in Dynamic Programming Recurrence",
-          "confidence": 0.95,
+          "failure_mode": "Empty Submission / Missing Implementation",
+          "confidence": 0.98,
           "evidence_count": 1,
           "example_submissions": [
-            "test_dp_1"
+            "lc_pragatighosh25_1789477942_3",
+            "cf_247354135"
           ],
-          "description": "Detected 1 failure occurrence exhibiting adjacent state overlap in dynamic programming recurrence.",
-          "root_cause": "The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint.",
-          "why_it_fails": "Because `dp[i-1]` already contains optimal loot that may include house `i-1`, adding `nums[i]` robs two adjacent houses. For input [2,7,9,3,1], at i=2 (val 9), it computes dp[2] = dp[1] + 9 = 7 + 9 = 16, resulting in total 20 instead of the optimal non-adjacent sum 12.",
-          "correct_concept": "Dynamic programming optimal substructure requires choosing between two mutually exclusive choices: (1) skip house `i` and keep `dp[i-1]`, or (2) rob house `i` and add it to non-adjacent optimal loot `dp[i-2]`.",
-          "suggested_fix": "Update the recurrence relation to `dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i])` with base cases `dp[0] = nums[0]` and `dp[1] = Math.max(nums[0], nums[1])`."
+          "description": "Detected 1 failure occurrence exhibiting empty submission / missing implementation.",
+          "root_cause": "Empty source code submission.",
+          "why_it_fails": "When the judge attempts to invoke the `tribonacci` method on an instance of `Solution`, it encounters a null or missing symbol. For example, if the judge calls `Solution().tribonacci(4)`, the program crashes because no such logic exists to handle the input.",
+          "correct_concept": "Class-based method implementation.",
+          "suggested_fix": "Implement the `tribonacci` method within the `Solution` class."
+        },
+        {
+          "topic": "Binary Tree",
+          "failure_mode": "Failure to distinguish between left child and left leaf",
+          "confidence": 0.98,
+          "evidence_count": 1,
+          "example_submissions": [
+            "lc_pragatighosh25_1789321072_7"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting failure to distinguish between left child and left leaf.",
+          "root_cause": "Incorrect identification of leaf nodes in the recursive step.",
+          "why_it_fails": "For a tree like [1, 2, 3, 4, 5], the node '2' is a left child but not a leaf. If the code simply checks `if (root->left)`, it incorrectly includes the value of '2' (or its subtree) instead of only targeting nodes that are left children AND have no children of their own.",
+          "correct_concept": "Tree traversal with state-based leaf validation.",
+          "suggested_fix": "Implement a check for `!node->left && !node->right` specifically for the left child."
+        },
+        {
+          "topic": "Graphs",
+          "failure_mode": "Infinite Recursion / Cycle Traversal",
+          "confidence": 0.98,
+          "evidence_count": 1,
+          "example_submissions": [
+            "lc_pragatighosh25_1789320308_9"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting infinite recursion / cycle traversal.",
+          "root_cause": "Missing visited state tracking in DFS.",
+          "why_it_fails": "In a graph with a cycle (e.g., 0-1, 1-2, 2-0), the DFS will call `dfs(0) -> dfs(1) -> dfs(2) -> dfs(0)`, repeating this sequence until the stack memory is exhausted. It fails to recognize that node 0 has already been processed.",
+          "correct_concept": "Graph traversal with cycle detection.",
+          "suggested_fix": "Pass a boolean visited array through the recursion."
+        },
+        {
+          "topic": "Matrix / Simulation",
+          "failure_mode": "Empty Submission / Incomplete Implementation",
+          "confidence": 0.98,
+          "evidence_count": 1,
+          "example_submissions": [
+            "lc_pragatighosh25_1789319362_11"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting empty submission / incomplete implementation.",
+          "root_cause": "Empty implementation.",
+          "why_it_fails": "Because the function body is empty, the code returns a default value (or fails to compile/link), resulting in a Wrong Answer for any non-empty grid input like `[[1]]`, where the expected output is 4.",
+          "correct_concept": "Grid traversal and edge counting.",
+          "suggested_fix": "Implement nested loops to iterate over the grid and apply the perimeter logic."
+        },
+        {
+          "topic": "Two Pointers",
+          "failure_mode": "Incomplete Vowel Set Definition",
+          "confidence": 0.98,
+          "evidence_count": 1,
+          "example_submissions": [
+            "lc_pragatighosh25_1789148373_16"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting incomplete vowel set definition.",
+          "root_cause": "Incomplete character set validation for vowels.",
+          "why_it_fails": "For an input like 'Aa', the code only identifies 'a' as a vowel. Consequently, it fails to swap the 'A' at index 0 with the 'a' at index 1, returning 'Aa' instead of the expected 'aA'.",
+          "correct_concept": "Two-pointer string manipulation with case-insensitive character matching.",
+          "suggested_fix": "Update the vowel check condition to include uppercase characters or normalize input to lowercase."
+        },
+        {
+          "topic": "Math",
+          "failure_mode": "Empty Submission / Missing Implementation",
+          "confidence": 0.98,
+          "evidence_count": 1,
+          "example_submissions": [
+            "cf_387042705",
+            "cf_385978450"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting empty submission / missing implementation.",
+          "root_cause": "Empty submission file.",
+          "why_it_fails": "Because there is no code to read the input or print the result, the judge receives an empty output stream. For any input like `3 17 4`, the program terminates immediately without printing the required result `13`.",
+          "correct_concept": "Arithmetic series summation and basic I/O.",
+          "suggested_fix": "Implement the main function and the cost calculation formula."
+        },
+        {
+          "topic": "Implementation",
+          "failure_mode": "Missing implementation logic for string comparison",
+          "confidence": 0.98,
+          "evidence_count": 1,
+          "example_submissions": [
+            "cf_381881974",
+            "cf_342082158"
+          ],
+          "description": "Detected 1 failure occurrence exhibiting missing implementation logic for string comparison.",
+          "root_cause": "Missing implementation",
+          "why_it_fails": "Without code, the program produces no output or fails to compile, resulting in a verdict of WA or Compilation Error. For example, given inputs 'aaa' and 'aaa', the program must output '0', but it currently performs no operations.",
+          "correct_concept": "Lexicographical string comparison",
+          "suggested_fix": "Implement input reading and character-by-character comparison"
         }
       ],
       "recommended_problems": [
         {
           "platform": "leetcode",
-          "problem_id": "200",
-          "title": "Number of Islands",
+          "problem_id": "1137",
+          "title": "N-th Tribonacci Number",
+          "difficulty": "Easy",
+          "topic": "Dynamic Programming",
+          "reason": "Forces the implementation of a class-based DP solution to replace the 'Empty Submission' failure pattern identified in Blind Spot 1.",
+          "url": "https://leetcode.com/problems/n-th-tribonacci-number/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "404",
+          "title": "Sum of Left Leaves",
+          "difficulty": "Easy",
+          "topic": "Binary Tree",
+          "reason": "Directly targets the inability to distinguish between a left child and a left leaf, requiring the specific `!node->left && !node->right` check.",
+          "url": "https://leetcode.com/problems/sum-of-left-leaves/"
+        },
+        {
+          "platform": "leetcode",
+          "problem_id": "207",
+          "title": "Course Schedule",
           "difficulty": "Medium",
           "topic": "Graphs",
-          "reason": "Practice immediate visited-marking upon queue enqueue: Use a visited array/set and check all nodes in 0..V-1..",
-          "url": "https://leetcode.com/problems/number-of-islands/"
+          "reason": "Requires cycle detection using a visited state (or recursion stack tracking) to prevent infinite recursion, addressing Blind Spot 3.",
+          "url": "https://leetcode.com/problems/course-schedule/"
         },
         {
           "platform": "leetcode",
-          "problem_id": "704",
-          "title": "Binary Search",
+          "problem_id": "463",
+          "title": "Island Perimeter",
           "difficulty": "Easy",
-          "topic": "Binary Search",
-          "reason": "Practice maintaining strict loop invariants to eliminate 'Lower Bound Over-Reduction on Upper Bound Branch'.",
-          "url": "https://leetcode.com/problems/binary-search/"
+          "topic": "Matrix / Simulation",
+          "reason": "Demands a complete grid traversal implementation to calculate perimeter, correcting the 'Empty Submission' pattern in Blind Spot 4.",
+          "url": "https://leetcode.com/problems/island-perimeter/"
         },
         {
           "platform": "leetcode",
-          "problem_id": "34",
-          "title": "Find First and Last Position of Element in Sorted Array",
-          "difficulty": "Medium",
-          "topic": "Binary Search",
-          "reason": "Targeted boundary conditions to resolve: When `nums[mid] > target`, `mid` itself could still be the smallest index where `nums[index] >= target`. Decrementing `right = mid - 1` excludes the correct insert position..",
-          "url": "https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/"
-        },
-        {
-          "platform": "leetcode",
-          "problem_id": "198",
-          "title": "House Robber",
-          "difficulty": "Medium",
-          "topic": "Dynamic Programming",
-          "reason": "Practice non-adjacent state recurrence to fix: The transition `dp[i] = dp[i-1] + nums[i]` incorrectly assumes house `i` can be robbed immediately following house `i-1`, violating the non-adjacent house constraint..",
-          "url": "https://leetcode.com/problems/house-robber/"
-        },
-        {
-          "platform": "leetcode",
-          "problem_id": "300",
-          "title": "Longest Increasing Subsequence",
-          "difficulty": "Medium",
-          "topic": "Dynamic Programming",
-          "reason": "Master state transitions and optimal substructure: Dynamic programming optimal substructure requires choosing between two mutually exclusive choices: (1) skip house `i` and keep `dp[i-1]`, or (2) rob house `i` and add it to non-adjacent optimal loot `dp[i-2]`..",
-          "url": "https://leetcode.com/problems/longest-increasing-subsequence/"
-        }
-      ]
-    },
-    "non_existent_user_xyz": {
-      "user_id": "non_existent_user_xyz",
-      "analyzed_at": 1789906538007,
-      "summary": "No submission history found for this account. Ingest or sync submissions from LeetCode or Codeforces to begin blind spot diagnosis.",
-      "weak_topics": [],
-      "recommended_problems": [
-        {
-          "platform": "leetcode",
-          "problem_id": "704",
-          "title": "Binary Search",
+          "problem_id": "345",
+          "title": "Reverse Vowels of a String",
           "difficulty": "Easy",
-          "topic": "Binary Search",
-          "reason": "Foundational baseline problem to assess loop invariants and search boundaries.",
-          "url": "https://leetcode.com/problems/binary-search/"
+          "topic": "Two Pointers",
+          "reason": "Forces the user to handle case-insensitive vowel sets (A, E, I, O, U, a, e, i, o, u), fixing the incomplete character set validation in Blind Spot 5.",
+          "url": "https://leetcode.com/problems/reverse-vowels-of-a-string/"
         },
         {
-          "platform": "leetcode",
-          "problem_id": "198",
-          "title": "House Robber",
-          "difficulty": "Medium",
-          "topic": "Dynamic Programming",
-          "reason": "Foundational problem to assess optimal substructure state recurrence definition.",
-          "url": "https://leetcode.com/problems/house-robber/"
-        }
-      ]
-    },
-    "user_perfect_coder": {
-      "user_id": "user_perfect_coder",
-      "analyzed_at": 1789906538050,
-      "summary": "Analyzed 1 submissions. Outstanding performance! All analyzed submissions have an Accepted (AC) verdict. No recurring algorithmic blind spots detected.",
-      "weak_topics": [],
-      "recommended_problems": [
-        {
-          "platform": "leetcode",
-          "problem_id": "300",
-          "title": "Longest Increasing Subsequence",
-          "difficulty": "Medium",
-          "topic": "Dynamic Programming",
-          "reason": "Advance your mastery with O(N log N) patience sorting / binary search state transitions.",
-          "url": "https://leetcode.com/problems/longest-increasing-subsequence/"
+          "platform": "codeforces",
+          "problem_id": "4A",
+          "title": "Watermelon",
+          "difficulty": "800",
+          "topic": "Implementation",
+          "reason": "Requires basic I/O and conditional logic to solve, ensuring the user moves past the 'Empty Submission' and 'Missing Implementation' patterns found in Blind Spots 6 and 7.",
+          "url": "https://codeforces.com/problemset/problem/4/A"
         }
       ]
     }
